@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Version Num="1238"/>
+<FriendlyName>omg it works</FriendlyName>
+<Device DeviceName="Saitek Pro Flight X-55 Rhino Throttle" GUID="{4BF4B930-725A-11E4-8003-444553540000}" ProductID="41493">
+	<Axes>
+		<Axis AxisName="X" AxisSensitivy="0" AxisDeadZone="0"/>
+		<Axis AxisName="Y" AxisSensitivy="0" AxisDeadZone="0"/>
+		<Axis AxisName="Z" AxisSensitivy="-82" AxisDeadZone="0"/>
+		<Axis AxisName="rX" AxisSensitivy="0" AxisDeadZone="0"/>
+		<Axis AxisName="rY" AxisSensitivy="0" AxisDeadZone="0"/>
+		<Axis AxisName="rZ" AxisSensitivy="0" AxisDeadZone="0"/>
+	</Axes>
+	<Context ContextName="PLANE">
+		<Action ActionName="KEY_GEAR_TOGGLE" Flag="2">
+			<Primary>
+				<KEY Information="Joystick Button 8">7</KEY>
+			</Primary>
+		</Action>
+		<Action ActionName="KEY_FLAPS_UP" Flag="2">
+			<Primary>
+				<KEY Information="Joystick Button 2">1</KEY>
+			</Primary>
+		</Action>
+		<Action ActionName="KEY_FLAPS_DOWN" Flag="2">
+			<Primary>
+				<KEY Information="Joystick Button 3">2</KEY>
+			</Primary>
+		</Action>
+		<Action ActionName="KEY_PARKING_BRAKES" Flag="2">
+			<Primary>
+				<KEY Information="Joystick Button 9">8</KEY>
+			</Primary>
+		</Action>
+		<Action ActionName="KEY_AXIS_ELEV_TRIM_SET" Flag="132">
+			<Primary>
+				<KEY Information="Joystick L-Axis Z ">1058</KEY>
+			</Primary>
+		</Action>
+		<Action ActionName="KEY_GEAR_UP" Flag="2">
+			<Primary>
+				<KEY Information="Joystick Button 6">5</KEY>
+			</Primary>
+		</Action>
+		<Action ActionName="KEY_GEAR_DOWN" Flag="2">
+			<Primary>
+				<KEY Information="Joystick Button 7">6</KEY>
+			</Primary>
+		</Action>
+		<Action ActionName="KEY_ENGINE_AUTO_START" Flag="2">
+			<Primary>
+				<KEY Information="Joystick Button 10">9</KEY>
+			</Primary>
+		</Action>
+		<Action ActionName="KEY_AXIS_MIXTURE_SET" Flag="4">
+			<Primary>
+				<KEY Information="Joystick L-Axis X ">1026</KEY>
+			</Primary>
+		</Action>
+		<Action ActionName="KEY_AXIS_FLAPS_SET" Flag="4">
+			<Primary>
+				<KEY Information="Joystick R-Axis X ">770</KEY>
+			</Primary>
+		</Action>
+		<Action ActionName="KEY_THROTTLE_AXIS_SET_EX1" Flag="4">
+			<Primary>
+				<KEY Information="Joystick L-Axis Y ">1042</KEY>
+			</Primary>
+		</Action>
+		<Action ActionName="KEY_PROP_PITCH_AXIS_SET_EX1" Flag="4">
+			<Primary>
+				<KEY Information="Joystick R-Axis Z ">802</KEY>
+			</Primary>
+		</Action>
+		<Action ActionName="KEY_ACTIVE_PAUSE_TOGGLE" Flag="2">
+			<Primary>
+				<KEY Information="Joystick Button 4">3</KEY>
+			</Primary>
+		</Action>
+	</Context>
+	<Context ContextName="INGAME_UI">
+		<Action ActionName="KEY_SHOW_NAVLOG" Flag="2">
+			<Primary>
+				<KEY Information="Joystick Button 18">17</KEY>
+			</Primary>
+			<Secondary>
+				<KEY Information="Joystick Button 19">18</KEY>
+			</Secondary>
+		</Action>
+		<Action ActionName="KEY_SHOW_VFRMAP" Flag="2">
+			<Primary>
+				<KEY Information="Joystick Button 14">13</KEY>
+			</Primary>
+			<Secondary>
+				<KEY Information="Joystick Button 15">14</KEY>
+			</Secondary>
+		</Action>
+		<Action ActionName="TOGGLE_COPILOT_DELEGATE_CONTROLS" Flag="2">
+			<Primary>
+				<KEY Information="Joystick Button 1">0</KEY>
+			</Primary>
+		</Action>
+	</Context>
+	<Context ContextName="MODES">
+		<Action ActionName="KEY_SIM_RATE" Flag="2">
+			<Primary>
+				<KEY Information="Joystick Button 5">4</KEY>
+			</Primary>
+		</Action>
+		<Action ActionName="KEY_VIEW_MODE" Flag="2">
+			<Primary>
+				<KEY Information="Joystick Button 4">3</KEY>
+			</Primary>
+		</Action>
+		<Action ActionName="KEY_SIM_RATE_INCR" Flag="2">
+			<Primary>
+				<KEY Information="Joystick Button 29">28</KEY>
+			</Primary>
+		</Action>
+		<Action ActionName="KEY_SIM_RATE_DECR" Flag="2">
+			<Primary>
+				<KEY Information="Joystick Button 28">27</KEY>
+			</Primary>
+		</Action>
+	</Context>
+</Device>
+

@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DefaulftInput Primary="1">
+  <Version Num="1238" />
+  <Device DeviceName="Saitek Pro Flight X-56 Rhino Throttle" GUID="83add1a0-ce12-11e8-8003-444553540000" ProductID="A221">
+    <Axes>
+      <Axis AxisName="X" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="Y" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="Z" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="rX" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="rY" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="rZ" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="SliderX" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="SliderY" AxisSensitivy="0" AxisDeadZone="0" />
+    </Axes>
+    <Context ContextName="PLANE">
+      <Action ActionName="KEY_SPOILERS_TOGGLE" Flag="2">
+        <Primary>
+          <KEY Information="Button8">7</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_PARKING_BRAKES" Flag="2">
+        <Primary>
+          <KEY Information="Button9">8</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_FLAPS_INCR" Flag="2">
+        <Primary>
+          <KEY Information="Button30">29</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_FLAPS_DECR" Flag="2">
+        <Primary>
+          <KEY Information="Button31">30</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_AXIS_ELEV_TRIM_SET" Flag="4">
+        <Primary>
+          <KEY Information="Axis Z">1058</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_GEAR_UP" Flag="2">
+        <Primary>
+          <KEY Information="Button6">5</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_GEAR_DOWN" Flag="2">
+        <Primary>
+          <KEY Information="Button7">6</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_AXIS_MIXTURE_SET" Flag="4">
+        <Primary>
+          <KEY Information="Axis X">1026</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_THROTTLE_AXIS_SET_EX1" Flag="4">
+        <Primary>
+          <KEY Information="Axis Y">1042</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_PROP_PITCH_AXIS_SET_EX1" Flag="4">
+        <Primary>
+          <KEY Information="Rotation Z">802</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="MODES">
+      <Action ActionName="KEY_VIEW_MODE" Flag="2">
+        <Primary>
+          <KEY Information="Button4">3</KEY>
+        </Primary>
+      </Action>
+    </Context>
+  </Device>
+</DefaulftInput>

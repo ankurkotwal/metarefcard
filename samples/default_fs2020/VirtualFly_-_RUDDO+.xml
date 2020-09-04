@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DefaulftInput Primary="1">
+  <Version Num="1238" />
+  <Device DeviceName="VirtualFly - RUDDO+" GUID="b5219b80-53eb-11ea-8009-444553540000" ProductID="0DA3">
+    <Axes>
+      <Axis AxisName="X" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="Y" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="Z" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="rX" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="rY" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="rZ" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="SliderX" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="SliderY" AxisSensitivy="0" AxisDeadZone="0" />
+    </Axes>
+    <Context ContextName="PLANE">
+      <Action ActionName="KEY_AXIS_RUDDER_SET" Flag="4">
+        <Primary>
+          <KEY Information="Axis X">1026</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_AXIS_LEFT_BRAKE_SET" Flag="4">
+        <Primary>
+          <KEY Information="Rotation X">770</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_AXIS_RIGHT_BRAKE_SET" Flag="4">
+        <Primary>
+          <KEY Information="Rotation Y">786</KEY>
+        </Primary>
+      </Action>
+    </Context>
+  </Device>
+</DefaulftInput>

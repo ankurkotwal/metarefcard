@@ -11,7 +11,7 @@
             "mode": "auto",
             "program": "${workspaceFolder}/server/parseFS2020.go",
             "env": {},
-            "args": ["${workspaceFolder}/samples/stick", "${workspaceFolder}/samples/throttle"]
+            "args": ["${workspaceFolder}/samples/x55_stick.xml", "${workspaceFolder}/samples/x55_throttle.xml"]
         }
     ]
 }
