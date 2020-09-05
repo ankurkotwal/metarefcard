@@ -12,27 +12,13 @@ import (
 	"strconv"
 )
 
-// TODO - Mode ControllerInput and Controller structs into separate file
-
-// DeviceInput - generic input mapping for a controller
-type DeviceInput struct {
-	InputKey string
-	GameKey  string
-	Value    int
-}
-
-// Device - generic controller definition
-type Device struct {
-	Name      string
-	GUID      string
-	ProductID string
-}
-
 // FS2020 Input model
 // Device -> Context -> Action -> Primary/Secondary -> Key
 
 type gameDevice struct {
-	Device         Device
+	DeviceName     string
+	GUID           string
+	ProductID      string
 	ContextActions map[string]map[string]*gameAction
 }
 
@@ -49,6 +35,8 @@ const (
 	keyPrimary   = iota
 	keySecondary = iota
 )
+
+// 	TODO - Mapping to FS2020 binding
 
 func main() {
 	debugOutput := false
@@ -102,18 +90,18 @@ func main() {
 					for _, attr := range ty.Attr {
 						switch attr.Name.Local {
 						case "DeviceName":
-							aDevice.Device.Name = attr.Value
+							aDevice.DeviceName = attr.Value
 							break
 						case "GUID":
-							aDevice.Device.GUID = attr.Value
+							aDevice.GUID = attr.Value
 							break
 						case "ProductID":
-							aDevice.Device.ProductID = attr.Value
+							aDevice.ProductID = attr.Value
 							break
 						}
 					}
 					var found bool
-					currentDevice, found = devicesByName[aDevice.Device.Name]
+					currentDevice, found = devicesByName[aDevice.DeviceName]
 					out, _ := json.Marshal(aDevice)
 					if found {
 						log.Printf("Duplicate device: %s\n", out)
@@ -123,7 +111,7 @@ func main() {
 						}
 						currentDevice = &aDevice
 						currentDevice.ContextActions = make(map[string]map[string]*gameAction)
-						devicesByName[aDevice.Device.Name] = currentDevice
+						devicesByName[aDevice.DeviceName] = currentDevice
 					}
 				case "Context":
 					// Found new context
@@ -219,7 +207,7 @@ func main() {
 	if verboseOutput {
 		for _, gameDevice := range devicesByName {
 			log.Printf("DeviceName=\"%s\" GUID=\"%s\" ProductId=\"%s\"\n",
-				gameDevice.Device.Name, gameDevice.Device.GUID, gameDevice.Device.ProductID)
+				gameDevice.DeviceName, gameDevice.GUID, gameDevice.ProductID)
 			for contextName, actions := range gameDevice.ContextActions {
 				log.Printf("  ContextName=\"%s\"\n", contextName)
 				for actionName, action := range actions {
