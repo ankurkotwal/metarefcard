@@ -17,6 +17,8 @@ import (
 // FS2020 Input model
 // Device -> Context -> Action -> Primary/Secondary -> Key
 
+type gameBindsByDevice map[string]*gameDevice
+
 type gameDevice struct {
 	DeviceName     string
 	GUID           string
@@ -59,13 +61,37 @@ func main() {
 		os.Exit(1)
 	}
 
-	deviceIndex := data.Init()
+	deviceIndex := data.BuildIndex()
 	if verboseOutput {
 		fmt.Printf("=== Device Index ===\n")
 		data.PrintDeviceIndex(deviceIndex)
 	}
 
-	devicesByName := make(map[string]*gameDevice)
+	gameMappingsByDeviceName := loadGameConfigs(flag.Args(), debugOutput)
+
+	if verboseOutput {
+		log.Printf("=== Loaded FS2020 Config ===\n")
+		for _, gameDevice := range *gameMappingsByDeviceName {
+			log.Printf("DeviceName=\"%s\" GUID=\"%s\" ProductId=\"%s\"\n",
+				gameDevice.DeviceName, gameDevice.GUID, gameDevice.ProductID)
+			for contextName, actions := range gameDevice.ContextActions {
+				log.Printf("  ContextName=\"%s\"\n", contextName)
+				for actionName, action := range actions {
+					secondaryText := ""
+					if len(action.SecondaryInfo) != 0 {
+						secondaryText = fmt.Sprintf(" SecondaryInfo=\"%s\" SecondaryKey=\"%d\"",
+							action.SecondaryInfo, action.SecondaryKey)
+					}
+					log.Printf("    ActionName=\"%s\" Flag=\"%d\" PrimaryInfo=\"%s\" PrimaryKey=\"%d\"%s\n",
+						actionName, action.Flag, action.PrimaryInfo, action.PrimaryKey, secondaryText)
+				}
+			}
+		}
+	}
+}
+
+func loadGameConfigs(files []string, debugOutput bool) *gameBindsByDevice {
+	gameBinds := make(gameBindsByDevice)
 
 	// XML state variables
 	var currentDevice *gameDevice
@@ -74,7 +100,7 @@ func main() {
 	currentKeyType := keyUnknown
 	var currentKey *int
 
-	for _, filename := range flag.Args() {
+	for _, filename := range files {
 		if debugOutput {
 			log.Printf("Opening file %s\n", filename)
 		}
@@ -114,7 +140,7 @@ func main() {
 						}
 					}
 					var found bool
-					currentDevice, found = devicesByName[aDevice.DeviceName]
+					currentDevice, found = gameBinds[aDevice.DeviceName]
 					out, _ := json.Marshal(aDevice)
 					if found {
 						log.Printf("Duplicate device: %s\n", out)
@@ -124,7 +150,7 @@ func main() {
 						}
 						currentDevice = &aDevice
 						currentDevice.ContextActions = make(map[string]map[string]*gameAction)
-						devicesByName[aDevice.DeviceName] = currentDevice
+						gameBinds[aDevice.DeviceName] = currentDevice
 					}
 				case "Context":
 					// Found new context
@@ -217,25 +243,5 @@ func main() {
 			}
 		}
 	}
-	if verboseOutput {
-		log.Printf("=== Loaded FS2020 Config ===\n")
-		for _, gameDevice := range devicesByName {
-			log.Printf("DeviceName=\"%s\" GUID=\"%s\" ProductId=\"%s\"\n",
-				gameDevice.DeviceName, gameDevice.GUID, gameDevice.ProductID)
-			for contextName, actions := range gameDevice.ContextActions {
-				log.Printf("  ContextName=\"%s\"\n", contextName)
-				for actionName, action := range actions {
-					secondaryText := ""
-					if len(action.SecondaryInfo) != 0 {
-						secondaryText = fmt.Sprintf(" SecondaryInfo=\"%s\" SecondaryKey=\"%d\"",
-							action.SecondaryInfo, action.SecondaryKey)
-					}
-					log.Printf("    ActionName=\"%s\" Flag=\"%d\" PrimaryInfo=\"%s\" PrimaryKey=\"%d\"%s\n",
-						actionName, action.Flag, action.PrimaryInfo, action.PrimaryKey, secondaryText)
-				}
-			}
-		}
-	}
-	// out, _ := json.Marshal(devicesByName)
-	// log.Print(out)
+	return &gameBinds
 }
