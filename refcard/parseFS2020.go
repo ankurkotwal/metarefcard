@@ -10,6 +10,8 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+
+	"github.com/ankurkotwal/InputRefCard/data"
 )
 
 // FS2020 Input model
@@ -40,16 +42,27 @@ const (
 
 func main() {
 	debugOutput := false
-	verboseOutput := true
+	verboseOutput := false
 
 	flag.Usage = func() {
 		fmt.Printf("Usage: %s file...\n\n", filepath.Base(os.Args[0]))
 		fmt.Printf("file\tFlight Simulator 2020 input configration (XML).\n")
 		flag.PrintDefaults()
 	}
-	if len(os.Args) < 2 {
+	flag.BoolVar(&debugOutput, "d", false, "Debug output.")
+	flag.BoolVar(&verboseOutput, "v", false, "Verbose output.")
+	flag.Parse()
+	args := flag.Args()
+	if len(flag.Args()) < 1 {
 		flag.Usage()
+		print(args)
 		os.Exit(1)
+	}
+
+	deviceIndex := data.Init()
+	if verboseOutput {
+		fmt.Printf("=== Device Index ===\n")
+		data.PrintDeviceIndex(deviceIndex)
 	}
 
 	devicesByName := make(map[string]*gameDevice)
@@ -61,7 +74,7 @@ func main() {
 	currentKeyType := keyUnknown
 	var currentKey *int
 
-	for _, filename := range os.Args[1:] {
+	for _, filename := range flag.Args() {
 		if debugOutput {
 			log.Printf("Opening file %s\n", filename)
 		}
@@ -205,6 +218,7 @@ func main() {
 		}
 	}
 	if verboseOutput {
+		log.Printf("=== Loaded FS2020 Config ===\n")
 		for _, gameDevice := range devicesByName {
 			log.Printf("DeviceName=\"%s\" GUID=\"%s\" ProductId=\"%s\"\n",
 				gameDevice.DeviceName, gameDevice.GUID, gameDevice.ProductID)

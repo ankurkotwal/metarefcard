@@ -9,6 +9,12 @@
 # Local History for Visual Studio Code
 .history/
 
+##### Python #####
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
 ##### Go gitignore #####
 # Binaries for programs and plugins
 *.exe

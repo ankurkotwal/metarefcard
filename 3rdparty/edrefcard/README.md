@@ -1,0 +1,1 @@
+Sourced from https://github.com/richardbuckle/EDRefCard/blob/dev/www/scripts/bindingsData.py

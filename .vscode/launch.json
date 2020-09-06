@@ -11,7 +11,18 @@
             "mode": "auto",
             "program": "${workspaceFolder}/refcard/parseFS2020.go",
             "env": {},
-            "args": ["${workspaceFolder}/samples/x55_stick.xml", "${workspaceFolder}/samples/x55_throttle.xml"]
+            "args": [
+                "-v",
+                "${workspaceFolder}/samples/x55_stick.xml",
+                "${workspaceFolder}/samples/x55_throttle.xml"
+            ]
+        },
+        {
+            "name": "Generate Device Bindings",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
         }
     ]
 }
