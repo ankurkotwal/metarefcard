@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 
 import sys
-sys.path.append("3rdparty/edrefcard")
+sys.path.append("../3rdparty/edrefcard")
 
 from bindingsData import *
 
-outFilename = 'refcard/data/generatedDevices.go'
+outFilename = '../refcard/data/generatedDevices.go'
 
 output = []
 
 output.append('''package data
 
-func Init() DeviceIndexByGroupName {
+// BuildIndex - builds the device index
+func BuildIndex() DeviceIndexByGroupName {
     var deviceIndex DeviceIndexByGroupName
     var deviceGroup *DeviceGroup
     var deviceData *DeviceData

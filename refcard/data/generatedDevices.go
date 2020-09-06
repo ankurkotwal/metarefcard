@@ -1,6 +1,7 @@
 package data
 
-func Init() DeviceIndexByGroupName {
+// BuildIndex - builds the device index
+func BuildIndex() DeviceIndexByGroupName {
     var deviceIndex DeviceIndexByGroupName
     var deviceGroup *DeviceGroup
     var deviceData *DeviceData
