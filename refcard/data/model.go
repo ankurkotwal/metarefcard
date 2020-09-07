@@ -5,6 +5,9 @@ import "fmt"
 // Example
 // x55 -> { image, devices: { stick: { inputs: { button1: {isDigital, x, y, width, height}}}}}
 
+// DeviceToGroup - map of device name to the group it belongs to. Group is the key in DeviceIndexByGroupName
+type DeviceToGroup map[string]string
+
 // DeviceIndexByGroupName - master index, keyed by group name
 type DeviceIndexByGroupName map[string]*DeviceGroup
 
@@ -38,8 +41,8 @@ type InputData struct {
 // TODO - Keyboard handling
 
 // PrintDeviceIndex - prints the full device index
-func PrintDeviceIndex(deviceIndex DeviceIndexByGroupName) {
-	for groupName, deviceGroup := range deviceIndex {
+func PrintDeviceIndex(deviceIndex *DeviceIndexByGroupName) {
+	for groupName, deviceGroup := range *deviceIndex {
 		for deviceName, deviceData := range deviceGroup.Devices {
 			for inputName, data := range *(deviceData.InputDataByName) {
 				fmt.Printf("%s %s %s %s %s %t %d %d %d %d\n",
