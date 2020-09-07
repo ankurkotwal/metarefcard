@@ -266,80 +266,83 @@ type deviceMap struct {
 }
 type inputNameMap map[string]string
 
+const deviceUnknown = "DeviceUnknown"
+const deviceMissingInfo = "DeviceMissingInfo"
+
 func getGameDeviceGenericName(deviceName string) string {
 	switch deviceName {
 	case "Airbus T-A320 Quadrant throttle":
-		return ""
+		return deviceMissingInfo
 	case "Alpha Flight Controls":
-		return ""
+		return deviceMissingInfo
 	case "BU0836X Interface":
-		return ""
+		return deviceMissingInfo
 	case "BU0836X Interface_1":
-		return ""
+		return deviceMissingInfo
 	case "Joystick - HOTAS Warthog":
-		return ""
+		return "ThrustMasterWarthogJoystick"
 	case "Keyboard (FSX)":
-		return ""
+		return deviceMissingInfo
 	case "Logitech Extreme 3D":
-		return ""
+		return "LogitechExtreme3DPro"
 	case "Mouse":
-		return ""
+		return "" // TODO Add Mouse support
 	case "PS4":
-		return ""
+		return "DualShock4"
 	case "Saitek Pro Flight Quadrant":
-		return ""
+		return deviceMissingInfo
 	case "Saitek Pro Flight Rudder Pedals":
-		return ""
+		return "SaitekProFlightCombatRudderPedals"
 	case "Saitek Pro Flight X-55 Rhino Stick":
-		return ""
+		return "SaitekX55Joystick"
 	case "Saitek Pro Flight X-55 Rhino Throttle":
-		return ""
+		return "SaitekX55Throttle"
 	case "Saitek Pro Flight X-56 Rhino Stick":
-		return ""
+		return "SaitekX56Joystick"
 	case "Saitek Pro Flight X-56 Rhino Throttle":
-		return ""
+		return "SaitekX56Throttle"
 	case "Saitek Pro Flight Yoke":
-		return ""
+		return deviceMissingInfo
 	case "Saitek X52 Flight Control System":
-		return ""
+		return "SaitekX52"
 	case "Saitek X52 Pro Flight Control System":
-		return ""
+		return "SaitekX52Pro"
 	case "T.16000M":
-		return ""
+		return "T16000M"
 	case "T.A320 CoPilot":
-		return ""
+		return deviceMissingInfo
 	case "T.A320 Pilot":
-		return ""
+		return deviceMissingInfo
 	case "T.Flight Hotas 4":
-		return ""
+		return "ThrustMasterTFlightHOTASX" // TODO - PS4 variant
 	case "T.Flight Hotas One":
-		return ""
+		return "ThrustMasterTFlightHOTASX" // TODO - XB1 variant
 	case "T.Flight Hotas X":
-		return ""
+		return "ThrustMasterTFlightHOTASX"
 	case "T.Flight Rudder Pedals":
-		return ""
+		return "T-Rudder"
 	case "T.Flight Stick X":
-		return ""
+		return "044FB106"
 	case "Throttle - HOTAS Warthog":
-		return ""
+		return "ThrustMasterWarthogThrottle"
 	case "TWCS Throttle":
-		return ""
+		return "T16000MTHROTTLE"
 	case "T-Pendular-Rudder":
-		return ""
+		return deviceMissingInfo
 	case "VF - TPM V3RNIO":
-		return ""
+		return deviceMissingInfo
 	case "VirtualFly - RUDDO+":
-		return ""
+		return deviceMissingInfo
 	case "VirtualFly - TQ3+":
-		return ""
+		return deviceMissingInfo
 	case "VirtualFly - TQ6+":
-		return ""
+		return deviceMissingInfo
 	case "VirtualFly - YOKO+":
-		return ""
+		return deviceMissingInfo
 	case "XInput Gamepad":
-		return ""
+		return "GamePad"
 	}
-	return ""
+	return deviceUnknown
 }
 
 func mapGameBindsToIndex(gameBinds *gameBindsByDevice, deviceIndex data.DeviceIndexByGroupName) {

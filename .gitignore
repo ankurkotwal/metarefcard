@@ -1,4 +1,7 @@
-##### VSCode gitignore #####
+##### VIM #####
+*.swp
+
+##### VSCode #####
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
