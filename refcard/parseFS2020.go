@@ -13,10 +13,11 @@ import (
 	"strconv"
 
 	"github.com/ankurkotwal/InputRefCard/data"
+	"github.com/ankurkotwal/InputRefCard/data2"
 )
 
 func main() {
-	data.LoadDeviceData()
+	data2.LoadDeviceData()
 	debugOutput := false
 	verboseOutput := false
 

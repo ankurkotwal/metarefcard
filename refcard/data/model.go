@@ -2,10 +2,6 @@ package data
 
 import (
 	"fmt"
-	"io/ioutil"
-	"log"
-
-	"gopkg.in/yaml.v3"
 )
 
 // Example
@@ -58,43 +54,4 @@ func PrintDeviceIndex(deviceIndex *DeviceIndexByGroupName) {
 			}
 		}
 	}
-}
-
-// T - blah
-type T DeviceIndexByGroupName
-
-// LoadDeviceData - Reads device data from files
-func LoadDeviceData() {
-	t := T{}
-
-	yamlData, err := ioutil.ReadFile("data/generatedDevices.yaml")
-	if err != nil {
-		log.Printf("yamlFile.Get err   #%v ", err)
-	}
-
-	err = yaml.Unmarshal([]byte(yamlData), &t)
-	if err != nil {
-		log.Fatalf("error: %v", err)
-	}
-	fmt.Printf("--- t:\n%v\n\n", t)
-
-	d, err := yaml.Marshal(&t)
-	if err != nil {
-		log.Fatalf("error: %v", err)
-	}
-	fmt.Printf("--- t dump:\n%s\n\n", string(d))
-
-	m := make(map[interface{}]interface{})
-
-	err = yaml.Unmarshal([]byte(yamlData), &m)
-	if err != nil {
-		log.Fatalf("error: %v", err)
-	}
-	fmt.Printf("--- m:\n%v\n\n", m)
-
-	// d, err = yaml.Marshal(&m)
-	// if err != nil {
-	// 	log.Fatalf("error: %v", err)
-	// }
-	// fmt.Printf("--- m dump:\n%s\n\n", string(d))
 }
