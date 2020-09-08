@@ -16,6 +16,7 @@ import (
 )
 
 func main() {
+	data.LoadDeviceData()
 	debugOutput := false
 	verboseOutput := false
 

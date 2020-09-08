@@ -1,0 +1,36 @@
+---
+SaitekX55: 
+  Devices: 
+    SaitekX55Joystick: 
+      Image: x55.jpg
+      DisplayName: SaitekX55Joystick
+      Input: 
+        Joy_1: 
+          IsDigital: true
+          OffsetX: 2044
+          OffsetY: 604
+          Width: 642
+          Height: 108
+        Joy_2: 
+          IsDigital: true
+          OffsetX: 2144
+          OffsetY: 224
+          Width: 792
+          Height: 54
+    SaitekX55Throttle: 
+      Image: x55.jpg
+      DisplayName: SaitekX55Throttle
+      Input: 
+        Joy_1: 
+          IsDigital: true
+          OffsetX: 44
+          OffsetY: 1660
+          Width: 672
+          Height: 54
+        Joy_2: 
+          IsDigital: true
+          OffsetX: 1874
+          OffsetY: 1660
+          Width: 672
+          Height: 54
+  
