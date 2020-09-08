@@ -1,2 +1,5 @@
 {
+    "python.autoComplete.extraPaths": [
+        "3rdparty/edrefcard"
+    ],
 }

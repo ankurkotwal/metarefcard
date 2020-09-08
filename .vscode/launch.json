@@ -8,8 +8,8 @@
             "name": "Generate Device Bindings",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal"
+            "program": "generateControllerInputs.py",
+            "console": "integratedTerminal",
         }
     ]
 }
