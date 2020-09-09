@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -13,21 +14,40 @@ import (
 	"strconv"
 
 	"github.com/ankurkotwal/InputRefCard/data"
-	"github.com/ankurkotwal/InputRefCard/data2"
+	"gopkg.in/yaml.v3"
 )
 
 func main() {
-	data2.LoadDeviceData()
 	debugOutput := false
 	verboseOutput := false
 
+	parseCliArgs(&debugOutput, &verboseOutput)
+
+	// Load the game files provided
+	gameBinds, gameDeviceNames := loadGameConfigs(flag.Args(), debugOutput, verboseOutput)
+	loadGameData(gameDeviceNames, debugOutput)
+
+	// Create a mapping of game device names to short names from our model
+	gameDeviceShortNames := make(map[string]bool)
+	for _, shortName := range *gameDeviceNames {
+		gameDeviceShortNames[shortName] = true
+	}
+
+	// Load the abstract device model (i.e. non-game specific) based on the devices in our game files
+	deviceIndex := data.LoadDeviceData(&gameDeviceShortNames, debugOutput)
+
+	// Map the game input bindings to our model
+	mapGameBindsToIndex(gameBinds, deviceIndex)
+}
+
+func parseCliArgs(debugOutput *bool, verboseOutput *bool) {
 	flag.Usage = func() {
 		fmt.Printf("Usage: %s file...\n\n", filepath.Base(os.Args[0]))
 		fmt.Printf("file\tFlight Simulator 2020 input configration (XML).\n")
 		flag.PrintDefaults()
 	}
-	flag.BoolVar(&debugOutput, "d", false, "Debug output.")
-	flag.BoolVar(&verboseOutput, "v", false, "Verbose output.")
+	flag.BoolVar(debugOutput, "d", false, "Debug output.")
+	flag.BoolVar(verboseOutput, "v", false, "Verbose output.")
 	flag.Parse()
 	args := flag.Args()
 	if len(flag.Args()) < 1 {
@@ -36,35 +56,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Load the game files provided
-	gameBinds, gameDeviceNames := loadGameConfigs(flag.Args(), debugOutput)
-	_ = gameDeviceNames // TOOD Remove
-	if verboseOutput {
-		log.Printf("=== Loaded FS2020 Config ===\n")
-		for _, gameDevice := range *gameBinds {
-			log.Printf("DeviceName=\"%s\" GUID=\"%s\" ProductId=\"%s\"\n",
-				gameDevice.DeviceName, gameDevice.GUID, gameDevice.ProductID)
-			for contextName, actions := range gameDevice.ContextActions {
-				log.Printf("  ContextName=\"%s\"\n", contextName)
-				for actionName, action := range actions {
-					secondaryText := ""
-					if len(action.SecondaryInfo) != 0 {
-						secondaryText = fmt.Sprintf(" SecondaryInfo=\"%s\" SecondaryKey=\"%d\"",
-							action.SecondaryInfo, action.SecondaryKey)
-					}
-					log.Printf("    ActionName=\"%s\" Flag=\"%d\" PrimaryInfo=\"%s\" PrimaryKey=\"%d\"%s\n",
-						actionName, action.Flag, action.PrimaryInfo, action.PrimaryKey, secondaryText)
-				}
-			}
-		}
-	}
-
-	deviceGroupIndex, deviceIndex := data.BuildIndex()
-	_ = deviceGroupIndex
-	if verboseOutput {
-		fmt.Printf("=== Device Index ===\n")
-		data.PrintDeviceIndex(deviceIndex)
-	}
 }
 
 // FS2020 Input model
@@ -92,9 +83,10 @@ const (
 	keySecondary = iota
 )
 
-func loadGameConfigs(files []string, debugOutput bool) (*gameBindsByDevice, *map[string]bool) {
+// Load the game config files (provided by user)
+func loadGameConfigs(files []string, debugOutput bool, verboseOutput bool) (*gameBindsByDevice, *map[string]string) {
 	gameBinds := make(gameBindsByDevice)
-	gameDevices := make(map[string]bool)
+	gameDevices := make(map[string]string)
 
 	// XML state variables
 	var currentDevice *gameDevice
@@ -154,7 +146,7 @@ func loadGameConfigs(files []string, debugOutput bool) (*gameBindsByDevice, *map
 						currentDevice = &aDevice
 						currentDevice.ContextActions = make(map[string]map[string]*gameAction)
 						gameBinds[aDevice.DeviceName] = currentDevice
-						gameDevices[aDevice.DeviceName] = true
+						gameDevices[aDevice.DeviceName] = deviceUnknown
 					}
 				case "Context":
 					// Found new context
@@ -247,7 +239,72 @@ func loadGameConfigs(files []string, debugOutput bool) (*gameBindsByDevice, *map
 			}
 		}
 	}
+
+	if verboseOutput {
+		log.Printf("=== Loaded FS2020 Config ===\n")
+		for _, gameDevice := range gameBinds {
+			log.Printf("DeviceName=\"%s\" GUID=\"%s\" ProductId=\"%s\"\n",
+				gameDevice.DeviceName, gameDevice.GUID, gameDevice.ProductID)
+			for contextName, actions := range gameDevice.ContextActions {
+				log.Printf("  ContextName=\"%s\"\n", contextName)
+				for actionName, action := range actions {
+					secondaryText := ""
+					if len(action.SecondaryInfo) != 0 {
+						secondaryText = fmt.Sprintf(" SecondaryInfo=\"%s\" SecondaryKey=\"%d\"",
+							action.SecondaryInfo, action.SecondaryKey)
+					}
+					log.Printf("    ActionName=\"%s\" Flag=\"%d\" PrimaryInfo=\"%s\" PrimaryKey=\"%d\"%s\n",
+						actionName, action.Flag, action.PrimaryInfo, action.PrimaryKey, secondaryText)
+				}
+			}
+		}
+	}
 	return &gameBinds, &gameDevices
+}
+
+type fs2020Data struct {
+	DeviceNameMap map[string]string `yaml:"DeviceNameMap"`
+}
+
+const (
+	deviceUnknown     = "DeviceUnknown"     // Unfamiliar with this device
+	deviceMissingInfo = "DeviceMissingInfo" // Only know the name of device
+)
+
+// Load FS2020 specific data from our model. Update the device names (map game device name to our model names)
+func loadGameData(gameDeviceNames *map[string]string, debugOutput bool) {
+	nameMap := fs2020Data{}
+	// Load our game data
+	yamlData, err := ioutil.ReadFile("data/fs2020.yaml")
+	if err != nil {
+		log.Printf("yamlFile.Get err   #%v ", err)
+	}
+	// Unmarshall yaml file to data structure
+	err = yaml.Unmarshal([]byte(yamlData), &nameMap)
+	if err != nil {
+		log.Fatalf("error: %v", err)
+	}
+	if debugOutput {
+		d, err := yaml.Marshal(&nameMap)
+		if err != nil {
+			log.Fatalf("error: %v", err)
+		}
+		fmt.Printf("=== Device Name Map ===\n%s\n\n", string(d))
+	}
+
+	// Update map of game device names to our model device names
+	for fullName := range *gameDeviceNames {
+		if shortName, found := nameMap.DeviceNameMap[fullName]; found {
+			if len(shortName) == 0 {
+				(*gameDeviceNames)[fullName] = deviceMissingInfo // Know of the device but not much else
+			} else {
+				(*gameDeviceNames)[fullName] = shortName
+			}
+		} else {
+			(*gameDeviceNames)[fullName] = deviceUnknown // Don't know anything about this device
+		}
+
+	}
 }
 
 // FS2020 Device Name -> Index name, game inputs -> index inputs
@@ -261,110 +318,28 @@ func loadGameConfigs(files []string, debugOutput bool) (*gameBindsByDevice, *map
 // Rotation X/Y/Z (+/-)?
 // Slider X/Y (+/-)?
 
-type deviceNameMap map[string]deviceMap
-type deviceMap struct {
-	Name   string
-	Inputs inputNameMap
+type imageOverlay struct {
+	Text      string
+	InputData *gameAction
 }
-type inputNameMap map[string]string
+type overlaysByImage map[string]imageOverlay
 
-const deviceUnknown = "DeviceUnknown"
-const deviceMissingInfo = "DeviceMissingInfo"
-
-func getGameDeviceGenericName(deviceName string) string {
-	switch deviceName {
-	case "Airbus T-A320 Quadrant throttle":
-		return deviceMissingInfo
-	case "Alpha Flight Controls":
-		return deviceMissingInfo
-	case "BU0836X Interface":
-		return deviceMissingInfo
-	case "BU0836X Interface_1":
-		return deviceMissingInfo
-	case "Joystick - HOTAS Warthog":
-		return "ThrustMasterWarthogJoystick"
-	case "Keyboard (FSX)":
-		return deviceMissingInfo
-	case "Logitech Extreme 3D":
-		return "LogitechExtreme3DPro"
-	case "Mouse":
-		return "" // TODO Add Mouse support
-	case "PS4":
-		return "DualShock4"
-	case "Saitek Pro Flight Quadrant":
-		return deviceMissingInfo
-	case "Saitek Pro Flight Rudder Pedals":
-		return "SaitekProFlightCombatRudderPedals"
-	case "Saitek Pro Flight X-55 Rhino Stick":
-		return "SaitekX55Joystick"
-	case "Saitek Pro Flight X-55 Rhino Throttle":
-		return "SaitekX55Throttle"
-	case "Saitek Pro Flight X-56 Rhino Stick":
-		return "SaitekX56Joystick"
-	case "Saitek Pro Flight X-56 Rhino Throttle":
-		return "SaitekX56Throttle"
-	case "Saitek Pro Flight Yoke":
-		return deviceMissingInfo
-	case "Saitek X52 Flight Control System":
-		return "SaitekX52"
-	case "Saitek X52 Pro Flight Control System":
-		return "SaitekX52Pro"
-	case "T.16000M":
-		return "T16000M"
-	case "T.A320 CoPilot":
-		return deviceMissingInfo
-	case "T.A320 Pilot":
-		return deviceMissingInfo
-	case "T.Flight Hotas 4":
-		return "ThrustMasterTFlightHOTASX" // TODO - PS4 variant
-	case "T.Flight Hotas One":
-		return "ThrustMasterTFlightHOTASX" // TODO - XB1 variant
-	case "T.Flight Hotas X":
-		return "ThrustMasterTFlightHOTASX"
-	case "T.Flight Rudder Pedals":
-		return "T-Rudder"
-	case "T.Flight Stick X":
-		return "044FB106"
-	case "Throttle - HOTAS Warthog":
-		return "ThrustMasterWarthogThrottle"
-	case "TWCS Throttle":
-		return "T16000MTHROTTLE"
-	case "T-Pendular-Rudder":
-		return deviceMissingInfo
-	case "VF - TPM V3RNIO":
-		return deviceMissingInfo
-	case "VirtualFly - RUDDO+":
-		return deviceMissingInfo
-	case "VirtualFly - TQ3+":
-		return deviceMissingInfo
-	case "VirtualFly - TQ6+":
-		return deviceMissingInfo
-	case "VirtualFly - YOKO+":
-		return deviceMissingInfo
-	case "XInput Gamepad":
-		return "GamePad"
-	}
-	return deviceUnknown
-}
-
-func mapGameBindsToIndex(gameBinds *gameBindsByDevice, deviceIndex data.DeviceIndexByGroupName) {
-	deviceNameMap := make(map[string]string)
-	deviceNameMap["Saitek Pro Flight X-55 Rhino Throttle"] = "SaitekX55Throttle"
-	deviceNameMap["Saitek Pro Flight X-55 Rhino Stick"] = "SaitekX55Stick"
-
+func mapGameBindsToIndex(gameBinds *gameBindsByDevice, deviceIndex *data.DeviceMap) *overlaysByImage {
+	overlaysByImage := overlaysByImage{}
 	buttonRegex := regexp.MustCompile(`Button\s*(\d+)`)
 	axisRegex1 := regexp.MustCompile(`Axis\s*([XYZ])\s*([+-])?`)
 	axisRegex2 := regexp.MustCompile(`(?:([LR])-)Axis\s*([XYZ])\s*([+-])?`)
 	povRegex := regexp.MustCompile(`(?i)Pov[\s_]([[:alpha:]])`)
 	rotationRegex := regexp.MustCompile(`Rotation\s*([XYZ])\s*([+-])?`)
 	sliderRegex := regexp.MustCompile(`Slider\s*([XYZ])\s*([+-])?`)
-	inputNameMap := make(map[string]string)
 
+	_ = overlaysByImage
 	_ = buttonRegex
 	_ = axisRegex1
 	_ = axisRegex2
 	_ = povRegex
 	_ = rotationRegex
 	_ = sliderRegex
-	_ = inputNameMap
+
+	return &overlaysByImage
 }

@@ -2,56 +2,71 @@ package data
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
+
+	"gopkg.in/yaml.v3"
 )
 
 // Example
 // x55 -> { image, devices: { stick: { inputs: { button1: {isDigital, x, y, width, height}}}}}
 
-// DeviceToGroup - map of device name to the group it belongs to. Group is the key in DeviceIndexByGroupName
-type DeviceToGroup map[string]string
-
-// DeviceIndexByGroupName - master index, keyed by group name
-type DeviceIndexByGroupName map[string]*DeviceGroup
-
-// DeviceGroup - image and map of devices by name
-type DeviceGroup struct {
-	Image   string
-	Devices DevicesByName
+// DeviceMap - structure of devices (by group name)
+type DeviceMap map[string]struct {
+	Image   string `yaml:"Image"`
+	Devices map[string]struct {
+		DisplayName string `yaml:"DisplayName"`
+		Inputs      map[string]struct {
+			IsDigital bool `yaml:"IsDigital"`
+			ImageX    int  `yaml:"OffsetX"`
+			ImageY    int  `yaml:"OffsetY"`
+			Width     int  `yaml:"Width"`
+			Height    int  `yaml:"Height"`
+		} `yaml:"Inputs"`
+	} `yaml:"Devices"`
 }
 
-// DevicesByName - map of devices by name
-type DevicesByName map[string]*DeviceData
+// LoadDeviceData - Reads device data from files
+func LoadDeviceData(neededDeviceGroups *map[string]bool, debugOutput bool) *DeviceMap {
+	deviceMap := DeviceMap{}
+	yamlData, err := ioutil.ReadFile("data/generatedDevices.yaml")
+	if err != nil {
+		log.Printf("yamlFile.Get err   #%v ", err)
+	}
 
-// DeviceData - information about a device
-type DeviceData struct {
-	// DeviceData - data about a specific device
-	DisplayName     string
-	InputDataByName *InputDataByName
-}
+	err = yaml.Unmarshal([]byte(yamlData), &deviceMap)
+	if err != nil {
+		log.Fatalf("error: %v", err)
+	}
+	if debugOutput {
+		d, err := yaml.Marshal(&deviceMap)
+		if err != nil {
+			log.Fatalf("error: %v", err)
+		}
+		fmt.Printf("=== Full Device Map ===\n%s\n\n", string(d))
+	}
 
-// InputDataByName - map of device input data by input name
-type InputDataByName map[string]*InputData
+	// Filter for only the device groups we're interested in
+	for groupName, groupData := range deviceMap {
+		foundDevice := false
+		for shortName := range groupData.Devices {
+			if (*neededDeviceGroups)[shortName] {
+				foundDevice = true
+			}
+		}
+		if !foundDevice {
+			delete(deviceMap, groupName)
+		}
+	}
 
-// InputData - data about the input & image location
-type InputData struct {
-	IsDigital   bool
-	ImageX      int
-	ImageY      int
-	ImageWidth  int
-	ImageHeight int
+	if debugOutput {
+		d, err := yaml.Marshal(&deviceMap)
+		if err != nil {
+			log.Fatalf("error: %v", err)
+		}
+		fmt.Printf("=== Targeted Device Map ===\n%s\n\n", string(d))
+	}
+	return &deviceMap
 }
 
 // TODO - Keyboard handling
-
-// PrintDeviceIndex - prints the full device index
-func PrintDeviceIndex(deviceIndex *DeviceIndexByGroupName) {
-	for groupName, deviceGroup := range *deviceIndex {
-		for deviceName, deviceData := range deviceGroup.Devices {
-			for inputName, data := range *(deviceData.InputDataByName) {
-				fmt.Printf("%s %s %s %s %s %t %d %d %d %d\n",
-					groupName, deviceGroup.Image, deviceName, deviceData.DisplayName, inputName,
-					data.IsDigital, data.ImageX, data.ImageY, data.ImageWidth, data.ImageHeight)
-			}
-		}
-	}
-}
