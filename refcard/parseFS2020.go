@@ -24,20 +24,19 @@ func main() {
 	parseCliArgs(&debugOutput, &verboseOutput)
 
 	// Load the game files provided
-	gameBinds, gameDeviceNames := loadGameConfigs(flag.Args(), debugOutput, verboseOutput)
-	loadGameData(gameDeviceNames, debugOutput)
+	gameDeviceNameMap := loadGameModel(debugOutput)
+	gameBinds := loadGameConfigs(flag.Args(), gameDeviceNameMap, debugOutput, verboseOutput)
 
-	// Create a mapping of game device names to short names from our model
-	gameDeviceShortNames := make(map[string]bool)
-	for _, shortName := range *gameDeviceNames {
-		gameDeviceShortNames[shortName] = true
+	neededDevices := make(map[string]bool)
+	for device := range gameBinds {
+		neededDevices[device] = true
 	}
-
 	// Load the abstract device model (i.e. non-game specific) based on the devices in our game files
-	deviceIndex := data.LoadDeviceData(&gameDeviceShortNames, debugOutput)
+	deviceIndex := data.LoadDeviceData(neededDevices, debugOutput)
 
 	// Map the game input bindings to our model
-	mapGameBindsToIndex(gameBinds, deviceIndex)
+	overlaysByImage := populateImageOverlays(deviceIndex, gameBinds)
+	_ = overlaysByImage
 }
 
 func parseCliArgs(debugOutput *bool, verboseOutput *bool) {
@@ -58,6 +57,12 @@ func parseCliArgs(debugOutput *bool, verboseOutput *bool) {
 
 }
 
+const (
+	keyUnknown   = iota
+	keyPrimary   = iota
+	keySecondary = iota
+)
+
 // FS2020 Input model
 // Device -> Context -> Action -> Primary/Secondary -> Key
 type gameBindsByDevice map[string]*gameDevice
@@ -77,16 +82,9 @@ type gameAction struct {
 	SecondaryKey  int
 }
 
-const (
-	keyUnknown   = iota
-	keyPrimary   = iota
-	keySecondary = iota
-)
-
 // Load the game config files (provided by user)
-func loadGameConfigs(files []string, debugOutput bool, verboseOutput bool) (*gameBindsByDevice, *map[string]string) {
+func loadGameConfigs(files []string, deviceNameMap deviceNameFullToShort, debugOutput bool, verboseOutput bool) gameBindsByDevice {
 	gameBinds := make(gameBindsByDevice)
-	gameDevices := make(map[string]string)
 
 	// XML state variables
 	var currentDevice *gameDevice
@@ -145,8 +143,15 @@ func loadGameConfigs(files []string, debugOutput bool, verboseOutput bool) (*gam
 						}
 						currentDevice = &aDevice
 						currentDevice.ContextActions = make(map[string]map[string]*gameAction)
-						gameBinds[aDevice.DeviceName] = currentDevice
-						gameDevices[aDevice.DeviceName] = deviceUnknown
+						if shortName, ok := deviceNameMap[aDevice.DeviceName]; ok {
+							gameBinds[shortName] = currentDevice
+							if shortName == deviceMissingInfo {
+								log.Printf("Error: Missing info for device '%s'", aDevice.DeviceName)
+							}
+						} else {
+							deviceNameMap[shortName] = deviceUnknown
+							log.Printf("Error: Unknown device '%s'", aDevice.DeviceName)
+						}
 					}
 				case "Context":
 					// Found new context
@@ -259,12 +264,13 @@ func loadGameConfigs(files []string, debugOutput bool, verboseOutput bool) (*gam
 			}
 		}
 	}
-	return &gameBinds, &gameDevices
+	return gameBinds
 }
 
 type fs2020Data struct {
-	DeviceNameMap map[string]string `yaml:"DeviceNameMap"`
+	DeviceNameMap deviceNameFullToShort `yaml:"DeviceNameMap"`
 }
+type deviceNameFullToShort map[string]string
 
 const (
 	deviceUnknown     = "DeviceUnknown"     // Unfamiliar with this device
@@ -272,7 +278,7 @@ const (
 )
 
 // Load FS2020 specific data from our model. Update the device names (map game device name to our model names)
-func loadGameData(gameDeviceNames *map[string]string, debugOutput bool) {
+func loadGameModel(debugOutput bool) deviceNameFullToShort {
 	nameMap := fs2020Data{}
 	// Load our game data
 	yamlData, err := ioutil.ReadFile("data/fs2020.yaml")
@@ -292,19 +298,44 @@ func loadGameData(gameDeviceNames *map[string]string, debugOutput bool) {
 		fmt.Printf("=== Device Name Map ===\n%s\n\n", string(d))
 	}
 
+	fullToShort := deviceNameFullToShort{}
 	// Update map of game device names to our model device names
-	for fullName := range *gameDeviceNames {
-		if shortName, found := nameMap.DeviceNameMap[fullName]; found {
-			if len(shortName) == 0 {
-				(*gameDeviceNames)[fullName] = deviceMissingInfo // Know of the device but not much else
-			} else {
-				(*gameDeviceNames)[fullName] = shortName
-			}
+	for fullName, shortName := range nameMap.DeviceNameMap {
+		if shortName != "" {
+			fullToShort[fullName] = shortName
 		} else {
-			(*gameDeviceNames)[fullName] = deviceUnknown // Don't know anything about this device
+			fullToShort[fullName] = deviceMissingInfo
 		}
-
 	}
+
+	return fullToShort
+}
+
+func populateImageOverlays(deviceIndex data.DeviceModel, gameBinds gameBindsByDevice) data.OverlaysByImage {
+	// Iterate through our game binds
+	var overlaysByImage data.OverlaysByImage
+	for deviceName, gameDevice := range gameBinds {
+		modelDevice := deviceIndex[deviceName]
+		image := modelDevice.Image
+		for context, actions := range gameDevice.ContextActions {
+			for actionName, actionData := range actions {
+				inputDataList := findMatchingInputModels(actionData, *modelDevice.Inputs)
+				for _, inputData := range inputDataList {
+					var overlayData data.OverlayData
+					overlayData.Context = context
+					overlayData.Text = actionName
+					overlayData.PosAndSize = &inputData
+
+					if _, ok := overlaysByImage[image]; !ok {
+						overlaysByImage[image] = make([]data.OverlayData, 0) // TODO don't hardcode 100
+					}
+					overlaysByImage[image] = append(overlaysByImage[deviceName], overlayData)
+				}
+			}
+		}
+	}
+
+	return overlaysByImage
 }
 
 // FS2020 Device Name -> Index name, game inputs -> index inputs
@@ -318,22 +349,46 @@ func loadGameData(gameDeviceNames *map[string]string, debugOutput bool) {
 // Rotation X/Y/Z (+/-)?
 // Slider X/Y (+/-)?
 
-type imageOverlay struct {
-	Text      string
-	InputData *gameAction
-}
-type overlaysByImage map[string]imageOverlay
+// Takes the game provided bindings with the internal device map to
+// build a list of image overlays.
+func findMatchingInputModels(actionData *gameAction, inputs data.InputsMap) []data.InputData {
+	inputDataList := make([]data.InputData, 0)
 
-func mapGameBindsToIndex(gameBinds *gameBindsByDevice, deviceIndex *data.DeviceMap) *overlaysByImage {
-	overlaysByImage := overlaysByImage{}
+	// TODO - avoid repeated declaration of regexs
 	buttonRegex := regexp.MustCompile(`Button\s*(\d+)`)
 	axisRegex1 := regexp.MustCompile(`Axis\s*([XYZ])\s*([+-])?`)
 	axisRegex2 := regexp.MustCompile(`(?:([LR])-)Axis\s*([XYZ])\s*([+-])?`)
-	povRegex := regexp.MustCompile(`(?i)Pov[\s_]([[:alpha:]])`)
+	povRegex := regexp.MustCompile(`(?i)Pov[\s_]([[:alpha:]]+)`)
 	rotationRegex := regexp.MustCompile(`Rotation\s*([XYZ])\s*([+-])?`)
 	sliderRegex := regexp.MustCompile(`Slider\s*([XYZ])\s*([+-])?`)
 
-	_ = overlaysByImage
+	matches := buttonRegex.FindAllStringSubmatch((*actionData).PrimaryInfo, -1)
+	if matches != nil {
+	} else {
+		matches = axisRegex1.FindAllStringSubmatch((*actionData).PrimaryInfo, -1)
+		if matches != nil {
+		} else {
+			matches = axisRegex2.FindAllStringSubmatch((*actionData).PrimaryInfo, -1)
+			if matches != nil {
+			} else {
+				matches = povRegex.FindAllStringSubmatch((*actionData).PrimaryInfo, -1)
+				if matches != nil {
+				} else {
+					matches = rotationRegex.FindAllStringSubmatch((*actionData).PrimaryInfo, -1)
+					if matches != nil {
+					} else {
+						matches = sliderRegex.FindAllStringSubmatch((*actionData).PrimaryInfo, -1)
+						if matches != nil {
+						} else {
+							log.Printf("Error: Could not find matching Action %v", *actionData)
+						}
+					}
+				}
+			}
+		}
+	}
+	_ = matches
+
 	_ = buttonRegex
 	_ = axisRegex1
 	_ = axisRegex2
@@ -341,5 +396,5 @@ func mapGameBindsToIndex(gameBinds *gameBindsByDevice, deviceIndex *data.DeviceM
 	_ = rotationRegex
 	_ = sliderRegex
 
-	return &overlaysByImage
+	return inputDataList
 }
