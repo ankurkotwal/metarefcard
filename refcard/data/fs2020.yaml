@@ -21,8 +21,8 @@ DeviceNameMap:
   T.16000M: T16000M
   T.A320 CoPilot:
   T.A320 Pilot:
-  T.Flight Hotas 4: ThrustMasterTFlightHOTASX # TODO - PS4 variant
-  T.Flight Hotas One: ThrustMasterTFlightHOTASX # TODO - XB1 variant
+  T.Flight Hotas 4: ThrustMasterHOTAS4
+  T.Flight Hotas One: ThrustMasterHOTAS4
   T.Flight Hotas X: ThrustMasterTFlightHOTASX
   T.Flight Rudder Pedals: T-Rudder
   T.Flight Stick X: 044FB106
@@ -35,4 +35,14 @@ DeviceNameMap:
   VirtualFly - TQ6+:
   VirtualFly - YOKO+:
   XInput Gamepad: GamePad
+SliderInputMapping: # Devices with known sliders and which model input they map to
+  044FB106: Joy_UAxis
+  LogitechExtreme3DPro: Joy_UAxis
+  T16000M: Joy_UAxis
+  T16000MFCS: Joy_UAxis
+  T16000MTHROTTLE: Joy_ZAxis
+  ThrustMasterHOTAS4: Joy_ZAxis
+  ThrustMasterTFlightHOTASX: Joy_ZAxis
+  ThrustMasterWarthogThrottle: Joy_ZAxis
+  T-Rudder: Joy_ZAxis
 ...
