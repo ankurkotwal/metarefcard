@@ -1,3 +1,6 @@
+##### Output files #####
+out/
+
 ##### VIM #####
 *.swp
 

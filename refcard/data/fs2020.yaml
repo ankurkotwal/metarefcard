@@ -1,11 +1,11 @@
 ---
 DeviceNameMap:
-  Airbus T-A320 Quadrant throttle :
+  Airbus T-A320 Quadrant throttle:
   Alpha Flight Controls:
   BU0836X Interface:
   BU0836X Interface_1:
   Joystick - HOTAS Warthog: ThrustMasterWarthogJoystick
-  Keyboard (FSX):  # TODO Keyboad
+  Keyboard (FSX): # TODO Keyboad
   Logitech Extreme 3D: LogitechExtreme3DPro
   Mouse: # TODO Mouse
   PS4: DualShock4
@@ -35,14 +35,51 @@ DeviceNameMap:
   VirtualFly - TQ6+:
   VirtualFly - YOKO+:
   XInput Gamepad: GamePad
-SliderInputMapping: # Devices with known sliders and which model input they map to
-  044FB106: Joy_UAxis
-  LogitechExtreme3DPro: Joy_UAxis
-  T16000M: Joy_UAxis
-  T16000MFCS: Joy_UAxis
-  T16000MTHROTTLE: Joy_ZAxis
-  ThrustMasterHOTAS4: Joy_ZAxis
-  ThrustMasterTFlightHOTASX: Joy_ZAxis
-  ThrustMasterWarthogThrottle: Joy_ZAxis
-  T-Rudder: Joy_ZAxis
-...
+InputMapping: # Devices with known game inputs and which model input they map to
+  044FB106:
+    Slider:
+      X: U
+  LogitechExtreme3DPro:
+    Slider:
+      X: U
+  SaitekX56Throttle:
+    Axis:
+      RX: RZ
+      RY: U
+      RZ: V
+    Slider:
+      X: RX
+      Y: RY
+  T16000M:
+    Slider:
+      X: U
+  T16000MFCS:
+    Slider:
+      X: U
+  T16000MTHROTTLE: # TODO Unknown Axis Mapping
+    Slider:
+      X: X
+      Y: Y
+  ThrustMasterHOTAS4:
+    Slider:
+      X: Z
+  ThrustMasterTFlightHOTASX:
+    Slider:
+      X: Z
+  ThrustMasterWarthogThrottle:
+    Slider:
+      X: Z
+  T-Rudder:
+    Slider:
+      Y: Z
+InputAdditions:
+  SaitekX56Throttle:
+    Inputs:
+      YAxis:
+        IsDigital: false
+        OffsetX: 164
+        OffsetY: 428
+        Width: 572
+        Height: 54
+InputLabels:
+  TOGGLE_SMART_CAMERA: Toggle Smart Camera

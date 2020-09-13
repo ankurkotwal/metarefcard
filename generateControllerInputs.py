@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import sys
+import sys, re
 sys.path.append("3rdparty/edrefcard")
 
 from bindingsData import *
@@ -34,7 +34,8 @@ for name in supportedDevices :
         for key in hotasDetails[device]:
             if key == 'displayName':
                 continue
-            outFile.write('        {k}:\n'.format(k=key))
+            shortKey = re.sub('^Joy_', '', key)
+            outFile.write('        {k}:\n'.format(k=shortKey))
             data = hotasDetails[device][key]
             if data['Type'] == 'Digital':
                 outFile.write('          IsDigital: true\n')

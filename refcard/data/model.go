@@ -14,9 +14,11 @@ import (
 // deviceMap - structure of devices (by group name)
 type deviceMap map[string]struct {
 	Image   string                     `yaml:"Image"`
-	Devices map[string]deviceInputData `yaml:"Devices"`
+	Devices map[string]DeviceInputData `yaml:"Devices"`
 }
-type deviceInputData struct {
+
+// DeviceInputData - data about a given device
+type DeviceInputData struct {
 	DisplayName string    `yaml:"DisplayName"`
 	Inputs      InputsMap `yaml:"Inputs"`
 }
@@ -36,7 +38,7 @@ type DeviceModel map[string]*DeviceData
 // DeviceData - information about a device
 type DeviceData struct {
 	Image  string
-	Inputs *InputsMap
+	Inputs InputsMap
 }
 
 // InputsMap - Map of input data by name
@@ -80,7 +82,7 @@ func LoadDeviceData(neededDevices map[string]bool, debugOutput bool) DeviceModel
 				deviceData := new(DeviceData)
 				deviceModel[shortName] = deviceData
 				deviceData.Image = groupData.Image
-				deviceData.Inputs = &inputData.Inputs
+				deviceData.Inputs = inputData.Inputs
 			}
 		}
 	}

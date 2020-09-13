@@ -102,16 +102,6 @@
 				<KEY Information="Joystick Button 14">13</KEY>
 			</Primary>
 		</Action>
-		<Action ActionName="KEY_COCKPIT_FREELOOK_VRTC_SET" Flag="4">
-			<Primary>
-				<KEY Information="Joystick R-Axis Y ">786</KEY>
-			</Primary>
-		</Action>
-		<Action ActionName="KEY_COCKPIT_FREELOOK_HRZ_SET" Flag="132">
-			<Primary>
-				<KEY Information="Joystick R-Axis X ">770</KEY>
-			</Primary>
-		</Action>
 	</Context>
 	<Context ContextName="EXTERNAL_CAMERA">
 		<Action ActionName="KEY_CAMERACHASE_RESET" Flag="2">
@@ -157,16 +147,6 @@
 		<Action ActionName="KEY_CHASE_LOOK_DOWN" Flag="1">
 			<Primary>
 				<KEY Information="Joystick Button 9">8</KEY>
-			</Primary>
-		</Action>
-		<Action ActionName="KEY_CHASE_FREELOOK_VRTC_SET" Flag="4">
-			<Primary>
-				<KEY Information="Joystick R-Axis Y ">786</KEY>
-			</Primary>
-		</Action>
-		<Action ActionName="KEY_CHASE_FREELOOK_HRZ_SET" Flag="132">
-			<Primary>
-				<KEY Information="Joystick R-Axis X ">770</KEY>
 			</Primary>
 		</Action>
 	</Context>

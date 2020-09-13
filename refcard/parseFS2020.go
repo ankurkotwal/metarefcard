@@ -19,15 +19,18 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+const appName string = "MetaRefCard"
+
 func main() {
+	// TODO Bug HOTAS image titles say Elite Dangerous
 	debugOutput := false
 	verboseOutput := false
 
 	parseCliArgs(&debugOutput, &verboseOutput)
 
 	// Load the game files provided
-	gameDeviceNameMap, sliderInputMap := loadGameModel(debugOutput)
-	gameBinds := loadGameConfigs(flag.Args(), gameDeviceNameMap,
+	gameData := loadGameModel(debugOutput)
+	gameBinds := loadGameConfigs(flag.Args(), gameData.DeviceNameMap,
 		debugOutput, verboseOutput)
 
 	neededDevices := make(map[string]bool)
@@ -36,30 +39,56 @@ func main() {
 	}
 	// Load the abstract device model (i.e. non-game specific) based on the devices in our game files
 	deviceIndex := data.LoadDeviceData(neededDevices, debugOutput)
+	// Add device additions to the main device index
+	for deviceName, deviceInputData := range gameData.InputAdditions {
+		if deviceData, found := deviceIndex[deviceName]; found {
+			for additionInput, additionData := range deviceInputData.Inputs {
+				deviceData.Inputs[additionInput] = additionData
+			}
+		} else {
+			log.Printf("Error: InputAddition device %s not found in deviceIndex\n", deviceName)
+		}
+	}
+
+	// TODO Bug - Same input could be used multiple times. Need to handle.
 
 	// Setup the regexes once and pass them around
 	regexes := make(map[string]*regexp.Regexp)
 	regexes["button"] = regexp.MustCompile(`Button\s*(\d+)`)
-	regexes["axis"] = regexp.MustCompile(`(?:([LR])-)?Axis\s*([XYZ])?\s*([+-])?`)
+	regexes["axis"] = regexp.MustCompile(`(?:([R])-)?Axis\s*([XYZ])`)
 	regexes["pov"] = regexp.MustCompile(`(?i)Pov(\d?)[\s_]([[:alpha:]]+)`)
-	regexes["rotation"] = regexp.MustCompile(`Rotation\s*([XYZ])\s*([+-])?`)
-	regexes["slider"] = regexp.MustCompile(`Slider\s*([XYZ])\s*([+-])?`)
+	regexes["rotation"] = regexp.MustCompile(`Rotation\s*([XYZ])`)
+	regexes["slider"] = regexp.MustCompile(`Slider\s*([XYZ])`)
+
+	// TODO different Font sizes
+	fontFace, err := gg.LoadFontFace("resources/font/Roboto-Regular.ttf", 0.9*44)
+	if err != nil {
+		panic(err)
+	}
 
 	// Map the game input bindings to our model
-	overlaysByImage := populateImageOverlays(deviceIndex, gameBinds, regexes, sliderInputMap)
+	overlaysByImage := populateImageOverlays(deviceIndex, gameBinds, regexes, gameData)
 	for imageFilename, overlayDataRange := range overlaysByImage {
-		image, err := gg.LoadImage(imageFilename)
-		_ = image
+		image, err := gg.LoadImage(fmt.Sprintf("resources/hotas_images/%s", imageFilename))
 		if err != nil {
 			log.Printf("Error: loadImage %s failed. %v\n", imageFilename, err)
 			continue
 		}
+		dc := gg.NewContextForImage(image)
+		dc.SetRGB(0, 0, 0)
+		dc.SetFontFace(fontFace)
 		for _, overlayData := range overlayDataRange {
-			dc := gg.NewContext(overlayData.PosAndSize.Width, overlayData.PosAndSize.Height)
-			dc.SetRGBA(1, 1, 1, 1)
-
+			// TODO Support secondary inputs
+			dc.DrawString(overlayData.Text,
+				float64(overlayData.PosAndSize.ImageX),
+				float64(overlayData.PosAndSize.ImageY)+0.9*44)
+			// if overlayData.PosAndSize.IsDigital == false {
+			// 	fmt.Printf("%v\n", overlayData.PosAndSize)
+			// }
 		}
+		dc.SavePNG(fmt.Sprintf("out/%s", imageFilename))
 	}
+	fmt.Println("Done")
 }
 
 func parseCliArgs(debugOutput *bool, verboseOutput *bool) {
@@ -292,11 +321,16 @@ func loadGameConfigs(files []string, deviceNameMap deviceNameFullToShort,
 }
 
 type fs2020Data struct {
-	DeviceNameMap  deviceNameFullToShort `yaml:"DeviceNameMap"`
-	SliderInputMap sliderInputMap        `yaml:"SliderInputMapping"`
+	DeviceNameMap  deviceNameFullToShort           `yaml:"DeviceNameMap"`
+	InputMap       deviceInputTypeMapping          `yaml:"InputMapping"`
+	InputAdditions map[string]data.DeviceInputData `yaml: "InputAdditions"`
+	InputLabels    map[string]string               `yaml:"InputLabels"`
 }
 type deviceNameFullToShort map[string]string
-type sliderInputMap map[string]string // Device name -> model input
+type deviceInputTypeMapping map[string]inputTypeMapping
+type inputTypeMapping map[string]map[string]string // Device -> Type (Axis/Slider) -> axisInputMap/sliderInputMap
+// Axis -> X/Y/Z -> model [R]X/Y/Z Axis
+// Slider -> X/Y/Z -> model [R]U/V/X/Y/Z Axis
 
 const (
 	deviceUnknown     = "DeviceUnknown"     // Unfamiliar with this device
@@ -304,7 +338,7 @@ const (
 )
 
 // Load FS2020 specific data from our model. Update the device names (map game device name to our model names)
-func loadGameModel(debugOutput bool) (deviceNameFullToShort, sliderInputMap) {
+func loadGameModel(debugOutput bool) *fs2020Data {
 	data := fs2020Data{}
 	// Load our game data
 	yamlData, err := ioutil.ReadFile("data/fs2020.yaml")
@@ -314,12 +348,12 @@ func loadGameModel(debugOutput bool) (deviceNameFullToShort, sliderInputMap) {
 	// Unmarshall yaml file to data structure
 	err = yaml.Unmarshal([]byte(yamlData), &data)
 	if err != nil {
-		log.Fatalf("error: %v", err)
+		log.Fatalf("Error: %v", err)
 	}
 	if debugOutput {
 		d, err := yaml.Marshal(&data)
 		if err != nil {
-			log.Fatalf("error: %v", err)
+			log.Fatalf("Error: %v", err)
 		}
 		fmt.Printf("=== FS2020 Data ===\n%s\n\n", string(d))
 	}
@@ -333,12 +367,13 @@ func loadGameModel(debugOutput bool) (deviceNameFullToShort, sliderInputMap) {
 			fullToShort[fullName] = deviceMissingInfo
 		}
 	}
+	data.DeviceNameMap = fullToShort
 
-	return fullToShort, data.SliderInputMap
+	return &data
 }
 
 func populateImageOverlays(deviceIndex data.DeviceModel, gameBinds gameBindsByDevice,
-	regexes map[string]*regexp.Regexp, sliderInputMap sliderInputMap) data.OverlaysByImage {
+	regexes map[string]*regexp.Regexp, gameData *fs2020Data) data.OverlaysByImage {
 	// Iterate through our game binds
 	overlaysByImage := make(data.OverlaysByImage)
 	for deviceName, gameDevice := range gameBinds {
@@ -346,11 +381,21 @@ func populateImageOverlays(deviceIndex data.DeviceModel, gameBinds gameBindsByDe
 		image := modelDevice.Image
 		for context, actions := range gameDevice.ContextActions {
 			for actionName, actionData := range actions {
-				inputDataList := findMatchingInputModels(deviceName, actionData, *modelDevice.Inputs, regexes, sliderInputMap)
+				inputDataList := findMatchingInputModels(deviceName, actionData,
+					modelDevice.Inputs, regexes, (*gameData).InputMap[deviceName])
 				for _, inputData := range inputDataList {
+					if inputData.ImageX == 0 && inputData.ImageY == 0 {
+						log.Printf("Error: Location 0,0 for %s %v", actionName, inputData)
+						continue
+					}
 					var overlayData data.OverlayData
 					overlayData.Context = context
-					overlayData.Text = actionName
+					// Game data might have a better label for this text
+					if label, found := (*gameData).InputLabels[actionName]; found {
+						overlayData.Text = label
+					} else {
+						overlayData.Text = actionName
+					}
 					overlayData.PosAndSize = &inputData
 
 					if _, ok := overlaysByImage[image]; !ok {
@@ -365,32 +410,22 @@ func populateImageOverlays(deviceIndex data.DeviceModel, gameBinds gameBindsByDe
 	return overlaysByImage
 }
 
-// FS2020 Device Name -> Index name, game inputs -> index inputs
-// Joystick Button %d
-// Button\d+
-// Joystick L-Axis X/Y/Z -> Joy_XAxis
-// Joystick R-Axis X/Y/Z -> JoyRXAxis, JoyRYAxis, JoyRZAxis
-// Axis X/Y/Z (+/-)?
-// Joystick Pov Up/Down/Left/Right -> Joy_POV1Up, Joy_POV1Down, Joy_POV1Left, Joy_POV1Right
-// POV1_UP, POV1_DOWN, POV1_LEFT, POV1_RIGHT
-// Rotation X/Y/Z (+/-)?
-// Slider X/Y (+/-)?
-
 // Takes the game provided bindings with the internal device map to
 // build a list of image overlays.
 func findMatchingInputModels(deviceName string, actionData *gameAction, inputs data.InputsMap,
-	regexes map[string]*regexp.Regexp, sliderInputMap sliderInputMap) []data.InputData {
+	regexes map[string]*regexp.Regexp, gameInputMap inputTypeMapping) []data.InputData {
 	inputDataList := make([]data.InputData, 0)
 
 	var inputData *data.InputData
-	inputData = findMatchingInputModelsInner(deviceName, (*actionData).PrimaryInfo, inputs, regexes, sliderInputMap)
+	inputData = findMatchingInputModelsInner(deviceName, (*actionData).PrimaryInfo, inputs, regexes, gameInputMap)
 	if inputData != nil {
 		inputDataList = append(inputDataList, *inputData)
 	} else {
 		log.Printf("Error: Did not find primary input for %s\n", (*actionData).PrimaryInfo)
 	}
+	// TODO - Don't append secondary input. Concat it.
 	if len((*actionData).SecondaryInfo) > 0 {
-		inputData = findMatchingInputModelsInner(deviceName, (*actionData).SecondaryInfo, inputs, regexes, sliderInputMap)
+		inputData := findMatchingInputModelsInner(deviceName, (*actionData).SecondaryInfo, inputs, regexes, gameInputMap)
 		if inputData != nil {
 			inputDataList = append(inputDataList, *inputData)
 		} else {
@@ -401,29 +436,42 @@ func findMatchingInputModels(deviceName string, actionData *gameAction, inputs d
 }
 
 func findMatchingInputModelsInner(deviceName string, action string, inputs data.InputsMap,
-	regexes map[string]*regexp.Regexp, sliderInputMap sliderInputMap) *data.InputData {
+	regexes map[string]*regexp.Regexp, gameInputMap inputTypeMapping) *data.InputData {
 	var matches [][]string
 
 	matches = regexes["button"].FindAllStringSubmatch(action, -1)
 	if matches != nil {
-		button := fmt.Sprintf("Joy_%s", matches[0][1])
-		modelInput := inputs[button]
+		modelInput := inputs[matches[0][1]]
 		return &modelInput
 	}
 
 	matches = regexes["axis"].FindAllStringSubmatch(action, -1)
 	if matches != nil {
 		// TODO Axis
-		axis := fmt.Sprintf("Joy_%s", matches[0][1])
+		// L-Axis X -> XAxis
+		// L-Axis Y -> YAxis
+		// L-Axis Z -> ZAxis
+		// R-Axis X -> RXAxis
+		// R-Axis Y -> RYAxis
+		// R-Axis Z -> RZAxis
+		axis := fmt.Sprintf("%s%s", matches[0][1], matches[0][2])
+		if gameInputMap != nil {
+			if subAxis, found := gameInputMap["Axis"]; found {
+				if substituteAxis, found := subAxis[axis]; found {
+					axis = substituteAxis
+				}
+			}
+		}
+		axis = fmt.Sprintf("%sAxis", axis)
 		modelInput := inputs[axis]
 		return &modelInput
 	}
 	matches = regexes["pov"].FindAllStringSubmatch(action, -1)
 	if matches != nil {
 		direction := strings.Title(strings.ToLower(matches[0][2]))
-		pov := fmt.Sprintf("Joy_POV%s%s", "1", direction)
+		pov := fmt.Sprintf("POV%s%s", "1", direction)
 		if len(matches[0][1]) > 0 {
-			pov = fmt.Sprintf("Joy_POV%s%s", matches[0][1], direction)
+			pov = fmt.Sprintf("POV%s%s", matches[0][1], direction)
 		}
 		modelInput := inputs[pov]
 		return &modelInput
@@ -431,7 +479,7 @@ func findMatchingInputModelsInner(deviceName string, action string, inputs data.
 
 	matches = regexes["rotation"].FindAllStringSubmatch(action, -1)
 	if matches != nil {
-		rotation := fmt.Sprintf("Joy_R%sAxis", matches[0][1])
+		rotation := fmt.Sprintf("R%sAxis", matches[0][1])
 		modelInput := inputs[rotation]
 		return &modelInput
 	}
@@ -439,8 +487,9 @@ func findMatchingInputModelsInner(deviceName string, action string, inputs data.
 	matches = regexes["slider"].FindAllStringSubmatch(action, -1)
 	if matches != nil {
 		var slider string
-		if input, ok := sliderInputMap[deviceName]; ok {
-			slider = input
+		// TODO - Slider map.
+		if input, ok := gameInputMap[deviceName]; ok {
+			_ = input
 		} else {
 			log.Printf("Error: Unknown action %s for slider on device %s\n", action, deviceName)
 			return nil
@@ -450,8 +499,8 @@ func findMatchingInputModelsInner(deviceName string, action string, inputs data.
 		}
 		log.Printf("Error: Couldn't find slider %s on device %s\n", slider, deviceName)
 		return nil
-	}
 
+	}
 	log.Printf("Error: Could not find matching Action %s on device %s\n", action, deviceName)
 	return nil
 }
