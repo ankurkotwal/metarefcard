@@ -20,6 +20,7 @@ import (
 )
 
 const appName string = "MetaRefCard"
+const appVersion string = "alpha"
 
 func main() {
 	// TODO Bug HOTAS image titles say Elite Dangerous
@@ -45,8 +46,6 @@ func main() {
 			for additionInput, additionData := range deviceInputData.Inputs {
 				deviceData.Inputs[additionInput] = additionData
 			}
-		} else {
-			log.Printf("Error: InputAddition device %s not found in deviceIndex\n", deviceName)
 		}
 	}
 
@@ -82,9 +81,6 @@ func main() {
 			dc.DrawString(overlayData.Text,
 				float64(overlayData.PosAndSize.ImageX),
 				float64(overlayData.PosAndSize.ImageY)+0.9*44)
-			// if overlayData.PosAndSize.IsDigital == false {
-			// 	fmt.Printf("%v\n", overlayData.PosAndSize)
-			// }
 		}
 		dc.SavePNG(fmt.Sprintf("out/%s", imageFilename))
 	}
@@ -323,7 +319,7 @@ func loadGameConfigs(files []string, deviceNameMap deviceNameFullToShort,
 type fs2020Data struct {
 	DeviceNameMap  deviceNameFullToShort           `yaml:"DeviceNameMap"`
 	InputMap       deviceInputTypeMapping          `yaml:"InputMapping"`
-	InputAdditions map[string]data.DeviceInputData `yaml: "InputAdditions"`
+	InputAdditions map[string]data.DeviceInputData `yaml:"InputAdditions"`
 	InputLabels    map[string]string               `yaml:"InputLabels"`
 }
 type deviceNameFullToShort map[string]string
@@ -447,13 +443,6 @@ func findMatchingInputModelsInner(deviceName string, action string, inputs data.
 
 	matches = regexes["axis"].FindAllStringSubmatch(action, -1)
 	if matches != nil {
-		// TODO Axis
-		// L-Axis X -> XAxis
-		// L-Axis Y -> YAxis
-		// L-Axis Z -> ZAxis
-		// R-Axis X -> RXAxis
-		// R-Axis Y -> RYAxis
-		// R-Axis Z -> RZAxis
 		axis := fmt.Sprintf("%s%s", matches[0][1], matches[0][2])
 		if gameInputMap != nil {
 			if subAxis, found := gameInputMap["Axis"]; found {

@@ -73,7 +73,7 @@ InputMapping: # Devices with known game inputs and which model input they map to
     Slider:
       Y: Z
 InputAdditions:
-  SaitekX56Throttle:
+  SaitekX55Throttle:
     Inputs:
       YAxis:
         IsDigital: false
@@ -82,4 +82,4 @@ InputAdditions:
         Width: 572
         Height: 54
 InputLabels:
-  TOGGLE_SMART_CAMERA: Toggle Smart Camera
+  KEY_TOGGLE_SMART_CAMERA: Toggle Smart Camera
