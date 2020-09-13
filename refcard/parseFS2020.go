@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/ankurkotwal/InputRefCard/data"
+	"github.com/fogleman/gg"
 	"gopkg.in/yaml.v3"
 )
 
@@ -46,7 +47,19 @@ func main() {
 
 	// Map the game input bindings to our model
 	overlaysByImage := populateImageOverlays(deviceIndex, gameBinds, regexes, sliderInputMap)
-	_ = overlaysByImage
+	for imageFilename, overlayDataRange := range overlaysByImage {
+		image, err := gg.LoadImage(imageFilename)
+		_ = image
+		if err != nil {
+			log.Printf("Error: loadImage %s failed. %v\n", imageFilename, err)
+			continue
+		}
+		for _, overlayData := range overlayDataRange {
+			dc := gg.NewContext(overlayData.PosAndSize.Width, overlayData.PosAndSize.Height)
+			dc.SetRGBA(1, 1, 1, 1)
+
+		}
+	}
 }
 
 func parseCliArgs(debugOutput *bool, verboseOutput *bool) {
