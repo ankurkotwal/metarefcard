@@ -23,7 +23,6 @@ const appName string = "MetaRef"
 const appVersion string = "alpha"
 
 func main() {
-	// TODO Bug HOTAS image titles say Elite Dangerous
 	debugOutput := false
 	verboseOutput := false
 
@@ -48,8 +47,6 @@ func main() {
 			}
 		}
 	}
-
-	// TODO Bug - Same input could be used multiple times. Need to handle.
 
 	// Setup the regexes once and pass them around
 	regexes := make(map[string]*regexp.Regexp)
@@ -79,7 +76,6 @@ func main() {
 		dc.SetRGB(0, 0, 0)
 		dc.SetFontFace(fontFace)
 		for _, overlayData := range overlayDataRange {
-			// TODO Support secondary inputs
 			dc.DrawString(overlayData.Text,
 				float64(overlayData.PosAndSize.ImageX+pixelInset),
 				float64(overlayData.PosAndSize.ImageY+fontSize))

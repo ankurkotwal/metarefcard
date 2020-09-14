@@ -97,5 +97,3 @@ func LoadDeviceData(neededDevices map[string]bool, debugOutput bool) DeviceModel
 	}
 	return deviceModel
 }
-
-// TODO - Keyboard handling
