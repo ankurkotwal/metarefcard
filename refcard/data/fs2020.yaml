@@ -1,4 +1,11 @@
 ---
+Regexes:
+  Button: Button\s*(\d+)
+  Axis: (?:([R])-)?Axis\s*([XYZ])
+  Pov: (?i)Pov(\d?)[\s_]([[:alpha:]]+)
+  Rotation: Rotation\s*([XYZ])
+  Slider: Slider\s*([XYZ])
+  Key: ^KEY_(.*)$
 DeviceNameMap:
   Airbus T-A320 Quadrant throttle:
   Alpha Flight Controls:

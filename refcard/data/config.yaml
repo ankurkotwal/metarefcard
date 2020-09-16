@@ -1,0 +1,21 @@
+---
+AppName: MetaRef
+Version: alpha
+DevicesModel: data/generatedDevices.yaml
+FontsDir: resources/fonts
+InputFont: Roboto-Regular.ttf
+InputFontSize: 40
+InputPixelInset: 10
+PixelMultiplier: 1.0
+ImagesDir: resources/hotas_images
+DefaultImageSize:
+  Width: 3840
+  Height: 2160
+ImageSizeOverride:
+  vkb-kosmosima-scg-left.jpg:
+    Width: 3879
+    Height: 2182
+  x45.jpg:
+    Width: 5120
+    Height: 2880
+...

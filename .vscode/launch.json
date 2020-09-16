@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Generate Device Bindings",
+            "name": "Python",
             "type": "python",
             "request": "launch",
-            "program": "generateControllerInputs.py",
+            "program": "${file}",
             "console": "integratedTerminal",
         }
     ]

@@ -1,18 +1,32 @@
 package data
 
 import (
-	"fmt"
-	"io/ioutil"
-	"log"
-
-	"gopkg.in/yaml.v3"
+	"github.com/ankurkotwal/InputRefCard/util"
 )
 
-// Example
-// x55 -> { image, devices: { stick: { inputs: { button1: {isDigital, x, y, width, height}}}}}
+// FilterDevices - Returns only the devices that the caller is asking for
+func FilterDevices(deviceMap DeviceMap, neededDevices map[string]bool, debugOutput bool) DeviceModel {
+	deviceModel := make(DeviceModel)
+	// Filter for only the device groups we're interested in
+	for _, groupData := range deviceMap {
+		for shortName, inputData := range groupData.Devices {
+			if neededDevices[shortName] {
+				deviceData := new(DeviceData)
+				deviceModel[shortName] = deviceData
+				deviceData.Image = groupData.Image
+				deviceData.Inputs = inputData.Inputs
+			}
+		}
+	}
 
-// deviceMap - structure of devices (by group name)
-type deviceMap map[string]struct {
+	if debugOutput {
+		util.PrintYamlObject(&deviceModel, "Targeted Device Map")
+	}
+	return deviceModel
+}
+
+// DeviceMap - structure of devices (by group name)
+type DeviceMap map[string]struct {
 	Image   string                     `yaml:"Image"`
 	Devices map[string]DeviceInputData `yaml:"Devices"`
 }
@@ -53,47 +67,4 @@ type OverlayData struct {
 	Context    string
 	Text       string
 	PosAndSize *InputData
-}
-
-// LoadDeviceData - Reads device data from files
-func LoadDeviceData(neededDevices map[string]bool, debugOutput bool) DeviceModel {
-	deviceMap := deviceMap{}
-	yamlData, err := ioutil.ReadFile("data/generatedDevices.yaml")
-	if err != nil {
-		log.Printf("yamlFile.Get err   #%v ", err)
-	}
-
-	err = yaml.Unmarshal([]byte(yamlData), &deviceMap)
-	if err != nil {
-		log.Fatalf("error: %v", err)
-	}
-	if debugOutput {
-		d, err := yaml.Marshal(&deviceMap)
-		if err != nil {
-			log.Fatalf("error: %v", err)
-		}
-		fmt.Printf("=== Full Device Map ===\n%s\n\n", string(d))
-	}
-
-	deviceModel := make(DeviceModel)
-	// Filter for only the device groups we're interested in
-	for _, groupData := range deviceMap {
-		for shortName, inputData := range groupData.Devices {
-			if neededDevices[shortName] {
-				deviceData := new(DeviceData)
-				deviceModel[shortName] = deviceData
-				deviceData.Image = groupData.Image
-				deviceData.Inputs = inputData.Inputs
-			}
-		}
-	}
-
-	if debugOutput {
-		d, err := yaml.Marshal(&deviceModel)
-		if err != nil {
-			log.Fatalf("error: %v", err)
-		}
-		fmt.Printf("=== Targeted Device Map ===\n%s\n\n", string(d))
-	}
-	return deviceModel
 }

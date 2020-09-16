@@ -1,6 +1,6 @@
 # HotasRefCard
 
-## Plan
+# Plan
 1. ~~Read FS2020 xml files~~
 2. ~~Read the EDRefCard inputs~~
 3. ~~Build a model of game inputs and controller mappings~~
@@ -11,3 +11,21 @@
 8. Keyboard & mouse
 9. Host on the web
 10. Extend to Elite Dangerous
+
+
+# Setup
+
+## Python
+### PyYaml
+Install modules
+```pip3 install pyyaml```
+
+# Generate Device Model
+Read `3rdparty/edrefcard/bindingsData.py` to generate a custom configuration.
+Command:
+```generateControllerInputs.py```
+
+# Generate Hotas Images
+Generate jpgs of the Hotas images found in `assets/hotas_images` into `refcard/resources/hotas_images`
+Command:
+```generateHotasImages.py```
