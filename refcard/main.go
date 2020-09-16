@@ -19,6 +19,7 @@ var verboseOutput bool = false
 var configFile = "configs/config.yaml"
 var config data.Config
 var deviceMap data.DeviceMap
+var fontBySize map[int]font.Face
 
 func main() {
 	parseCliArgs()
@@ -30,13 +31,11 @@ func main() {
 	util.LoadYaml(config.DevicesModel, &deviceMap, debugOutput, "Full Device Map")
 
 	// TODO different Font sizes
-	font, err := gg.LoadFontFace(fmt.Sprintf("%s/%s", config.FontsDir, config.InputFont),
-		float64(config.InputFontSize))
-	if err != nil {
-		panic(err)
-	}
+	fontBySize = make(map[int]font.Face)
+	font := util.LoadFont(fmt.Sprintf("%s/%s", config.FontsDir, config.InputFont), float64(config.InputFontSize))
+	fontBySize[config.InputFontSize] = font
 
-	fs2020.HandleRequest(generateImage, deviceMap, font, config, debugOutput, verboseOutput)
+	fs2020.HandleRequest(generateImage, deviceMap, debugOutput, verboseOutput)
 }
 
 func parseCliArgs() {
@@ -57,7 +56,7 @@ func parseCliArgs() {
 
 }
 
-func generateImage(overlaysByImage data.OverlaysByImage, font font.Face, config data.Config) {
+func generateImage(overlaysByImage data.OverlaysByImage) {
 	for imageFilename, overlayDataRange := range overlaysByImage {
 		image, err := gg.LoadImage(fmt.Sprintf("%s/%s", config.ImagesDir, imageFilename))
 		if err != nil {
@@ -66,8 +65,21 @@ func generateImage(overlaysByImage data.OverlaysByImage, font font.Face, config 
 		}
 		dc := gg.NewContextForImage(image)
 		dc.SetRGB(0, 0, 0)
-		dc.SetFontFace(font)
 		for _, overlayData := range overlayDataRange {
+			fontSize := config.InputFontSize
+			dc.SetFontFace(fontBySize[fontSize])
+			calcX, calcY := dc.MeasureString(overlayData.Text)
+			// Resize font till it fits
+			for calcX > float64(overlayData.PosAndSize.Width-config.InputPixelInset) ||
+				calcY > float64(overlayData.PosAndSize.Height) {
+				fontSize -= 2 // Decrement font size
+				if font, found := fontBySize[fontSize]; !found {
+					font = util.LoadFont(fmt.Sprintf("%s/%s", config.FontsDir, config.InputFont), float64(fontSize))
+					fontBySize[fontSize] = font
+				}
+				dc.SetFontFace(fontBySize[fontSize])
+				calcX, calcY = dc.MeasureString(overlayData.Text)
+			}
 			dc.DrawString(overlayData.Text,
 				float64(overlayData.PosAndSize.ImageX+config.InputPixelInset),
 				float64(overlayData.PosAndSize.ImageY+config.InputFontSize))

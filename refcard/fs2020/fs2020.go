@@ -14,7 +14,6 @@ import (
 
 	"github.com/ankurkotwal/InputRefCard/data"
 	"github.com/ankurkotwal/InputRefCard/util"
-	"golang.org/x/image/font"
 )
 
 var initiliased bool = false
@@ -23,8 +22,8 @@ var gameBinds gameBindsByDevice
 var regexes map[string]*regexp.Regexp
 
 // HandleRequest services the request to load files
-func HandleRequest(generateImage func(data.OverlaysByImage, font.Face, data.Config),
-	deviceMap data.DeviceMap, font font.Face, config data.Config, debugOutput bool, verboseOutput bool) {
+func HandleRequest(generateImage func(data.OverlaysByImage),
+	deviceMap data.DeviceMap, debugOutput bool, verboseOutput bool) {
 	if !initiliased {
 		// Load the game files provided
 		gameData = loadGameModel(debugOutput)
@@ -50,7 +49,7 @@ func HandleRequest(generateImage func(data.OverlaysByImage, font.Face, data.Conf
 		}
 	}
 	overlaysByImage := populateImageOverlays(deviceIndex, gameBinds, gameData)
-	generateImage(overlaysByImage, font, config)
+	generateImage(overlaysByImage)
 }
 
 // Load FS2020 specific data from our model. Update the device names (map game device name to our model names)

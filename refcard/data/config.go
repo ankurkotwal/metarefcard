@@ -9,7 +9,7 @@ type Config struct {
 	InputFont         string                  `yaml:"InputFont"`
 	InputFontSize     int                     `yaml:"InputFontSize"`
 	InputPixelInset   int                     `yaml:"InputPixelInset"`
-	PixelMultiplier   float32                 `yaml:"PixelMultiplier"`
+	PixelMultiplier   float64                 `yaml:"PixelMultiplier"`
 	ImagesDir         string                  `yaml:"ImagesDir"`
 	DefaultImageSize  Dimensions2d            `yaml:"DefaultImageSize"`
 	ImageSizeOverride map[string]Dimensions2d `yaml:"ImageSizeOverride"` // Device Name -> Dimensions2d

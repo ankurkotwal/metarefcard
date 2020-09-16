@@ -9,9 +9,10 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder}/parseFS2020.go",
+            "program": "${workspaceFolder}/main.go",
             "env": {},
             "args": [
+                // "${workspaceFolder}/samples/debug.xml",
                 "${workspaceFolder}/samples/x55_stick.xml",
                 "${workspaceFolder}/samples/x55_throttle.xml",
                 // "${workspaceFolder}/samples/default_fs2020/Joystick_-_HOTAS_Warthog.xml",

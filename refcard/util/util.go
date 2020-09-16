@@ -5,8 +5,19 @@ import (
 	"io/ioutil"
 	"log"
 
+	"github.com/fogleman/gg"
+	"golang.org/x/image/font"
 	"gopkg.in/yaml.v3"
 )
+
+// LoadFont returns a font as per size
+func LoadFont(filename string, fontSize float64) font.Face {
+	font, err := gg.LoadFontFace(filename, fontSize)
+	if err != nil {
+		panic(err)
+	}
+	return font
+}
 
 // LoadYaml loads Yaml file and prints any errors
 func LoadYaml(filename string, out interface{}, debugOutput bool, debugLabel string) {
