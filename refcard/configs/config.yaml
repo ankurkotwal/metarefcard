@@ -1,7 +1,7 @@
 ---
 AppName: MetaRef
 Version: alpha
-DevicesModel: data/generatedDevices.yaml
+DevicesModel: configs/generatedDevices.yaml
 FontsDir: resources/fonts
 InputFont: Roboto-Regular.ttf
 InputFontSize: 40

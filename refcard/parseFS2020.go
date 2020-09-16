@@ -16,7 +16,7 @@ import (
 
 var debugOutput bool = false
 var verboseOutput bool = false
-var configFile = "data/config.yaml"
+var configFile = "configs/config.yaml"
 var config data.Config
 var deviceMap data.DeviceMap
 
@@ -24,7 +24,7 @@ func main() {
 	parseCliArgs()
 
 	// Load the configuration
-	util.LoadYaml("data/config.yaml", &config, debugOutput, "Config")
+	util.LoadYaml(configFile, &config, debugOutput, "Config")
 
 	// Load the device model (i.e. non-game specific) based on the devices in our game files
 	util.LoadYaml(config.DevicesModel, &deviceMap, debugOutput, "Full Device Map")

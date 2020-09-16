@@ -56,7 +56,7 @@ func HandleRequest(generateImage func(data.OverlaysByImage, font.Face, data.Conf
 // Load FS2020 specific data from our model. Update the device names (map game device name to our model names)
 func loadGameModel(debugOutput bool) *fs2020Data {
 	data := fs2020Data{}
-	util.LoadYaml("data/fs2020.yaml", &data,
+	util.LoadYaml("configs/fs2020.yaml", &data,
 		debugOutput, "FS2020 Data")
 
 	fullToShort := deviceNameFullToShort{}
@@ -285,7 +285,7 @@ func populateImageOverlays(deviceIndex data.DeviceModel, gameBinds gameBindsByDe
 					if label, found := (*gameData).InputLabels[actionName]; found {
 						overlayData.Text = label
 					} else {
-						overlayData.Text = actionName
+						overlayData.Text = regexes["Key"].ReplaceAllString(actionName, "$1")
 					}
 					overlayData.PosAndSize = &inputData
 
@@ -300,8 +300,7 @@ func populateImageOverlays(deviceIndex data.DeviceModel, gameBinds gameBindsByDe
 							overlay[input] = overlayData
 						} else {
 							// Concatenate input
-							overlayData.Text = fmt.Sprintf("%s   %s",
-								previousOverlayData.Text, overlayData.Text)
+							overlayData.Text = fmt.Sprintf("%s   %s", previousOverlayData.Text, overlayData.Text)
 							overlay[input] = overlayData
 						}
 					}
