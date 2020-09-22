@@ -17,16 +17,20 @@
 # Setup
 
 ## Python
-### PyYaml
+### Generate Device Model
+#### Module dependencies
 Install modules
 ```pip3 install pyyaml```
-
-# Generate Device Model
+#### Running the script
 Read `3rdparty/edrefcard/bindingsData.py` to generate a custom configuration.
 Command:
 ```generateControllerInputs.py```
 
 # Generate Hotas Images
+#### Module dependencies
+Install modules
+```pip3 install ```
+#### Running the script
 Generate jpgs of the Hotas images found in `assets/hotas_images` into `refcard/resources/hotas_images`
 Command:
 ```generateHotasImages.py```
