@@ -2,4 +2,7 @@
     "python.autoComplete.extraPaths": [
         "3rdparty/edrefcard"
     ],
+    "python.analysis.extraPaths": [
+        "3rdparty/edrefcard"
+    ],
 }

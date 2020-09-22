@@ -12,10 +12,10 @@ DefaultImageSize:
   Width: 3840
   Height: 2160
 ImageSizeOverride:
-  vkb-kosmosima-scg-left.jpg:
+  vkb-kosmosima-scg-left.png:
     Width: 3879
     Height: 2182
-  x45.jpg:
+  x45.png:
     Width: 5120
     Height: 2880
 ...

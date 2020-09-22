@@ -19,7 +19,7 @@ for name in supportedDevices :
     image = group['Template']
     devices = group['HandledDevices']
     outFile.write('{n}:\n'.format(n=name))
-    outFile.write('  Image: {i}.jpg\n'.format(i=image))
+    outFile.write('  Image: {i}.png\n'.format(i=image))
     outFile.write('  Devices:\n')
     for device in devices:
         if device == 'Keyboard':

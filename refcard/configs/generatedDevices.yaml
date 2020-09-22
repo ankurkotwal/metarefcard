@@ -3,7 +3,7 @@
 #################################################################
 ---
 HotasCougar:
-  Image: hotascougar.jpg
+  Image: hotascougar.png
   Devices:
     044F0400:
       DisplayName: HotasCougar
@@ -238,7 +238,7 @@ HotasCougar:
           Height: 54
 
 LogitechExtreme3DPro:
-  Image: extreme3dpro.jpg
+  Image: extreme3dpro.png
   Devices:
     LogitechExtreme3DPro:
       DisplayName: LogitechExtreme3DPro
@@ -365,7 +365,7 @@ LogitechExtreme3DPro:
           Height: 54
 
 Logitech710WirelessGamepad:
-  Image: f710.jpg
+  Image: f710.png
   Devices:
     Logitech710WirelessGamepad:
       DisplayName: Logitech710WirelessGamepad
@@ -492,7 +492,7 @@ Logitech710WirelessGamepad:
           Height: 108
 
 LogitechGTWheel:
-  Image: gtwheel.jpg
+  Image: gtwheel.png
   Devices:
     046DC29A:
       DisplayName: Logitech GT Wheel
@@ -655,7 +655,7 @@ LogitechGTWheel:
           Height: 54
 
 LogitechG940:
-  Image: g940.jpg
+  Image: g940.png
   Devices:
     LogitechG940Joystick:
       DisplayName: LogitechG940Joystick
@@ -785,7 +785,7 @@ LogitechG940:
       Inputs:
 
 T16000M:
-  Image: t16000m.jpg
+  Image: t16000m.png
   Devices:
     T16000M:
       DisplayName: T16000M
@@ -936,7 +936,7 @@ T16000M:
           Height: 54
 
 T16000MFCS:
-  Image: t16000mfcs.jpg
+  Image: t16000mfcs.png
   Devices:
     T16000MFCS:
       DisplayName: T16000MFCS
@@ -1228,7 +1228,7 @@ T16000MFCS:
           Height: 54
 
 TFlightHOTASX:
-  Image: hotasx.jpg
+  Image: hotasx.png
   Devices:
     ThrustMasterTFlightHOTASX:
       DisplayName: ThrustMasterTFlightHOTASX
@@ -1361,7 +1361,7 @@ TFlightHOTASX:
           Height: 108
 
 ThrustMasterHOTAS4:
-  Image: hotas4.jpg
+  Image: hotas4.png
   Devices:
     ThrustMasterHOTAS4:
       DisplayName: ThrustMasterHOTAS4
@@ -1494,7 +1494,7 @@ ThrustMasterHOTAS4:
           Height: 108
 
 T-Rudder:
-  Image: tfrp.jpg
+  Image: tfrp.png
   Devices:
     T-Rudder:
       DisplayName: T-Rudder
@@ -1519,7 +1519,7 @@ T-Rudder:
           Height: 162
 
 TFlightStickX:
-  Image: stickx.jpg
+  Image: stickx.png
   Devices:
     044FB106:
       DisplayName: 044FB106
@@ -1646,7 +1646,7 @@ TFlightStickX:
           Height: 54
 
 Warthog:
-  Image: warthog.jpg
+  Image: warthog.png
   Devices:
     ThrustMasterWarthogJoystick:
       DisplayName: ThrustMasterWarthogJoystick
@@ -2289,7 +2289,7 @@ Warthog:
           Height: 54
 
 CobraM5:
-  Image: cobram5.jpg
+  Image: cobram5.png
   Devices:
     11C05603:
       DisplayName: Cobra M5
@@ -2659,7 +2659,7 @@ CobraM5:
           Height: 54
 
 Gladiator:
-  Image: gladiator.jpg
+  Image: gladiator.png
   Devices:
     231D0121:
       DisplayName: VKB Gladiator
@@ -2912,7 +2912,7 @@ Gladiator:
           Height: 54
 
 Cougar:
-  Image: cougar.jpg
+  Image: cougar.png
   Devices:
     044FB351:
       DisplayName: Cougar MFD 1
@@ -3258,7 +3258,7 @@ Cougar:
           Height: 80
 
 SaitekFLY5:
-  Image: fly5.jpg
+  Image: fly5.png
   Devices:
     SaitekFLY5:
       DisplayName: SaitekFLY5
@@ -3532,7 +3532,7 @@ SaitekFLY5:
           Height: 54
 
 SaitekX45:
-  Image: x45.jpg
+  Image: x45.png
   Devices:
     SaitekX45:
       DisplayName: SaitekX45
@@ -3755,7 +3755,7 @@ SaitekX45:
           Height: 54
 
 SaitekX52:
-  Image: x52.jpg
+  Image: x52.png
   Devices:
     SaitekX52:
       DisplayName: SaitekX52
@@ -4008,7 +4008,7 @@ SaitekX52:
           Height: 54
 
 SaitekX52Pro:
-  Image: x52pro.jpg
+  Image: x52pro.png
   Devices:
     SaitekX52Pro:
       DisplayName: SaitekX52Pro
@@ -4255,7 +4255,7 @@ SaitekX52Pro:
           Height: 108
 
 SaitekX55:
-  Image: x55.jpg
+  Image: x55.png
   Devices:
     SaitekX55Joystick:
       DisplayName: SaitekX55Joystick
@@ -4619,7 +4619,7 @@ SaitekX55:
           Height: 54
 
 SaitekX56:
-  Image: x56.jpg
+  Image: x56.png
   Devices:
     SaitekX56Joystick:
       DisplayName: SaitekX56Joystick
@@ -5391,7 +5391,7 @@ SaitekX56:
           Height: 54
 
 SaitekProFlightPedals:
-  Image: proflightpedals.jpg
+  Image: proflightpedals.png
   Devices:
     SaitekProFlightRudderPedals:
       DisplayName: SaitekProFlightRudderPedals
@@ -5437,7 +5437,7 @@ SaitekProFlightPedals:
           Height: 162
 
 SaitekProFlightCombatPedals:
-  Image: proflightcombatpedals.jpg
+  Image: proflightcombatpedals.png
   Devices:
     SaitekProFlightCombatRudderPedals:
       DisplayName: SaitekProFlightCombatRudderPedals
@@ -5462,7 +5462,7 @@ SaitekProFlightCombatPedals:
           Height: 162
 
 CHFighterStick:
-  Image: chfighter.jpg
+  Image: chfighter.png
   Devices:
     CHFighterStick:
       DisplayName: CHFighterStick
@@ -6171,7 +6171,7 @@ CHFighterStick:
           Height: 54
 
 CHCombatStick:
-  Image: chcombat.jpg
+  Image: chcombat.png
   Devices:
     CHCombatStick:
       DisplayName: CHCombatStick
@@ -6703,7 +6703,7 @@ CHCombatStick:
           Height: 54
 
 CHProThrottle:
-  Image: chfighter.jpg
+  Image: chfighter.png
   Devices:
     CHProThrottle1:
       DisplayName: CHProThrottle1
@@ -7130,7 +7130,7 @@ CHProThrottle:
           Height: 54
 
 CHThrottleQuadrant:
-  Image: chquadrant.jpg
+  Image: chquadrant.png
   Devices:
     068E00FA:
       DisplayName: CH Quadrant throttle
@@ -7245,7 +7245,7 @@ CHThrottleQuadrant:
           Height: 54
 
 CHProFlightThrottleQuadrant:
-  Image: chproflightquadrant.jpg
+  Image: chproflightquadrant.png
   Devices:
     06A30C2D:
       DisplayName: CH Pro Flight Quadrant throttle
@@ -7306,7 +7306,7 @@ CHProFlightThrottleQuadrant:
           Height: 54
 
 CHProPedals:
-  Image: chpropedals.jpg
+  Image: chpropedals.png
   Devices:
     CHProPedals:
       DisplayName: CHProPedals
@@ -7352,7 +7352,7 @@ CHProPedals:
           Height: 162
 
 SidePanelControlDeck:
-  Image: sidepanelcontroldeck.jpg
+  Image: sidepanelcontroldeck.png
   Devices:
     07382218:
       DisplayName: SidePanelControlDeck
@@ -7563,7 +7563,7 @@ SidePanelControlDeck:
           Height: 108
 
 XBox:
-  Image: xbox.jpg
+  Image: xbox.png
   Devices:
     XB360 Pad:
       DisplayName: XB360 Pad
@@ -8296,7 +8296,7 @@ XBox:
           Height: 108
 
 XBoxElite:
-  Image: xboxelite.jpg
+  Image: xboxelite.png
   Devices:
     045E02E3:
       DisplayName: XBox Elite controller
@@ -8543,7 +8543,7 @@ XBoxElite:
           Height: 108
 
 GamePad:
-  Image: xbox.jpg
+  Image: xbox.png
   Devices:
     GamePad:
       DisplayName: GamePad
@@ -8790,7 +8790,7 @@ GamePad:
           Height: 108
 
 Sabretooth:
-  Image: sabretooth.jpg
+  Image: sabretooth.png
   Devices:
     1689FE00:
       DisplayName: Razer Sabretooth
@@ -9037,7 +9037,7 @@ Sabretooth:
           Height: 108
 
 LogitechG940Pedals:
-  Image: g940pedals.jpg
+  Image: g940pedals.png
   Devices:
     LogitechG940Pedals:
       DisplayName: LogitechG940Pedals
@@ -9062,7 +9062,7 @@ LogitechG940Pedals:
           Height: 162
 
 SlawBF109Pedals:
-  Image: slawbf109pedals.jpg
+  Image: slawbf109pedals.png
   Devices:
     SlawFlightControlRudder:
       DisplayName: SlawFlightControlRudder
@@ -9087,7 +9087,7 @@ SlawBF109Pedals:
           Height: 162
 
 MFGCrosswind:
-  Image: crosswind.jpg
+  Image: crosswind.png
   Devices:
     16D00A38:
       DisplayName: MFG Crosswind
@@ -9133,7 +9133,7 @@ MFGCrosswind:
           Height: 162
 
 DS4:
-  Image: ds4.jpg
+  Image: ds4.png
   Devices:
     DS4:
       DisplayName: DS4
@@ -9407,7 +9407,7 @@ DS4:
           Height: 54
 
 VPC-WarBRD-DELTA-Left:
-  Image: vpc-warbrd-delta-left.jpg
+  Image: vpc-warbrd-delta-left.png
   Devices:
     03EB2042:
       DisplayName: VPC WarBRD Delta left
@@ -9576,7 +9576,7 @@ VPC-WarBRD-DELTA-Left:
           Height: 54
 
 VPC-WarBRD-DELTA-Right:
-  Image: vpc-warbrd-delta-right.jpg
+  Image: vpc-warbrd-delta-right.png
   Devices:
     03EB2044:
       DisplayName: VPC WarBRD Delta right
@@ -9745,7 +9745,7 @@ VPC-WarBRD-DELTA-Right:
           Height: 54
 
 VKB-Kosmosima-SCG-Left:
-  Image: vkb-kosmosima-scg-left.jpg
+  Image: vkb-kosmosima-scg-left.png
   Devices:
     231D0127:
       DisplayName: VKB Kosmosima SCG Left
@@ -9926,7 +9926,7 @@ VKB-Kosmosima-SCG-Left:
           Height: 68
 
 VKB-Kosmosima-SCG-Right:
-  Image: vkb-kosmosima-scg-right.jpg
+  Image: vkb-kosmosima-scg-right.png
   Devices:
     231D0126:
       DisplayName: VKB Kosmosima SCG Right
@@ -10107,7 +10107,7 @@ VKB-Kosmosima-SCG-Right:
           Height: 68
 
 Keyboard:
-  Image: keyboard.jpg
+  Image: keyboard.png
   Devices:
 
 ...
