@@ -41,7 +41,7 @@ func HandleRequest(generateImage func(data.OverlaysByImage),
 	}
 	deviceIndex := data.FilterDevices(deviceMap, neededDevices, debugOutput)
 	// Add device additions to the main device index
-	for deviceName, deviceInputData := range gameData.InputAdditions {
+	for deviceName, deviceInputData := range gameData.InputOverrides {
 		if deviceData, found := deviceIndex[deviceName]; found {
 			for additionInput, additionData := range deviceInputData.Inputs {
 				deviceData.Inputs[additionInput] = additionData
@@ -398,7 +398,7 @@ func findMatchingInputModelsInner(deviceName string, action string, inputs data.
 type fs2020Data struct {
 	DeviceNameMap  deviceNameFullToShort           `yaml:"DeviceNameMap"`
 	InputMap       deviceInputTypeMapping          `yaml:"InputMapping"`
-	InputAdditions map[string]data.DeviceInputData `yaml:"InputAdditions"`
+	InputOverrides map[string]data.DeviceInputData `yaml:"InputOverrides"`
 	InputLabels    map[string]string               `yaml:"InputLabels"`
 	Regexes        map[string]string               `yaml:"Regexes"`
 }

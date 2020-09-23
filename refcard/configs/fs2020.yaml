@@ -79,14 +79,26 @@ InputMapping: # Devices with known game inputs and which model input they map to
   T-Rudder:
     Slider:
       Y: Z
-InputAdditions:
+InputOverrides:
   SaitekX55Throttle:
     Inputs:
+      1:
+        IsDigital: true
+        OffsetX: 45
+        OffsetY: 496
+        Width: 852
+        Height: 54
+      XAxis:
+        IsDigital: false
+        OffsetX: 166
+        OffsetY: 681
+        Width: 570
+        Height: 54
       YAxis:
         IsDigital: false
-        OffsetX: 164
-        OffsetY: 428
-        Width: 572
+        OffsetX: 238
+        OffsetY: 588
+        Width: 570
         Height: 54
 InputLabels:
   KEY_TOGGLE_SMART_CAMERA: Toggle Smart Camera
