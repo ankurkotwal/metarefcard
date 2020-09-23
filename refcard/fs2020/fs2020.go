@@ -295,7 +295,7 @@ func populateImageOverlays(deviceIndex data.DeviceModel, gameBinds gameBindsByDe
 						overlaysByImage[image] = overlay
 					} else {
 						// Now find by input
-						if previousOverlayData, found := overlay[input]; !found {
+						if previousOverlayData, found := overlay[deviceAndInput]; !found {
 							overlay[deviceAndInput] = overlayData
 						} else {
 							// Concatenate input
