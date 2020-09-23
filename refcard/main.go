@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/ankurkotwal/InputRefCard/data"
 	"github.com/ankurkotwal/InputRefCard/fs2020"
@@ -19,7 +21,6 @@ var verboseOutput bool = false
 var configFile = "configs/config.yaml"
 var config data.Config
 var deviceMap data.DeviceMap
-var fontBySize map[int]font.Face
 
 func main() {
 	parseCliArgs()
@@ -29,11 +30,6 @@ func main() {
 
 	// Load the device model (i.e. non-game specific) based on the devices in our game files
 	util.LoadYaml(config.DevicesModel, &deviceMap, debugOutput, "Full Device Map")
-
-	// TODO different Font sizes
-	fontBySize = make(map[int]font.Face)
-	font := util.LoadFont(fmt.Sprintf("%s/%s", config.FontsDir, config.InputFont), float64(config.InputFontSize))
-	fontBySize[config.InputFontSize] = font
 
 	fs2020.HandleRequest(generateImage, deviceMap, debugOutput, verboseOutput)
 }
@@ -56,6 +52,27 @@ func parseCliArgs() {
 
 }
 
+// Return the multiplier/scale of image based on actual width vs default width
+func getPixelMultiplier(name string, dc *gg.Context) float64 {
+	multiplier := config.PixelMultiplier
+	if dimensions, found := config.ImageSizeOverride[name]; found {
+		multiplier = float64(dimensions.Width) / float64(config.DefaultImageWidth)
+	}
+	return multiplier
+}
+
+var fontBySize map[float64]font.Face = make(map[float64]font.Face)
+
+func getFontBySize(size float64) font.Face {
+	font, found := fontBySize[size]
+	if !found {
+		name := fmt.Sprintf("%s/%s", config.FontsDir, config.InputFont)
+		font = util.LoadFont(name, size)
+		fontBySize[size] = font
+	}
+	return font
+}
+
 func generateImage(overlaysByImage data.OverlaysByImage) {
 	for imageFilename, overlayDataRange := range overlaysByImage {
 		image, err := gg.LoadImage(fmt.Sprintf("%s/%s", config.ImagesDir, imageFilename))
@@ -64,28 +81,28 @@ func generateImage(overlaysByImage data.OverlaysByImage) {
 			continue
 		}
 		dc := gg.NewContextForImage(image)
+		pixelMultiplier := getPixelMultiplier(imageFilename, dc)
 		dc.SetRGB(0, 0, 0)
 		for _, overlayData := range overlayDataRange {
-			fontSize := config.InputFontSize
-			dc.SetFontFace(fontBySize[fontSize])
+			fontSize := float64(config.InputFontSize) * pixelMultiplier
+			dc.SetFontFace(getFontBySize(fontSize))
 			calcX, calcY := dc.MeasureString(overlayData.Text)
 			// Resize font till it fits
-			for calcX > float64(overlayData.PosAndSize.Width-config.InputPixelInset) ||
-				calcY > float64(overlayData.PosAndSize.Height) {
+			neededWidth := float64(overlayData.PosAndSize.Width-config.InputPixelInset) * pixelMultiplier
+			neededHeight := float64(overlayData.PosAndSize.Height) * pixelMultiplier
+			for calcX > neededWidth ||
+				calcY > neededHeight {
 				fontSize -= 2 // Decrement font size
-				if font, found := fontBySize[fontSize]; !found {
-					font = util.LoadFont(fmt.Sprintf("%s/%s", config.FontsDir, config.InputFont), float64(fontSize))
-					fontBySize[fontSize] = font
-				}
-				dc.SetFontFace(fontBySize[fontSize])
+				dc.SetFontFace(getFontBySize(fontSize))
 				calcX, calcY = dc.MeasureString(overlayData.Text)
 			}
 			dc.DrawString(overlayData.Text,
-				float64(overlayData.PosAndSize.ImageX+config.InputPixelInset),
-				float64(overlayData.PosAndSize.ImageY+config.InputFontSize))
+				float64(overlayData.PosAndSize.ImageX+config.InputPixelInset)*pixelMultiplier,
+				(float64(overlayData.PosAndSize.ImageY)+config.InputFontSize)*pixelMultiplier)
 		}
 		_ = os.Mkdir("out", os.ModePerm)
-		dc.SavePNG(fmt.Sprintf("out/%s", imageFilename))
+		jpgFilename := strings.TrimSuffix(imageFilename, path.Ext(imageFilename)) + ".jpg"
+		dc.SaveJPG(fmt.Sprintf("out/%s", jpgFilename), 90)
 	}
 	// Map the game input bindings to our model
 	fmt.Println("Done")

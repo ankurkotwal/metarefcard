@@ -6,7 +6,7 @@ FontsDir: resources/fonts
 InputFont: Roboto-Regular.ttf
 InputFontSize: 40
 InputPixelInset: 10
-PixelMultiplier: 1.0
+PixelMultiplier: 0.4
 ImagesDir: resources/hotas_images
 DefaultImageWidth: 3840
 DefaultImageHeight: 2160

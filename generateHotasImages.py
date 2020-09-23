@@ -61,6 +61,7 @@ def convertfile(inkscape, svg, defaultwidth, defaultheight, multiplier, override
 
     # Convert svg to png with Inkscape
     cmd_export = [inkscape,
+                  "--export-background=white",
                   "--export-png={o}".format(o=out),
                   "-w={w}".format(w=width),
                   "-h={h}".format(h=height),
