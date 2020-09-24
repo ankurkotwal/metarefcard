@@ -1,6 +1,8 @@
 ---
 AppName: MetaRef
-Version: alpha
+Version: v0.0.1
+DebugOutput: false
+VerboseOutput: false
 DevicesModel: configs/generatedDevices.yaml
 FontsDir: resources/fonts
 InputFont: Roboto-Regular.ttf

@@ -4,6 +4,8 @@ package data
 type Config struct {
 	AppName            string                  `yaml:"AppName"`
 	Version            string                  `yaml:"Version"`
+	DebugOutput        bool                    `yaml:"DebugOutput"`
+	VerboseOutput      bool                    `yaml:"VerboseOutput"`
 	DevicesModel       string                  `yaml:"DevicesModel"`
 	FontsDir           string                  `yaml:"FontsDir"`
 	InputFont          string                  `yaml:"InputFont"`

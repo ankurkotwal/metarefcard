@@ -12,8 +12,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ankurkotwal/InputRefCard/data"
-	"github.com/ankurkotwal/InputRefCard/util"
+	"github.com/ankurkotwal/MetaRef/refcard/data"
+	"github.com/ankurkotwal/MetaRef/refcard/util"
 )
 
 var initiliased bool = false
@@ -22,8 +22,7 @@ var gameBinds gameBindsByDevice
 var regexes map[string]*regexp.Regexp
 
 // HandleRequest services the request to load files
-func HandleRequest(generateImage func(data.OverlaysByImage),
-	deviceMap data.DeviceMap, debugOutput bool, verboseOutput bool) {
+func HandleRequest(deviceMap data.DeviceMap, debugOutput bool, verboseOutput bool) data.OverlaysByImage {
 	if !initiliased {
 		// Load the game files provided
 		gameData = loadGameModel(debugOutput)
@@ -48,14 +47,13 @@ func HandleRequest(generateImage func(data.OverlaysByImage),
 			}
 		}
 	}
-	overlaysByImage := populateImageOverlays(deviceIndex, gameBinds, gameData)
-	generateImage(overlaysByImage)
+	return populateImageOverlays(deviceIndex, gameBinds, gameData)
 }
 
 // Load FS2020 specific data from our model. Update the device names (map game device name to our model names)
 func loadGameModel(debugOutput bool) *fs2020Data {
 	data := fs2020Data{}
-	util.LoadYaml("configs/fs2020.yaml", &data, debugOutput, "FS2020 Data")
+	util.LoadYaml("configs/fs2020.yaml", &data, "FS2020 Data")
 
 	fullToShort := deviceNameFullToShort{}
 	// Update map of game device names to our model device names

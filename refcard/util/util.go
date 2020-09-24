@@ -6,6 +6,8 @@ import (
 	"log"
 
 	"github.com/fogleman/gg"
+	"github.com/fsnotify/fsnotify"
+	"github.com/spf13/viper"
 	"golang.org/x/image/font"
 	"gopkg.in/yaml.v3"
 )
@@ -20,7 +22,18 @@ func LoadFont(filename string, fontSize float64) font.Face {
 }
 
 // LoadYaml loads Yaml file and prints any errors
-func LoadYaml(filename string, out interface{}, debugOutput bool, debugLabel string) {
+func LoadYaml(filename string, out interface{}, label string) {
+	loadYaml(filename, out, label)
+	// Watch this file for changes and reload automatically
+	viperWatcher := viper.New()
+	viperWatcher.SetConfigFile(filename)
+	viperWatcher.WatchConfig()
+	viperWatcher.OnConfigChange(func(e fsnotify.Event) {
+		loadYaml(filename, out, label)
+	})
+}
+
+func loadYaml(filename string, out interface{}, label string) {
 	yamlData, err := ioutil.ReadFile(filename)
 	if err != nil {
 		log.Fatalf("error: yaml ioutil.ReadFile %v ", err)
@@ -29,8 +42,9 @@ func LoadYaml(filename string, out interface{}, debugOutput bool, debugLabel str
 	if err != nil {
 		log.Fatalf("error: yaml.Unmarshal %v", err)
 	}
+	debugOutput := false
 	if debugOutput {
-		PrintYamlObject(out, debugLabel)
+		PrintYamlObject(out, label)
 	}
 }
 

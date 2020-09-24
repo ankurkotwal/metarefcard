@@ -1,23 +1,26 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
+	"image/jpeg"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
 
-	"github.com/ankurkotwal/InputRefCard/data"
-	"github.com/ankurkotwal/InputRefCard/fs2020"
-	"github.com/ankurkotwal/InputRefCard/util"
+	"github.com/ankurkotwal/MetaRef/refcard/data"
+	"github.com/ankurkotwal/MetaRef/refcard/fs2020"
+	"github.com/ankurkotwal/MetaRef/refcard/util"
 	"github.com/fogleman/gg"
+	"github.com/gin-gonic/gin"
 	"golang.org/x/image/font"
 )
 
-var debugOutput bool = false
-var verboseOutput bool = false
 var configFile = "configs/config.yaml"
 var config data.Config
 var deviceMap data.DeviceMap
@@ -26,12 +29,29 @@ func main() {
 	parseCliArgs()
 
 	// Load the configuration
-	util.LoadYaml(configFile, &config, debugOutput, "Config")
+	util.LoadYaml(configFile, &config, "Config")
 
 	// Load the device model (i.e. non-game specific) based on the devices in our game files
-	util.LoadYaml(config.DevicesModel, &deviceMap, debugOutput, "Full Device Map")
+	util.LoadYaml(config.DevicesModel, &deviceMap, "Full Device Map")
 
-	fs2020.HandleRequest(generateImage, deviceMap, debugOutput, verboseOutput)
+	router := gin.Default()
+	router.LoadHTMLGlob("templates/*")
+	router.GET("/", func(c *gin.Context) {
+		c.Redirect(http.StatusFound, "/fs2020")
+		// TODO Remove unused code below, kept for reference
+		// c.HTML(http.StatusOK, "index.tmpl", gin.H{
+		// 	"title":   config.AppName,
+		// 	"version": config.Version,
+		// })
+	})
+	router.GET("/fs2020", func(c *gin.Context) {
+		overlaysByImage := fs2020.HandleRequest(deviceMap, config.DebugOutput, config.VerboseOutput)
+		files := generateImage(overlaysByImage)
+		// TODO Need to return all images
+		c.Data(http.StatusOK, "image/jpeg", files[0].Bytes())
+	})
+	router.Run(":8080")
+
 }
 
 func parseCliArgs() {
@@ -40,8 +60,6 @@ func parseCliArgs() {
 		fmt.Printf("file\tFlight Simulator 2020 input configration (XML).\n")
 		flag.PrintDefaults()
 	}
-	flag.BoolVar(&debugOutput, "d", false, "Debug output.")
-	flag.BoolVar(&verboseOutput, "v", false, "Verbose output.")
 	flag.Parse()
 	args := flag.Args()
 	if len(flag.Args()) < 1 {
@@ -73,7 +91,8 @@ func getFontBySize(size float64) font.Face {
 	return font
 }
 
-func generateImage(overlaysByImage data.OverlaysByImage) {
+func generateImage(overlaysByImage data.OverlaysByImage) []*bytes.Buffer {
+	var files []*bytes.Buffer = nil
 	for imageFilename, overlayDataRange := range overlaysByImage {
 		image, err := gg.LoadImage(fmt.Sprintf("%s/%s", config.ImagesDir, imageFilename))
 		if err != nil {
@@ -100,10 +119,16 @@ func generateImage(overlaysByImage data.OverlaysByImage) {
 				float64(overlayData.PosAndSize.ImageX+config.InputPixelInset)*pixelMultiplier,
 				(float64(overlayData.PosAndSize.ImageY)+config.InputFontSize)*pixelMultiplier)
 		}
+		var jpgBytes bytes.Buffer
+		dc.EncodeJPG(&jpgBytes, &jpeg.Options{Quality: 90})
+		files = append(files, &jpgBytes)
+
+		// TODO remove writing to disk or do it only in debug mode
 		_ = os.Mkdir("out", os.ModePerm)
 		jpgFilename := strings.TrimSuffix(imageFilename, path.Ext(imageFilename)) + ".jpg"
-		dc.SaveJPG(fmt.Sprintf("out/%s", jpgFilename), 90)
+		ioutil.WriteFile(fmt.Sprintf("out/%s", jpgFilename), jpgBytes.Bytes(), 0644)
 	}
 	// Map the game input bindings to our model
 	fmt.Println("Done")
+	return files
 }

@@ -1,7 +1,7 @@
 package data
 
 import (
-	"github.com/ankurkotwal/InputRefCard/util"
+	"github.com/ankurkotwal/MetaRef/refcard/util"
 )
 
 // FilterDevices - Returns only the devices that the caller is asking for
