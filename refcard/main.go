@@ -44,11 +44,45 @@ func main() {
 			"version": config.Version,
 		})
 	})
-	router.POST("/fs2020", func(c *gin.Context) {
-		overlaysByImage := fs2020.HandleRequest(deviceMap, config.DebugOutput, config.VerboseOutput)
-		files := generateImage(overlaysByImage)
-		// TODO Need to return all images
+	fs2020Handler := func(files [][]byte) []*bytes.Buffer {
+		overlaysByImage := fs2020.HandleRequest(files, deviceMap, config.DebugOutput, config.VerboseOutput)
+		return generateImage(overlaysByImage)
+	}
+	fs2020Return := func(files []*bytes.Buffer, c *gin.Context) {
 		c.Data(http.StatusOK, "image/jpeg", files[0].Bytes())
+	}
+	router.GET("/fs2020", func(c *gin.Context) {
+		// On the GET route, we'll load our own files (for testing purposes)
+		var inputFiles [][]byte
+		for _, filename := range flag.Args() {
+			file, err := ioutil.ReadFile(filename)
+			if err != nil {
+				log.Printf("Error reading file. %s\n", err)
+			}
+			inputFiles = append(inputFiles, file)
+		}
+		fs2020Return(fs2020Handler(inputFiles), c)
+	})
+	router.POST("/fs2020", func(c *gin.Context) {
+		form, _ := c.MultipartForm()
+		inputFiles := form.File["file"]
+
+		files := make([][]byte, len(inputFiles))
+		for idx, file := range inputFiles {
+			multipart, err := file.Open()
+			if err != nil {
+				log.Printf("Error opening multipart file %s - %s\n", file.Filename, err)
+				continue
+			}
+			contents, err := ioutil.ReadAll(multipart)
+			if err != nil {
+				log.Printf("Error reading multipart file %s - %s\n", file.Filename, err)
+				continue
+			}
+			files[idx] = contents
+		}
+		// TODO Need to return all images
+		fs2020Return(fs2020Handler(files), c)
 	})
 	router.Run(":8080")
 

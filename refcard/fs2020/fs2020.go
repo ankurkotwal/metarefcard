@@ -1,13 +1,12 @@
 package fs2020
 
 import (
+	"bytes"
 	"encoding/json"
 	"encoding/xml"
-	"flag"
 	"fmt"
 	"io"
 	"log"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -22,11 +21,11 @@ var gameBinds gameBindsByDevice
 var regexes map[string]*regexp.Regexp
 
 // HandleRequest services the request to load files
-func HandleRequest(deviceMap data.DeviceMap, debugOutput bool, verboseOutput bool) data.OverlaysByImage {
+func HandleRequest(files [][]byte, deviceMap data.DeviceMap, debugOutput bool, verboseOutput bool) data.OverlaysByImage {
 	if !initiliased {
 		// Load the game files provided
 		gameData = loadGameModel(debugOutput)
-		gameBinds = loadGameConfigs(flag.Args(), gameData.DeviceNameMap, debugOutput, verboseOutput)
+		gameBinds = loadGameConfigs(files, gameData.DeviceNameMap, debugOutput, verboseOutput)
 		regexes = make(map[string]*regexp.Regexp)
 		for name, pattern := range gameData.Regexes {
 			regexes[name] = regexp.MustCompile(pattern)
@@ -70,7 +69,7 @@ func loadGameModel(debugOutput bool) *fs2020Data {
 }
 
 // Load the game config files (provided by user)
-func loadGameConfigs(files []string, deviceNameMap deviceNameFullToShort,
+func loadGameConfigs(files [][]byte, deviceNameMap deviceNameFullToShort,
 	debugOutput bool, verboseOutput bool) gameBindsByDevice {
 	gameBinds := make(gameBindsByDevice)
 
@@ -81,17 +80,8 @@ func loadGameConfigs(files []string, deviceNameMap deviceNameFullToShort,
 	currentKeyType := keyUnknown
 	var currentKey *int
 
-	for _, filename := range files {
-		if debugOutput {
-			log.Printf("Opening file %s\n", filename)
-		}
-		file, err := os.Open(filename)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer file.Close()
-
-		decoder := xml.NewDecoder(file)
+	for _, file := range files {
+		decoder := xml.NewDecoder(bytes.NewReader(file))
 		for {
 			token, err := decoder.Token()
 			if token == nil || err == io.EOF {
@@ -296,6 +286,7 @@ func populateImageOverlays(deviceIndex data.DeviceModel, gameBinds gameBindsByDe
 						if previousOverlayData, found := overlay[deviceAndInput]; !found {
 							overlay[deviceAndInput] = overlayData
 						} else {
+							// TODO Sort the entries so we have stable output.
 							// Concatenate input
 							overlayData.Text = fmt.Sprintf("%s   %s", previousOverlayData.Text, overlayData.Text)
 							overlay[deviceAndInput] = overlayData
