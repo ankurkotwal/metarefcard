@@ -45,13 +45,9 @@ $(function(){
         data: formData,
         type: 'POST',
         success: function(data) {
-          imageContainer = $('#images')
+          imageContainer = $('#images');
           imageContainer.empty();
-          var b64Data = btoa(unescape(encodeURIComponent(data)));
-          var outputImg = document.createElement('img')
-          outputImg.src = 'data:image/jpg;base64,' + b64Data;
-          imageContainer.html(outputImg);
-          // imageContainer.append('<p>SUCCESS !!!</p>'); 
+          imageContainer.html(data);
         },
         error: function(data) { console.log('ERROR !!!'); },
         cache: false,

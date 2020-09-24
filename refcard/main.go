@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/base64"
 	"flag"
 	"fmt"
 	"image/jpeg"
@@ -12,6 +13,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"text/template"
 
 	"github.com/ankurkotwal/MetaRef/refcard/data"
 	"github.com/ankurkotwal/MetaRef/refcard/fs2020"
@@ -49,7 +51,31 @@ func main() {
 		return generateImage(overlaysByImage)
 	}
 	fs2020Return := func(files []*bytes.Buffer, c *gin.Context) {
-		c.Data(http.StatusOK, "image/jpeg", files[0].Bytes())
+		tmplFilename := "templates/refcard.tmpl"
+		t, err := template.New(path.Base(tmplFilename)).ParseFiles(tmplFilename)
+		if err != nil {
+			s := fmt.Sprintf("Error parsing image template - %s\n", err)
+			log.Print(s)
+			c.Data(http.StatusInternalServerError, "text/html; charset=utf-8", []byte(s))
+			return
+		}
+		imagesAsHTML := []byte{}
+		for _, file := range files {
+			image := struct {
+				Base64Contents string
+			}{
+				Base64Contents: base64.StdEncoding.EncodeToString(file.Bytes()),
+			}
+			log.Println(image.Base64Contents[0:16])
+			var tpl bytes.Buffer
+			if err := t.Execute(&tpl, image); err != nil {
+				s := fmt.Sprintf("Error executing image template - %s\n", err)
+				log.Print(s)
+				continue
+			}
+			imagesAsHTML = append(imagesAsHTML, tpl.Bytes()...)
+		}
+		c.Data(http.StatusOK, "text/html; charset=utf-8", imagesAsHTML)
 	}
 	router.GET("/fs2020", func(c *gin.Context) {
 		// On the GET route, we'll load our own files (for testing purposes)
