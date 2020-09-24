@@ -13,7 +13,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"strings"
+	"sort"
 
 	"github.com/ankurkotwal/MetaRef/refcard/data"
 	"github.com/ankurkotwal/MetaRef/refcard/fs2020"
@@ -176,7 +176,14 @@ func getFontBySize(size float64) font.Face {
 
 func generateImages(overlaysByImage data.OverlaysByImage) []*bytes.Buffer {
 	var files []*bytes.Buffer = nil
-	for imageFilename, overlayDataRange := range overlaysByImage {
+	imageNames := make([]string, 0)
+	for name := range overlaysByImage {
+		imageNames = append(imageNames, name)
+	}
+	sort.Strings(imageNames)
+
+	for _, imageFilename := range imageNames {
+		overlayDataRange := overlaysByImage[imageFilename]
 		image, err := gg.LoadImage(fmt.Sprintf("%s/%s", config.ImagesDir, imageFilename))
 		if err != nil {
 			log.Printf("Error: loadImage %s failed. %v\n", imageFilename, err)
@@ -205,11 +212,6 @@ func generateImages(overlaysByImage data.OverlaysByImage) []*bytes.Buffer {
 		var jpgBytes bytes.Buffer
 		dc.EncodeJPG(&jpgBytes, &jpeg.Options{Quality: 90})
 		files = append(files, &jpgBytes)
-
-		// TODO remove writing to disk or do it only in debug mode
-		_ = os.Mkdir("out", os.ModePerm)
-		jpgFilename := strings.TrimSuffix(imageFilename, path.Ext(imageFilename)) + ".jpg"
-		ioutil.WriteFile(fmt.Sprintf("out/%s", jpgFilename), jpgBytes.Bytes(), 0644)
 	}
 	// Map the game input bindings to our model
 	fmt.Println("Done")
