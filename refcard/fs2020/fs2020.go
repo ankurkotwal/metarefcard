@@ -364,9 +364,8 @@ func findMatchingInputModelsInner(deviceName string, action string, inputs data.
 	matches = regexes["Slider"].FindAllStringSubmatch(action, -1)
 	if matches != nil {
 		var slider string
-		// TODO - Slider map.
-		if input, ok := gameInputMap[deviceName]; ok {
-			_ = input
+		if input, ok := gameInputMap["Slider"]; ok {
+			slider = fmt.Sprintf("%sAxis", input[matches[0][1]])
 		} else {
 			log.Printf("Error: Unknown action %s for slider on device %s\n", action, deviceName)
 			return ""

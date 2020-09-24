@@ -63,7 +63,7 @@ InputMapping: # Devices with known game inputs and which model input they map to
   T16000MFCS:
     Slider:
       X: U
-  T16000MTHROTTLE: # TODO Unknown Axis Mapping
+  T16000MTHROTTLE:
     Slider:
       X: X
       Y: Y
