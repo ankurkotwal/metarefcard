@@ -6,7 +6,7 @@
 3. ~~Build a model of game inputs and controller mappings~~
 4. ~~Generate images~~
 5. ~~Dynamic font size~~
-6. Regenerate hotas_images, new X55 locations, vkb-kosmosima-scg-left 3879x2182, x-45 5120x2880, 
+6. ~~Regenerate hotas_images, new X55 locations, vkb-kosmosima-scg-left 3879x2182, x-45 5120x2880~~
 7. Sliders
 8. Keyboard & mouse
 9. Host on the web
@@ -18,7 +18,7 @@
 
 ## Python
 ### Generate Device Model
-#### Module dependencies
+#### Dependencies
 Install modules
 ```pip3 install pyyaml```
 #### Running the script
@@ -27,8 +27,9 @@ Command:
 ```generateControllerInputs.py```
 
 # Generate Hotas Images
-#### Module dependencies
-Install modules
+#### Dependencies
+* Inkscape
+* Imagemagick
 ```pip3 install ```
 #### Running the script
 Generate jpgs of the Hotas images found in `assets/hotas_images` into `refcard/resources/hotas_images`

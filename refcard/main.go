@@ -36,15 +36,15 @@ func main() {
 
 	router := gin.Default()
 	router.LoadHTMLGlob("templates/*")
+	router.StaticFile("/script.js", "resources/www/script.js")
+
 	router.GET("/", func(c *gin.Context) {
-		c.Redirect(http.StatusFound, "/fs2020")
-		// TODO Remove unused code below, kept for reference
-		// c.HTML(http.StatusOK, "index.tmpl", gin.H{
-		// 	"title":   config.AppName,
-		// 	"version": config.Version,
-		// })
+		c.HTML(http.StatusOK, "index.html", gin.H{
+			"title":   config.AppName,
+			"version": config.Version,
+		})
 	})
-	router.GET("/fs2020", func(c *gin.Context) {
+	router.POST("/fs2020", func(c *gin.Context) {
 		overlaysByImage := fs2020.HandleRequest(deviceMap, config.DebugOutput, config.VerboseOutput)
 		files := generateImage(overlaysByImage)
 		// TODO Need to return all images
