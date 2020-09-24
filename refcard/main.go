@@ -66,7 +66,6 @@ func main() {
 			}{
 				Base64Contents: base64.StdEncoding.EncodeToString(file.Bytes()),
 			}
-			log.Println(image.Base64Contents[0:16])
 			var tpl bytes.Buffer
 			if err := t.Execute(&tpl, image); err != nil {
 				s := fmt.Sprintf("Error executing image template - %s\n", err)
