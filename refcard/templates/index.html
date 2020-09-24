@@ -1,44 +1,52 @@
 <!doctype html>
 <html lang="en">
 
+<style>
+  hr.solid {
+    border-top: 1px solid;
+  }
+</style>
+
 <head>
   <!-- Required meta tags -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>{{ .title }} ({{ .version }})</title>
 
   <!-- Bootswatch Cosmo CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/cosmo/bootstrap.min.css"
     integrity="sha384-5QFXyVb+lrCzdN228VS3HmzpiE7ZVwLQtkt+0d9W43LQMzz4HBnnqvVxKg6O+04d" crossorigin="anonymous">
-  <title>{{ .title }} ({{ .version }})</title>
+</head>
 
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <a class="navbar-brand" href="#"><b>{{ .title }}</b> ({{ .version }})</a>
+<body style="background-color: #e9ecef">
+  <nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-primary">
+    <a class="navbar-brand" href="/"><b>{{ .title }}</b> ({{ .version }})</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
+    <div class="collapse navbar-collapse" id="navbarColor01">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="#">Flight Simulator 2020 <span class="sr-only">(current)</span></a>
+        </li>
+      </ul>
+    </div>
   </nav>
-</head>
 
-<body>
   <div class="jumbotron">
-    <h1 class="display-4">Flight Simulator 2020</h1>
-
-    <div id="images"></div>
-
-
-    <blockquote class="blockquote">
-      <p>Add xml files from <b>%LOCALAPPDATA%</b>.</p>
-    </blockquote>
+    <div id="images">
+      <h1 class="display-4">Flight Simulator 2020</h1>
+    </div>
     <div class="form-group">
       <select multiple="" class="form-control col-sm-3" id="files" rows="3">
       </select>
     </div>
-    <p></p>
+    Add files from <b>%LOCALAPPDATA%\Packages\Microsoft.FlightSimulator_8wekyb3d8bbwe\SystemAppData\wgs</b>
+    <br>
     <input id="filesInput" type="file" multiple style="display:none" />
-    <button id="addButton" type="button" class="btn btn-primary">Add File(s)</button>
+    <button id="addButton" type="button" class="btn btn-warning">Add File(s)</button>
     <button id="generateButton" type="button" class="btn btn-success">Generate Reference Card</button>
-
   </div>
 
   <!-- jQuery first, then Popper.js, then Bootstrap JS -->

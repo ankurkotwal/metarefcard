@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"flag"
 	"fmt"
+	"html/template"
 	"image/jpeg"
 	"io/ioutil"
 	"log"
@@ -13,7 +14,6 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
-	"text/template"
 
 	"github.com/ankurkotwal/MetaRef/refcard/data"
 	"github.com/ankurkotwal/MetaRef/refcard/fs2020"
@@ -22,6 +22,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"golang.org/x/image/font"
 )
+
+type requestHandler func(files [][]byte, deviceMap data.DeviceMap,
+	config *data.Config) data.OverlaysByImage
 
 var configFile = "configs/config.yaml"
 var config data.Config
@@ -40,76 +43,30 @@ func main() {
 	router.LoadHTMLGlob("templates/*")
 	router.StaticFile("/script.js", "resources/www/script.js")
 
+	// Index page
 	router.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.html", gin.H{
 			"title":   config.AppName,
 			"version": config.Version,
 		})
 	})
-	fs2020Handler := func(files [][]byte) []*bytes.Buffer {
-		overlaysByImage := fs2020.HandleRequest(files, deviceMap, config.DebugOutput, config.VerboseOutput)
-		return generateImage(overlaysByImage)
-	}
-	fs2020Return := func(files []*bytes.Buffer, c *gin.Context) {
-		tmplFilename := "templates/refcard.tmpl"
-		t, err := template.New(path.Base(tmplFilename)).ParseFiles(tmplFilename)
-		if err != nil {
-			s := fmt.Sprintf("Error parsing image template - %s\n", err)
-			log.Print(s)
-			c.Data(http.StatusInternalServerError, "text/html; charset=utf-8", []byte(s))
-			return
-		}
-		imagesAsHTML := []byte{}
-		for _, file := range files {
-			image := struct {
-				Base64Contents string
-			}{
-				Base64Contents: base64.StdEncoding.EncodeToString(file.Bytes()),
-			}
-			var tpl bytes.Buffer
-			if err := t.Execute(&tpl, image); err != nil {
-				s := fmt.Sprintf("Error executing image template - %s\n", err)
-				log.Print(s)
-				continue
-			}
-			imagesAsHTML = append(imagesAsHTML, tpl.Bytes()...)
-		}
-		c.Data(http.StatusOK, "text/html; charset=utf-8", imagesAsHTML)
-	}
-	router.GET("/fs2020", func(c *gin.Context) {
-		// On the GET route, we'll load our own files (for testing purposes)
-		var inputFiles [][]byte
-		for _, filename := range flag.Args() {
-			file, err := ioutil.ReadFile(filename)
-			if err != nil {
-				log.Printf("Error reading file. %s\n", err)
-			}
-			inputFiles = append(inputFiles, file)
-		}
-		fs2020Return(fs2020Handler(inputFiles), c)
-	})
-	router.POST("/fs2020", func(c *gin.Context) {
-		form, _ := c.MultipartForm()
-		inputFiles := form.File["file"]
 
-		files := make([][]byte, len(inputFiles))
-		for idx, file := range inputFiles {
-			multipart, err := file.Open()
-			if err != nil {
-				log.Printf("Error opening multipart file %s - %s\n", file.Filename, err)
-				continue
-			}
-			contents, err := ioutil.ReadAll(multipart)
-			if err != nil {
-				log.Printf("Error reading multipart file %s - %s\n", file.Filename, err)
-				continue
-			}
-			files[idx] = contents
-		}
-		// TODO Need to return all images
-		fs2020Return(fs2020Handler(files), c)
+	// Flight simulator endpoint
+	router.POST("/fs2020", func(c *gin.Context) {
+		// Use the posted form data
+		sendResponse(loadFormFiles(c), fs2020.HandleRequest, c)
 	})
-	router.Run(":8080")
+	router.GET("/fs2020", func(c *gin.Context) {
+		// Use local files (specified on the command line)
+		sendResponse(loadLocalFiles(), fs2020.HandleRequest, c)
+	})
+
+	// Run on port 8080 unless PORT varilable specified
+	port := os.Getenv("PORT")
+	if len(port) == 0 {
+		port = "8080"
+	}
+	router.Run(fmt.Sprintf(":%s", port))
 
 }
 
@@ -127,6 +84,73 @@ func parseCliArgs() {
 		os.Exit(1)
 	}
 
+}
+
+func loadLocalFiles() [][]byte {
+	// On the GET route, we'll load our own files (for testing purposes)
+	var inputFiles [][]byte
+	for _, filename := range flag.Args() {
+		file, err := ioutil.ReadFile(filename)
+		if err != nil {
+			log.Printf("Error reading file. %s\n", err)
+		}
+		inputFiles = append(inputFiles, file)
+	}
+	return inputFiles
+}
+
+func loadFormFiles(c *gin.Context) [][]byte {
+	form, err := c.MultipartForm()
+	if err != nil {
+		log.Printf("Error getting MultipartForm - %s\n", err)
+		return make([][]byte, 0)
+	}
+
+	inputFiles := form.File["file"]
+	files := make([][]byte, len(inputFiles))
+	for idx, file := range inputFiles {
+		multipart, err := file.Open()
+		if err != nil {
+			log.Printf("Error opening multipart file %s - %s\n", file.Filename, err)
+			continue
+		}
+		contents, err := ioutil.ReadAll(multipart)
+		if err != nil {
+			log.Printf("Error reading multipart file %s - %s\n", file.Filename, err)
+			continue
+		}
+		files[idx] = contents
+	}
+	return files
+}
+
+func sendResponse(loadedFiles [][]byte, handler requestHandler, c *gin.Context) {
+	overlaysByImage := handler(loadedFiles, deviceMap, &config)
+	generatedFiles := generateImages(overlaysByImage)
+	tmplFilename := "templates/refcard.tmpl"
+	t, err := template.New(path.Base(tmplFilename)).ParseFiles(tmplFilename)
+	if err != nil {
+		s := fmt.Sprintf("Error parsing image template - %s\n", err)
+		log.Print(s)
+		c.Data(http.StatusInternalServerError, "text/html; charset=utf-8", []byte(s))
+		return
+	}
+	imagesAsHTML := []byte{}
+	for _, file := range generatedFiles {
+		image := struct {
+			Base64Contents string
+		}{
+			Base64Contents: base64.StdEncoding.EncodeToString(file.Bytes()),
+		}
+		var tpl bytes.Buffer
+		if err := t.Execute(&tpl, image); err != nil {
+			s := fmt.Sprintf("Error executing image template - %s\n", err)
+			log.Print(s)
+			continue
+		}
+		imagesAsHTML = append(imagesAsHTML, tpl.Bytes()...)
+	}
+	c.Data(http.StatusOK, "text/html; charset=utf-8", imagesAsHTML)
 }
 
 // Return the multiplier/scale of image based on actual width vs default width
@@ -150,7 +174,7 @@ func getFontBySize(size float64) font.Face {
 	return font
 }
 
-func generateImage(overlaysByImage data.OverlaysByImage) []*bytes.Buffer {
+func generateImages(overlaysByImage data.OverlaysByImage) []*bytes.Buffer {
 	var files []*bytes.Buffer = nil
 	for imageFilename, overlayDataRange := range overlaysByImage {
 		image, err := gg.LoadImage(fmt.Sprintf("%s/%s", config.ImagesDir, imageFilename))

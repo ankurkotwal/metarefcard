@@ -17,27 +17,25 @@ import (
 
 var initiliased bool = false
 var gameData *fs2020Data
-var gameBinds gameBindsByDevice
 var regexes map[string]*regexp.Regexp
 
 // HandleRequest services the request to load files
-func HandleRequest(files [][]byte, deviceMap data.DeviceMap, debugOutput bool, verboseOutput bool) data.OverlaysByImage {
+func HandleRequest(files [][]byte, deviceMap data.DeviceMap, config *data.Config) data.OverlaysByImage {
 	if !initiliased {
-		// Load the game files provided
-		gameData = loadGameModel(debugOutput)
-		gameBinds = loadGameConfigs(files, gameData.DeviceNameMap, debugOutput, verboseOutput)
+		gameData = loadGameModel(config.DebugOutput)
 		regexes = make(map[string]*regexp.Regexp)
 		for name, pattern := range gameData.Regexes {
 			regexes[name] = regexp.MustCompile(pattern)
 		}
 		initiliased = true
 	}
+	gameBinds := loadInputFiles(files, gameData.DeviceNameMap, config.DebugOutput, config.VerboseOutput)
 
 	neededDevices := make(map[string]bool)
 	for device := range gameBinds {
 		neededDevices[device] = true
 	}
-	deviceIndex := data.FilterDevices(deviceMap, neededDevices, debugOutput)
+	deviceIndex := data.FilterDevices(deviceMap, neededDevices, config.DebugOutput)
 	// Add device additions to the main device index
 	for deviceName, deviceInputData := range gameData.InputOverrides {
 		if deviceData, found := deviceIndex[deviceName]; found {
@@ -69,7 +67,7 @@ func loadGameModel(debugOutput bool) *fs2020Data {
 }
 
 // Load the game config files (provided by user)
-func loadGameConfigs(files [][]byte, deviceNameMap deviceNameFullToShort,
+func loadInputFiles(files [][]byte, deviceNameMap deviceNameFullToShort,
 	debugOutput bool, verboseOutput bool) gameBindsByDevice {
 	gameBinds := make(gameBindsByDevice)
 
