@@ -199,17 +199,39 @@ func generateImages(overlaysByImage data.OverlaysByImage) []*bytes.Buffer {
 		for _, overlayData := range overlayDataRange {
 			fontSize := float64(config.InputFontSize) * pixelMultiplier
 			dc.SetFontFace(getFontBySize(fontSize))
-			calcX, calcY := dc.MeasureString(overlayData.Text)
+
+			// Get a list of contexts and sort them
+			contexts := make([]string, 0, len(overlayData.ContextToTexts))
+			for context := range overlayData.ContextToTexts {
+				contexts = append(contexts, context)
+			}
+			sort.Strings(contexts)
+			fullText := ""
+
+			// Iterate through contexts (in order) and texts (already sorted)
+			// to generate text to be displayed
+			for _, context := range contexts {
+				texts := overlayData.ContextToTexts[context]
+				for idx, text := range texts {
+					padding := "  "
+					if idx == 0 {
+						padding = ""
+					}
+					fullText = fmt.Sprintf("%s%s%s", fullText, padding, text)
+				}
+			}
+
+			calcX, calcY := dc.MeasureString(fullText)
 			// Resize font till it fits
 			neededWidth := float64(overlayData.PosAndSize.Width-config.InputPixelInset) * pixelMultiplier
 			neededHeight := float64(overlayData.PosAndSize.Height) * pixelMultiplier
 			for calcX > neededWidth ||
 				calcY > neededHeight {
-				fontSize -= 2 // Decrement font size
+				fontSize-- // Decrement font size
 				dc.SetFontFace(getFontBySize(fontSize))
-				calcX, calcY = dc.MeasureString(overlayData.Text)
+				calcX, calcY = dc.MeasureString(fullText)
 			}
-			dc.DrawString(overlayData.Text,
+			dc.DrawString(fullText,
 				float64(overlayData.PosAndSize.ImageX+config.InputPixelInset)*pixelMultiplier,
 				(float64(overlayData.PosAndSize.ImageY)+config.InputFontSize)*pixelMultiplier)
 		}

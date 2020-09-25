@@ -60,11 +60,10 @@ type InputsMap map[string]InputData
 
 // OverlaysByImage - image overlay data indexed by image name
 // Image -> Input -> OverlayData
-type OverlaysByImage map[string]map[string]OverlayData
+type OverlaysByImage map[string]map[string]*OverlayData
 
 // OverlayData - data about what to put in overlay, grouping and location
 type OverlayData struct {
-	Context    string
-	Text       string
-	PosAndSize *InputData
+	ContextToTexts map[string][]string
+	PosAndSize     *InputData
 }

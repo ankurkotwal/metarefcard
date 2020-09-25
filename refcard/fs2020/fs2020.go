@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -264,30 +265,36 @@ func populateImageOverlays(deviceIndex data.DeviceModel, gameBinds gameBindsByDe
 						continue
 					}
 					var overlayData data.OverlayData
-					overlayData.Context = context
+					overlayData.ContextToTexts = make(map[string][]string)
+					overlayData.PosAndSize = &inputData
+					var text string
 					// Game data might have a better label for this text
 					if label, found := (*gameData).InputLabels[actionName]; found {
-						overlayData.Text = label
+						text = label
 					} else {
-						overlayData.Text = regexes["Key"].ReplaceAllString(actionName, "$1")
+						text = regexes["Key"].ReplaceAllString(actionName, "$1")
 					}
-					overlayData.PosAndSize = &inputData
+					texts := make([]string, 1)
+					texts[0] = text
+					overlayData.ContextToTexts[context] = texts
 
 					// Find by Image first
 					deviceAndInput := fmt.Sprintf("%s:%s", deviceName, input)
 					if overlay, found := overlaysByImage[image]; !found {
-						overlay := make(map[string]data.OverlayData)
-						overlay[deviceAndInput] = overlayData
+						// First time adding this image
+						overlay := make(map[string]*data.OverlayData)
 						overlaysByImage[image] = overlay
+						overlay[deviceAndInput] = &overlayData
 					} else {
 						// Now find by input
 						if previousOverlayData, found := overlay[deviceAndInput]; !found {
-							overlay[deviceAndInput] = overlayData
+							// Not new image but new overlayData
+							overlay[deviceAndInput] = &overlayData
 						} else {
-							// TODO Sort the entries so we have stable output.
 							// Concatenate input
-							overlayData.Text = fmt.Sprintf("%s   %s", previousOverlayData.Text, overlayData.Text)
-							overlay[deviceAndInput] = overlayData
+							texts = append(previousOverlayData.ContextToTexts[context], text)
+							sort.Strings(texts)
+							previousOverlayData.ContextToTexts[context] = texts
 						}
 					}
 				}
