@@ -7,11 +7,16 @@
 4. ~~Generate images~~
 5. ~~Dynamic font size~~
 6. ~~Regenerate hotas_images, new X55 locations, vkb-kosmosima-scg-left 3879x2182, x-45 5120x2880~~
-7. Sliders
-8. Keyboard & mouse
-9. Host on the web
-10. Text wrapping
-11. Extend to Elite Dangerous
+7. ~~Convert to webapp~~
+8. ~~Sliders~~
+9.  ~~Add game banner~~
+10. Colours
+11. Make images clickable to open a new tab
+12. Add Google Analytics
+13. Build container image
+14. Publish on Cloud Run
+15. Keyboard & mouse
+16. Extend to Elite Dangerous
 
 
 # Setup
