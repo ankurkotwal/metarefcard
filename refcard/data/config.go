@@ -14,6 +14,7 @@ type Config struct {
 	PixelMultiplier    float64                 `yaml:"PixelMultiplier"`
 	BackgroundColour   string                  `yaml:"BackgroundColour"`
 	ForegroundColour   string                  `yaml:"ForegroundColour"`
+	AlternateColours   []string                `yaml:"AlternateColours"`
 	ImagesDir          string                  `yaml:"ImagesDir"`
 	DefaultImageWidth  int                     `yaml:"DefaultImageWidth"`
 	DefaultImageHeight int                     `yaml:"DefaultImageHeight"`

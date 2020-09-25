@@ -24,7 +24,7 @@ import (
 )
 
 type requestHandler func(files [][]byte, deviceMap data.DeviceMap,
-	config *data.Config) data.OverlaysByImage
+	config *data.Config) (data.OverlaysByImage, map[string]string)
 
 var configFile = "configs/config.yaml"
 var config data.Config
@@ -129,8 +129,8 @@ func loadFormFiles(c *gin.Context) [][]byte {
 }
 
 func sendResponse(loadedFiles [][]byte, handler requestHandler, c *gin.Context) {
-	overlaysByImage := handler(loadedFiles, deviceMap, &config)
-	generatedFiles := generateImages(overlaysByImage)
+	overlaysByImage, categories := handler(loadedFiles, deviceMap, &config)
+	generatedFiles := generateImages(overlaysByImage, categories)
 	tmplFilename := "templates/refcard.tmpl"
 	t, err := template.New(path.Base(tmplFilename)).ParseFiles(tmplFilename)
 	if err != nil {
@@ -178,87 +178,142 @@ func getFontBySize(size float64) font.Face {
 	return font
 }
 
-func generateImages(overlaysByImage data.OverlaysByImage) []*bytes.Buffer {
-	var files []*bytes.Buffer = nil
+func prepareGeneratorData(overlaysByImage data.OverlaysByImage, categories map[string]string) ([]string, map[string]string) {
+	// Generate category colours
+	i := 0
+	for category := range categories {
+		if i >= len(config.AlternateColours) {
+			// Ran out of colours, repeat
+			i = 0
+		}
+		categories[category] = config.AlternateColours[i]
+		i++
+	}
+
 	imageNames := make([]string, 0)
 	for name := range overlaysByImage {
 		imageNames = append(imageNames, name)
 	}
 	sort.Strings(imageNames)
+	return imageNames, categories
+}
+
+func prepareContexts(contextToTexts map[string][]string) []string {
+	// Get a list of contexts and sort them
+	contexts := make([]string, 0, len(contextToTexts))
+	for context := range contextToTexts {
+		contexts = append(contexts, context)
+	}
+	sort.Strings(contexts)
+	return contexts
+}
+
+type overlay struct {
+	Text string  // Text to be displayed
+	Bg   string  // Background colour
+	Fg   string  // Foreground colour
+	X    float64 // X location
+	Y    float64 // Y location
+	W    float64 // Width
+	H    float64 // Height
+}
+
+func generateImages(overlaysByImage data.OverlaysByImage, categories map[string]string) []*bytes.Buffer {
+	var files []*bytes.Buffer = nil
+
+	imageNames, categories := prepareGeneratorData(overlaysByImage, categories)
 
 	for _, imageFilename := range imageNames {
-		overlayDataRange := overlaysByImage[imageFilename]
 		image, err := gg.LoadImage(fmt.Sprintf("%s/%s", config.ImagesDir, imageFilename))
 		if err != nil {
 			log.Printf("Error: loadImage %s failed. %v\n", imageFilename, err)
 			continue
 		}
 
+		// Load the image
 		dc := gg.NewContext(image.Bounds().Size().X, image.Bounds().Size().Y)
 		// Set the background colour
 		dc.SetHexColor(config.BackgroundColour)
 		dc.Clear()
-
-		pixelMultiplier := getPixelMultiplier(imageFilename, dc)
 		// Apply the image on top
 		dc.DrawImage(image, 0, 0)
 		dc.SetRGB(0, 0, 0)
+		pixelMultiplier := getPixelMultiplier(imageFilename, dc)
+
+		overlayDataRange := overlaysByImage[imageFilename]
 		for _, overlayData := range overlayDataRange {
 			fontSize := float64(config.InputFontSize) * pixelMultiplier
 			dc.SetFontFace(getFontBySize(fontSize))
 
-			// Get a list of contexts and sort them
-			contexts := make([]string, 0, len(overlayData.ContextToTexts))
-			for context := range overlayData.ContextToTexts {
-				contexts = append(contexts, context)
-			}
-			sort.Strings(contexts)
-			fullText := ""
+			targetWidth := float64(overlayData.PosAndSize.Width-config.InputPixelInset) * pixelMultiplier
+			targetHeight := float64(overlayData.PosAndSize.Height-config.InputPixelInset) * pixelMultiplier
 
 			// Iterate through contexts (in order) and texts (already sorted)
 			// to generate text to be displayed
-			for _, context := range contexts {
+			fullText := ""
+			for _, context := range prepareContexts(overlayData.ContextToTexts) {
 				texts := overlayData.ContextToTexts[context]
-				for _, text := range texts {
+				incrementalTexts := make([]string, len(texts))
+				// First get the full text to workout font size
+				for idx, text := range texts {
+					incrementalTexts[idx] = fullText
 					padding := "   "
 					if len(fullText) == 0 {
 						padding = ""
 					}
 					fullText = fmt.Sprintf("%s%s%s", fullText, padding, text)
 				}
+				fontSize = calcFontSize(fullText, fontSize, targetWidth, targetHeight)
+				dc.SetFontFace(getFontBySize(fontSize))
+				// Now create overlays for each text
+				// Uggh, second loop through texts
+				for idx, text := range texts {
+					var imageOverlay overlay
+					imageOverlay.Text = text
+					// TODO - do something withe the background colour
+					imageOverlay.Bg = config.ForegroundColour
+					imageOverlay.Fg = categories[context]
+
+					offset, _ := dc.MeasureString(incrementalTexts[idx])
+					imageOverlay.X = offset + float64(overlayData.PosAndSize.ImageX+config.InputPixelInset)*pixelMultiplier
+					imageOverlay.Y = float64(overlayData.PosAndSize.ImageY)*pixelMultiplier + fontSize
+
+					dc.SetHexColor(imageOverlay.Fg)
+					dc.DrawStringAnchored(text, imageOverlay.X, imageOverlay.Y, 0, 0)
+				}
 			}
 
-			calcX, calcY := dc.MeasureString(fullText)
-			// Resize font till it fits
-			targetWidth := float64(overlayData.PosAndSize.Width-config.InputPixelInset) * pixelMultiplier
-			targetHeight := float64(overlayData.PosAndSize.Height-config.InputPixelInset) * pixelMultiplier
-			if calcX > targetWidth || calcY > targetHeight {
-				// Text is too big, shrink till it fits
-				for calcX > targetWidth || calcY > targetHeight {
-					fontSize-- // Decrement font size
-					dc.SetFontFace(getFontBySize(fontSize))
-					calcX, calcY = dc.MeasureString(fullText)
-				}
-			} else if calcX < targetWidth && calcY < targetHeight {
-				// Text can grow to fit
-				for calcX < targetWidth && calcY < targetHeight {
-					fontSize++ // Decrement font size
-					dc.SetFontFace(getFontBySize(fontSize))
-					calcX, calcY = dc.MeasureString(fullText)
-				}
-				fontSize--
-				dc.SetFontFace(getFontBySize(fontSize))
-			}
-			dc.DrawStringAnchored(fullText,
-				float64(overlayData.PosAndSize.ImageX+config.InputPixelInset)*pixelMultiplier,
-				(float64(overlayData.PosAndSize.ImageY)*pixelMultiplier + fontSize),
-				0, 0)
 		}
 		var jpgBytes bytes.Buffer
 		dc.EncodeJPG(&jpgBytes, &jpeg.Options{Quality: 90})
 		files = append(files, &jpgBytes)
 	}
-	// Map the game input bindings to our model
-	fmt.Println("Done")
 	return files
+}
+
+var fontCtx *gg.Context = nil
+
+// Resize font till it fits
+func calcFontSize(text string, fontSize float64, targetWidth float64, targetHeight float64) float64 {
+	if fontCtx == nil {
+		fontCtx = gg.NewContext(500, 500)
+	}
+	calcX, calcY := fontCtx.MeasureString(text)
+	if calcX > targetWidth || calcY > targetHeight {
+		// Text is too big, shrink till it fits
+		for calcX > targetWidth || calcY > targetHeight {
+			fontSize-- // Decrement font size
+			fontCtx.SetFontFace(getFontBySize(fontSize))
+			calcX, calcY = fontCtx.MeasureString(text)
+		}
+	} else if calcX < targetWidth && calcY < targetHeight {
+		// Text can grow to fit
+		for calcX < targetWidth && calcY < targetHeight {
+			fontSize++ // Decrement font size
+			fontCtx.SetFontFace(getFontBySize(fontSize))
+			calcX, calcY = fontCtx.MeasureString(text)
+		}
+		fontSize-- // Go down one size
+	}
+	return fontSize
 }

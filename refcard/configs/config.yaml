@@ -9,30 +9,35 @@ InputFont: Roboto-Regular.ttf
 InputFontSize: 40
 InputPixelInset: 10
 PixelMultiplier: 0.4
-BackgroundColour: "#e9ecef"
-ForegroundColour: "#000000"
-# AlternateColours:
-#   - #2780e3;
-#   - #373a3c;
-#   - #3fb618;
-#   - #9954bb;
-#   - #ff7518;
-#   - #ff0039;
-#   Light: #f8f9fa;
-#   Dark: #373a3c;
-#   Blue: #2780e3;
-#   Indigo: #6610f2;
-#   Purple: #613d7c;
-#   Pink: #e83e8c;
-#   Red: #ff0039;
-#   Orange: #f0ad4e;
-#   Yellow: #ff7518;
-#   Green: #3fb618;
-#   Teal: #20c997;
-#   Cyan: #9954bb;
-#   White: #fff;
-#   Gray: #868e96;
-#   Gray-dark: #373a3c;
+BackgroundColour: "#e9ecefff"
+LightColour: "#ffffffff"
+DarkColour: "#373a3cff"
+AlternateColours:
+  - "#2780e3ff" # Blue
+  - "#373a3cff" # Almost Black
+  - "#3fb618ff" # Green
+  - "#9954bbff" # Purple
+  - "#ff7518ff" # Orange
+  - "#ff0039ff" # Red
+  - "#2780e341" # Blue, 65% opacity
+  - "#373a3c41" # Almost Black, 65% opacity
+  - "#3fb61841" # Green, 65% opacity
+  - "#9954bb41" # Purple, 65% opacity
+  - "#ff751841" # Orange, 65% opacity
+  - "#ff003941" # Red, 65% opacity
+  # Blue: #2780e3;
+  # Indigo: #6610f2;
+  # Purple: #613d7c;
+  # Pink: #e83e8c;
+  # Red: #ff0039;
+  # Orange: #f0ad4e;
+  # Yellow: #ff7518;
+  # Green: #3fb618;
+  # Teal: #20c997;
+  # Cyan: #9954bb;
+  # White: #fff;
+  # Gray: #868e96;
+  # Gray-dark: #373a3c;
 ImagesDir: resources/hotas_images
 DefaultImageWidth: 3840
 DefaultImageHeight: 2160

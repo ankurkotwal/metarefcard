@@ -21,7 +21,7 @@ var gameData *fs2020Data
 var regexes map[string]*regexp.Regexp
 
 // HandleRequest services the request to load files
-func HandleRequest(files [][]byte, deviceMap data.DeviceMap, config *data.Config) data.OverlaysByImage {
+func HandleRequest(files [][]byte, deviceMap data.DeviceMap, config *data.Config) (data.OverlaysByImage, map[string]string) {
 	if !initiliased {
 		gameData = loadGameModel(config.DebugOutput)
 		regexes = make(map[string]*regexp.Regexp)
@@ -30,7 +30,7 @@ func HandleRequest(files [][]byte, deviceMap data.DeviceMap, config *data.Config
 		}
 		initiliased = true
 	}
-	gameBinds := loadInputFiles(files, gameData.DeviceNameMap, config.DebugOutput, config.VerboseOutput)
+	gameBinds, contexts := loadInputFiles(files, gameData.DeviceNameMap, config.DebugOutput, config.VerboseOutput)
 
 	neededDevices := make(map[string]bool)
 	for device := range gameBinds {
@@ -45,7 +45,7 @@ func HandleRequest(files [][]byte, deviceMap data.DeviceMap, config *data.Config
 			}
 		}
 	}
-	return populateImageOverlays(deviceIndex, gameBinds, gameData)
+	return populateImageOverlays(deviceIndex, gameBinds, gameData), contexts
 }
 
 // Load FS2020 specific data from our model. Update the device names (map game device name to our model names)
@@ -69,8 +69,9 @@ func loadGameModel(debugOutput bool) *fs2020Data {
 
 // Load the game config files (provided by user)
 func loadInputFiles(files [][]byte, deviceNameMap deviceNameFullToShort,
-	debugOutput bool, verboseOutput bool) gameBindsByDevice {
+	debugOutput bool, verboseOutput bool) (gameBindsByDevice, map[string]string) {
 	gameBinds := make(gameBindsByDevice)
+	contexts := make(map[string]string)
 
 	// XML state variables
 	var currentDevice *gameDevice
@@ -136,6 +137,7 @@ func loadInputFiles(files [][]byte, deviceNameMap deviceNameFullToShort,
 					for _, attr := range ty.Attr {
 						if attr.Name.Local == "ContextName" {
 							contextName = attr.Value
+							contexts[contextName] = ""
 							break
 						}
 					}
@@ -241,7 +243,8 @@ func loadInputFiles(files [][]byte, deviceNameMap deviceNameFullToShort,
 			}
 		}
 	}
-	return gameBinds
+
+	return gameBinds, contexts
 }
 
 func populateImageOverlays(deviceIndex data.DeviceModel, gameBinds gameBindsByDevice,
