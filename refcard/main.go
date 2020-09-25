@@ -212,9 +212,9 @@ func generateImages(overlaysByImage data.OverlaysByImage) []*bytes.Buffer {
 			// to generate text to be displayed
 			for _, context := range contexts {
 				texts := overlayData.ContextToTexts[context]
-				for idx, text := range texts {
-					padding := "  "
-					if idx == 0 {
+				for _, text := range texts {
+					padding := "   "
+					if len(fullText) == 0 {
 						padding = ""
 					}
 					fullText = fmt.Sprintf("%s%s%s", fullText, padding, text)
