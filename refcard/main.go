@@ -193,8 +193,15 @@ func generateImages(overlaysByImage data.OverlaysByImage) []*bytes.Buffer {
 			log.Printf("Error: loadImage %s failed. %v\n", imageFilename, err)
 			continue
 		}
-		dc := gg.NewContextForImage(image)
+
+		dc := gg.NewContext(image.Bounds().Size().X, image.Bounds().Size().Y)
+		// Set the background colour
+		dc.SetHexColor(config.BackgroundColour)
+		dc.Clear()
+
 		pixelMultiplier := getPixelMultiplier(imageFilename, dc)
+		// Apply the image on top
+		dc.DrawImage(image, 0, 0)
 		dc.SetRGB(0, 0, 0)
 		for _, overlayData := range overlayDataRange {
 			fontSize := float64(config.InputFontSize) * pixelMultiplier
@@ -223,17 +230,29 @@ func generateImages(overlaysByImage data.OverlaysByImage) []*bytes.Buffer {
 
 			calcX, calcY := dc.MeasureString(fullText)
 			// Resize font till it fits
-			neededWidth := float64(overlayData.PosAndSize.Width-config.InputPixelInset) * pixelMultiplier
-			neededHeight := float64(overlayData.PosAndSize.Height) * pixelMultiplier
-			for calcX > neededWidth ||
-				calcY > neededHeight {
-				fontSize-- // Decrement font size
+			targetWidth := float64(overlayData.PosAndSize.Width-config.InputPixelInset) * pixelMultiplier
+			targetHeight := float64(overlayData.PosAndSize.Height-config.InputPixelInset) * pixelMultiplier
+			if calcX > targetWidth || calcY > targetHeight {
+				// Text is too big, shrink till it fits
+				for calcX > targetWidth || calcY > targetHeight {
+					fontSize-- // Decrement font size
+					dc.SetFontFace(getFontBySize(fontSize))
+					calcX, calcY = dc.MeasureString(fullText)
+				}
+			} else if calcX < targetWidth && calcY < targetHeight {
+				// Text can grow to fit
+				for calcX < targetWidth && calcY < targetHeight {
+					fontSize++ // Decrement font size
+					dc.SetFontFace(getFontBySize(fontSize))
+					calcX, calcY = dc.MeasureString(fullText)
+				}
+				fontSize--
 				dc.SetFontFace(getFontBySize(fontSize))
-				calcX, calcY = dc.MeasureString(fullText)
 			}
-			dc.DrawString(fullText,
+			dc.DrawStringAnchored(fullText,
 				float64(overlayData.PosAndSize.ImageX+config.InputPixelInset)*pixelMultiplier,
-				(float64(overlayData.PosAndSize.ImageY)+config.InputFontSize)*pixelMultiplier)
+				(float64(overlayData.PosAndSize.ImageY)*pixelMultiplier + fontSize),
+				0, 0)
 		}
 		var jpgBytes bytes.Buffer
 		dc.EncodeJPG(&jpgBytes, &jpeg.Options{Quality: 90})

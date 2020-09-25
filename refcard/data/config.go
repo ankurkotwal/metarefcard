@@ -12,6 +12,8 @@ type Config struct {
 	InputFontSize      float64                 `yaml:"InputFontSize"`
 	InputPixelInset    int                     `yaml:"InputPixelInset"`
 	PixelMultiplier    float64                 `yaml:"PixelMultiplier"`
+	BackgroundColour   string                  `yaml:"BackgroundColour"`
+	ForegroundColour   string                  `yaml:"ForegroundColour"`
 	ImagesDir          string                  `yaml:"ImagesDir"`
 	DefaultImageWidth  int                     `yaml:"DefaultImageWidth"`
 	DefaultImageHeight int                     `yaml:"DefaultImageHeight"`
