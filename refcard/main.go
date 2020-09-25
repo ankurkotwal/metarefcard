@@ -31,7 +31,8 @@ var config data.Config
 var deviceMap data.DeviceMap
 
 func main() {
-	parseCliArgs()
+	exposeGetHandler := false
+	parseCliArgs(&exposeGetHandler)
 
 	// Load the configuration
 	util.LoadYaml(configFile, &config, "Config")
@@ -56,10 +57,12 @@ func main() {
 		// Use the posted form data
 		sendResponse(loadFormFiles(c), fs2020.HandleRequest, c)
 	})
-	router.GET("/fs2020", func(c *gin.Context) {
-		// Use local files (specified on the command line)
-		sendResponse(loadLocalFiles(), fs2020.HandleRequest, c)
-	})
+	if exposeGetHandler {
+		router.GET("/fs2020", func(c *gin.Context) {
+			// Use local files (specified on the command line)
+			sendResponse(loadLocalFiles(), fs2020.HandleRequest, c)
+		})
+	}
 
 	// Run on port 8080 unless PORT varilable specified
 	port := os.Getenv("PORT")
@@ -70,12 +73,13 @@ func main() {
 
 }
 
-func parseCliArgs() {
+func parseCliArgs(exposeGetHandler *bool) {
 	flag.Usage = func() {
 		fmt.Printf("Usage: %s file...\n\n", filepath.Base(os.Args[0]))
 		fmt.Printf("file\tFlight Simulator 2020 input configration (XML).\n")
 		flag.PrintDefaults()
 	}
+	flag.BoolVar(exposeGetHandler, "g", false, "Deploy GET handlers.")
 	flag.Parse()
 	args := flag.Args()
 	if len(flag.Args()) < 1 {

@@ -12,6 +12,7 @@
             "program": "${workspaceFolder}/main.go",
             "env": {},
             "args": [
+                "-g", // Expose GET Handlers
                 // "${workspaceFolder}/samples/debug.xml",
                 "${workspaceFolder}/samples/x55_stick.xml",
                 "${workspaceFolder}/samples/x55_throttle.xml",
