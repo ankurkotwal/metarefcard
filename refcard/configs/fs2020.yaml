@@ -64,6 +64,9 @@ InputMapping: # Devices with known game inputs and which model input they map to
     Slider:
       X: U
   T16000MTHROTTLE:
+    Rotation:
+      X: X
+      Y: Y
     Slider:
       X: X
       Y: Y
@@ -77,6 +80,9 @@ InputMapping: # Devices with known game inputs and which model input they map to
     Slider:
       X: Z
   T-Rudder:
+    Rotation:
+      X: X
+      Y: Y
     Slider:
       Y: Z
 InputOverrides:

@@ -257,10 +257,10 @@ func populateImageOverlays(deviceIndex data.DeviceModel, gameBinds gameBindsByDe
 				for _, input := range inputLookups {
 					inputData, found := modelDevice.Inputs[input]
 					if !found {
-						log.Printf("Error: Unknown input to lookup %s\n", input)
+						log.Printf("Error: Unknown input to lookup %s for device %s\n", input, deviceName)
 					}
 					if inputData.ImageX == 0 && inputData.ImageY == 0 {
-						log.Printf("Error: Location 0,0 for %s %v", actionName, inputData)
+						log.Printf("Error: Location 0,0 for %s device %s %v ", actionName, deviceName, inputData)
 						continue
 					}
 					var overlayData data.OverlayData
@@ -358,6 +358,10 @@ func findMatchingInputModelsInner(deviceName string, action string, inputs data.
 	matches = regexes["Rotation"].FindAllStringSubmatch(action, -1)
 	if matches != nil {
 		rotation := fmt.Sprintf("R%sAxis", matches[0][1])
+		if input, ok := gameInputMap["Rotation"]; ok {
+			// Check override
+			rotation = fmt.Sprintf("%sAxis", input[matches[0][1]])
+		}
 		return rotation
 	}
 
