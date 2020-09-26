@@ -181,7 +181,14 @@ func getFontBySize(size float64) font.Face {
 func prepareGeneratorData(overlaysByImage data.OverlaysByImage, categories map[string]string) ([]string, map[string]string) {
 	// Generate category colours
 	i := 0
+	categoryNames := make([]string, len(categories))
 	for category := range categories {
+		categoryNames[i] = category
+		i++
+	}
+	sort.Strings(categoryNames)
+	i = 0
+	for _, category := range categoryNames {
 		if i >= len(config.AlternateColours) {
 			// Ran out of colours, repeat
 			i = 0
@@ -251,23 +258,28 @@ func generateImages(overlaysByImage data.OverlaysByImage, categories map[string]
 			// Iterate through contexts (in order) and texts (already sorted)
 			// to generate text to be displayed
 			fullText := ""
+			incrementalTexts := []string{""}
 			for _, context := range prepareContexts(overlayData.ContextToTexts) {
 				texts := overlayData.ContextToTexts[context]
-				incrementalTexts := make([]string, len(texts))
 				// First get the full text to workout font size
-				for idx, text := range texts {
-					incrementalTexts[idx] = fullText
+				for _, text := range texts {
 					padding := "   "
-					if len(fullText) == 0 {
-						padding = ""
+					if len(fullText) != 0 {
+						fullText = fmt.Sprintf("%s%s%s", fullText, padding, text)
+					} else {
+						fullText = text
 					}
-					fullText = fmt.Sprintf("%s%s%s", fullText, padding, text)
+					incrementalTexts = append(incrementalTexts, fullText+padding)
 				}
-				fontSize = calcFontSize(fullText, fontSize, targetWidth, targetHeight)
-				dc.SetFontFace(getFontBySize(fontSize))
-				// Now create overlays for each text
-				// Uggh, second loop through texts
-				for idx, text := range texts {
+			}
+			fontSize = calcFontSize(fullText, fontSize, targetWidth, targetHeight)
+			dc.SetFontFace(getFontBySize(fontSize))
+			// Now create overlays for each text
+			// Uggh, second loop through texts
+			idx := 0
+			for _, context := range prepareContexts(overlayData.ContextToTexts) {
+				texts := overlayData.ContextToTexts[context]
+				for _, text := range texts {
 					var imageOverlay overlay
 					imageOverlay.Text = text
 					// TODO - do something withe the background colour
@@ -275,6 +287,7 @@ func generateImages(overlaysByImage data.OverlaysByImage, categories map[string]
 					imageOverlay.Fg = categories[context]
 
 					offset, _ := dc.MeasureString(incrementalTexts[idx])
+					idx++
 					imageOverlay.X = offset + float64(overlayData.PosAndSize.ImageX+config.InputPixelInset)*pixelMultiplier
 					imageOverlay.Y = float64(overlayData.PosAndSize.ImageY)*pixelMultiplier + fontSize
 
@@ -282,7 +295,6 @@ func generateImages(overlaysByImage data.OverlaysByImage, categories map[string]
 					dc.DrawStringAnchored(text, imageOverlay.X, imageOverlay.Y, 0, 0)
 				}
 			}
-
 		}
 		var jpgBytes bytes.Buffer
 		dc.EncodeJPG(&jpgBytes, &jpeg.Options{Quality: 90})
@@ -298,18 +310,19 @@ func calcFontSize(text string, fontSize float64, targetWidth float64, targetHeig
 	if fontCtx == nil {
 		fontCtx = gg.NewContext(500, 500)
 	}
+	fontCtx.SetFontFace(getFontBySize(fontSize))
 	calcX, calcY := fontCtx.MeasureString(text)
 	if calcX > targetWidth || calcY > targetHeight {
 		// Text is too big, shrink till it fits
 		for calcX > targetWidth || calcY > targetHeight {
-			fontSize-- // Decrement font size
+			fontSize--
 			fontCtx.SetFontFace(getFontBySize(fontSize))
 			calcX, calcY = fontCtx.MeasureString(text)
 		}
 	} else if calcX < targetWidth && calcY < targetHeight {
 		// Text can grow to fit
 		for calcX < targetWidth && calcY < targetHeight {
-			fontSize++ // Decrement font size
+			fontSize++
 			fontCtx.SetFontFace(getFontBySize(fontSize))
 			calcX, calcY = fontCtx.MeasureString(text)
 		}

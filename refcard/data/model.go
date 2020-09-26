@@ -59,7 +59,7 @@ type DeviceData struct {
 type InputsMap map[string]InputData
 
 // OverlaysByImage - image overlay data indexed by image name
-// Image -> Input -> OverlayData
+// Image -> Device:Input -> OverlayData
 type OverlaysByImage map[string]map[string]*OverlayData
 
 // OverlayData - data about what to put in overlay, grouping and location

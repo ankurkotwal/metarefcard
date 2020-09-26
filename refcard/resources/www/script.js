@@ -41,6 +41,7 @@ $(function(){
     });
     
     generateButton.click(function() {
+      $('#images').empty();
       $('#progressbar').show();
       let formData = new FormData();
       
