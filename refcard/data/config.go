@@ -13,7 +13,8 @@ type Config struct {
 	InputPixelInset    int                     `yaml:"InputPixelInset"`
 	PixelMultiplier    float64                 `yaml:"PixelMultiplier"`
 	BackgroundColour   string                  `yaml:"BackgroundColour"`
-	ForegroundColour   string                  `yaml:"ForegroundColour"`
+	LightColour        string                  `yaml:"LightColour"`
+	DarkColour         string                  `yaml:"DarkColour"`
 	AlternateColours   []string                `yaml:"AlternateColours"`
 	ImagesDir          string                  `yaml:"ImagesDir"`
 	DefaultImageWidth  int                     `yaml:"DefaultImageWidth"`

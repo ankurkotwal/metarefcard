@@ -131,6 +131,8 @@ func loadFormFiles(c *gin.Context) [][]byte {
 func sendResponse(loadedFiles [][]byte, handler requestHandler, c *gin.Context) {
 	overlaysByImage, categories := handler(loadedFiles, deviceMap, &config)
 	generatedFiles := generateImages(overlaysByImage, categories)
+
+	// Generate HTML
 	tmplFilename := "templates/refcard.tmpl"
 	t, err := template.New(path.Base(tmplFilename)).ParseFiles(tmplFilename)
 	if err != nil {
@@ -178,31 +180,14 @@ func getFontBySize(size float64) font.Face {
 	return font
 }
 
-func prepareGeneratorData(overlaysByImage data.OverlaysByImage, categories map[string]string) ([]string, map[string]string) {
-	// Generate category colours
-	i := 0
-	categoryNames := make([]string, len(categories))
-	for category := range categories {
-		categoryNames[i] = category
-		i++
-	}
-	sort.Strings(categoryNames)
-	i = 0
-	for _, category := range categoryNames {
-		if i >= len(config.AlternateColours) {
-			// Ran out of colours, repeat
-			i = 0
-		}
-		categories[category] = config.AlternateColours[i]
-		i++
-	}
-
+func prepareGeneratorData(overlaysByImage data.OverlaysByImage) []string {
+	// Generate sorted list of image names
 	imageNames := make([]string, 0)
 	for name := range overlaysByImage {
 		imageNames = append(imageNames, name)
 	}
 	sort.Strings(imageNames)
-	return imageNames, categories
+	return imageNames
 }
 
 func prepareContexts(contextToTexts map[string][]string) []string {
@@ -215,20 +200,10 @@ func prepareContexts(contextToTexts map[string][]string) []string {
 	return contexts
 }
 
-type overlay struct {
-	Text string  // Text to be displayed
-	Bg   string  // Background colour
-	Fg   string  // Foreground colour
-	X    float64 // X location
-	Y    float64 // Y location
-	W    float64 // Width
-	H    float64 // Height
-}
-
 func generateImages(overlaysByImage data.OverlaysByImage, categories map[string]string) []*bytes.Buffer {
 	var files []*bytes.Buffer = nil
 
-	imageNames, categories := prepareGeneratorData(overlaysByImage, categories)
+	imageNames := prepareGeneratorData(overlaysByImage)
 
 	for _, imageFilename := range imageNames {
 		image, err := gg.LoadImage(fmt.Sprintf("%s/%s", config.ImagesDir, imageFilename))
@@ -263,7 +238,7 @@ func generateImages(overlaysByImage data.OverlaysByImage, categories map[string]
 				texts := overlayData.ContextToTexts[context]
 				// First get the full text to workout font size
 				for _, text := range texts {
-					padding := "   "
+					padding := " "
 					if len(fullText) != 0 {
 						fullText = fmt.Sprintf("%s%s%s", fullText, padding, text)
 					} else {
@@ -273,26 +248,27 @@ func generateImages(overlaysByImage data.OverlaysByImage, categories map[string]
 				}
 			}
 			fontSize = calcFontSize(fullText, fontSize, targetWidth, targetHeight)
-			dc.SetFontFace(getFontBySize(fontSize))
 			// Now create overlays for each text
 			// Uggh, second loop through texts
 			idx := 0
 			for _, context := range prepareContexts(overlayData.ContextToTexts) {
 				texts := overlayData.ContextToTexts[context]
 				for _, text := range texts {
-					var imageOverlay overlay
-					imageOverlay.Text = text
-					// TODO - do something withe the background colour
-					imageOverlay.Bg = config.ForegroundColour
-					imageOverlay.Fg = categories[context]
-
+					dc.SetFontFace(getFontBySize(fontSize))
 					offset, _ := dc.MeasureString(incrementalTexts[idx])
 					idx++
-					imageOverlay.X = offset + float64(overlayData.PosAndSize.ImageX+config.InputPixelInset)*pixelMultiplier
-					imageOverlay.Y = float64(overlayData.PosAndSize.ImageY)*pixelMultiplier + fontSize
 
-					dc.SetHexColor(imageOverlay.Fg)
-					dc.DrawStringAnchored(text, imageOverlay.X, imageOverlay.Y, 0, 0)
+					x := offset + float64(overlayData.PosAndSize.ImageX+config.InputPixelInset)*pixelMultiplier
+					y := float64(overlayData.PosAndSize.ImageY) * pixelMultiplier
+					w, h := dc.MeasureString(text)
+
+					dc.SetHexColor(categories[context])
+					dc.DrawRoundedRectangle(x, y, w, h, 6)
+					dc.Fill()
+					dc.SetHexColor(config.LightColour)
+					dc.SetFontFace(getFontBySize(fontSize - 1)) // Render one font size smaller to fit in rect
+					w2, _ := dc.MeasureString(text)
+					dc.DrawStringAnchored(text, x+(w-w2)/2, y, 0, 0.85)
 				}
 			}
 		}
@@ -308,7 +284,7 @@ var fontCtx *gg.Context = nil
 // Resize font till it fits
 func calcFontSize(text string, fontSize float64, targetWidth float64, targetHeight float64) float64 {
 	if fontCtx == nil {
-		fontCtx = gg.NewContext(500, 500)
+		fontCtx = gg.NewContext(1, 1) // Only needed for fonts, small size
 	}
 	fontCtx.SetFontFace(getFontBySize(fontSize))
 	calcX, calcY := fontCtx.MeasureString(text)

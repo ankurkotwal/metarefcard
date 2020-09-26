@@ -45,7 +45,21 @@ func HandleRequest(files [][]byte, deviceMap data.DeviceMap, config *data.Config
 			}
 		}
 	}
-	return populateImageOverlays(deviceIndex, gameBinds, gameData), contexts
+
+	// Generate colours for contexts here
+	sort.Strings(contexts)
+	categories := make(map[string]string) // Context -> Colour
+	i := 0
+	for _, category := range contexts {
+		if i >= len(config.AlternateColours) {
+			// Ran out of colours, repeat
+			i = 0
+		}
+		categories[category] = config.AlternateColours[i]
+		i++
+	}
+
+	return populateImageOverlays(deviceIndex, gameBinds, gameData), categories
 }
 
 // Load FS2020 specific data from our model. Update the device names (map game device name to our model names)
@@ -69,9 +83,9 @@ func loadGameModel(debugOutput bool) *fs2020Data {
 
 // Load the game config files (provided by user)
 func loadInputFiles(files [][]byte, deviceNameMap deviceNameFullToShort,
-	debugOutput bool, verboseOutput bool) (gameBindsByDevice, map[string]string) {
+	debugOutput bool, verboseOutput bool) (gameBindsByDevice, []string) {
 	gameBinds := make(gameBindsByDevice)
-	contexts := make(map[string]string)
+	contexts := make([]string, 0)
 
 	// XML state variables
 	var currentDevice *gameDevice
@@ -137,7 +151,7 @@ func loadInputFiles(files [][]byte, deviceNameMap deviceNameFullToShort,
 					for _, attr := range ty.Attr {
 						if attr.Name.Local == "ContextName" {
 							contextName = attr.Value
-							contexts[contextName] = ""
+							contexts = append(contexts, contextName)
 							break
 						}
 					}
@@ -275,7 +289,9 @@ func populateImageOverlays(deviceIndex data.DeviceModel, gameBinds gameBindsByDe
 					if label, found := (*gameData).InputLabels[actionName]; found {
 						text = label
 					} else {
-						text = regexes["Key"].ReplaceAllString(actionName, "$1")
+						// Trim unneeded text in input code
+						text = regexes["TrimKey"].ReplaceAllString(actionName, "$1")
+						text = regexes["TrimAxis"].ReplaceAllString(text, "$1$2")
 					}
 					texts := make([]string, 1)
 					texts[0] = text
