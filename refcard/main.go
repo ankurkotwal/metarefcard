@@ -81,13 +81,6 @@ func parseCliArgs(exposeGetHandler *bool) {
 	}
 	flag.BoolVar(exposeGetHandler, "g", false, "Deploy GET handlers.")
 	flag.Parse()
-	args := flag.Args()
-	if len(flag.Args()) < 1 {
-		flag.Usage()
-		print(args)
-		os.Exit(1)
-	}
-
 }
 
 func loadLocalFiles() [][]byte {
