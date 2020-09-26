@@ -14,17 +14,17 @@ LightColour: "#ffffffff"
 DarkColour: "#373a3cff"
 AlternateColours:
   - "#2780e3ff" # Blue
-  - "#373a3cff" # Almost Black
+  - "#ff0039ff" # Red
+  - "#ff7518ff" # Orange
   - "#3fb618ff" # Green
   - "#9954bbff" # Purple
-  - "#ff7518ff" # Orange
-  - "#ff0039ff" # Red
+  - "#373a3cff" # Almost Black
   - "#2780e3a6" # Blue, lower opacity
-  - "#373a3ca6" # Almost Black, lower opacity
+  - "#ff0039a6" # Red, lower opacity
+  - "#ff7518a6" # Orange, lower opacity
   - "#3fb618a6" # Green, lower opacity
   - "#9954bba6" # Purple, lower opacity
-  - "#ff7518a6" # Orange, lower opacity
-  - "#ff0039a6" # Red, lower opacity
+  - "#373a3ca6" # Almost Black, lower opacity
   # Blue: #2780e3;
   # Indigo: #6610f2;
   # Purple: #613d7c;

@@ -11,7 +11,7 @@
 8. ~~Sliders~~
 9.  ~~Add game banner~~
 10. ~~Colours~~
-11. Make images clickable to open a new tab
+11. ~~Make images clickable to open a new tab~~
 12. Build container image
 13. Add Google Analytics
 14. Publish on Cloud Run

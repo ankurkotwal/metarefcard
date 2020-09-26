@@ -55,8 +55,11 @@ func HandleRequest(files [][]byte, deviceMap data.DeviceMap, config *data.Config
 			// Ran out of colours, repeat
 			i = 0
 		}
-		categories[category] = config.AlternateColours[i]
-		i++
+		if _, found := categories[category]; !found {
+			// Only move to next colour if this is an unseen category
+			categories[category] = config.AlternateColours[i]
+			i++
+		}
 	}
 
 	return populateImageOverlays(deviceIndex, gameBinds, gameData), categories
