@@ -12,11 +12,15 @@
 9.  ~~Add game banner~~
 10. ~~Colours~~
 11. ~~Make images clickable to open a new tab~~
-12. Build container image
-13. Add Google Analytics
-14. Publish on Cloud Run
-15. Keyboard & mouse
-16. Extend to Elite Dangerous
+12. ~~Build container image~~
+13. ~~Publish on Cloud Run~~
+14. ~~Add Google Analytics~~
+15. Add a message for unsupported devices. Maybe capture those configs to process later?
+16. Add early testing info text, Github repo, how to report an issue
+17. Watermark
+18. Generate game name + device name
+19. Keyboard & mouse
+20. Extend to Elite Dangerous
 
 
 # Setup
