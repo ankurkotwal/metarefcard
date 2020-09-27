@@ -292,9 +292,7 @@ func populateImageOverlays(deviceIndex data.DeviceModel, gameBinds gameBindsByDe
 					if label, found := (*gameData).InputLabels[actionName]; found {
 						text = label
 					} else {
-						// Trim unneeded text in input code
-						text = regexes["TrimKey"].ReplaceAllString(actionName, "$1")
-						text = regexes["TrimAxis"].ReplaceAllString(text, "$1$2")
+						log.Printf("Unknown action %s context %s device %s", actionName, context, deviceName)
 					}
 					texts := make([]string, 1)
 					texts[0] = text
