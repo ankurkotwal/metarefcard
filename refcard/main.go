@@ -221,7 +221,7 @@ func generateImages(overlaysByImage data.OverlaysByImage, categories map[string]
 			dc.SetFontFace(getFontBySize(fontSize))
 
 			targetWidth := float64(overlayData.PosAndSize.Width-config.InputPixelInset) * pixelMultiplier
-			targetHeight := float64(overlayData.PosAndSize.Height-config.InputPixelInset) * pixelMultiplier
+			targetHeight := float64(overlayData.PosAndSize.Height) * pixelMultiplier
 
 			// Iterate through contexts (in order) and texts (already sorted)
 			// to generate text to be displayed
@@ -254,6 +254,8 @@ func generateImages(overlaysByImage data.OverlaysByImage, categories map[string]
 					x := offset + float64(overlayData.PosAndSize.ImageX+config.InputPixelInset)*pixelMultiplier
 					y := float64(overlayData.PosAndSize.ImageY) * pixelMultiplier
 					w, h := dc.MeasureString(text)
+					// Vertically center
+					y = y + (targetHeight-h)/2
 
 					dc.SetHexColor(categories[context])
 					dc.DrawRoundedRectangle(x, y, w, h, 6)
