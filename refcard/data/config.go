@@ -10,6 +10,7 @@ type Config struct {
 	FontsDir           string                  `yaml:"FontsDir"`
 	InputFont          string                  `yaml:"InputFont"`
 	InputFontSize      float64                 `yaml:"InputFontSize"`
+	DefaultLineHeight  int                     `yaml:"DefaultLineHeight"`
 	InputPixelInset    int                     `yaml:"InputPixelInset"`
 	PixelMultiplier    float64                 `yaml:"PixelMultiplier"`
 	BackgroundColour   string                  `yaml:"BackgroundColour"`

@@ -7,6 +7,7 @@ DevicesModel: configs/generatedDevices.yaml
 FontsDir: resources/fonts
 InputFont: Roboto-Regular.ttf
 InputFontSize: 40
+DefaultLineHeight: 54
 InputPixelInset: 10
 PixelMultiplier: 0.4
 BackgroundColour: "#e9ecefff"
