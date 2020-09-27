@@ -5,7 +5,7 @@ DebugOutput: false
 VerboseOutput: false
 DevicesModel: configs/generatedDevices.yaml
 FontsDir: resources/fonts
-InputFont: Roboto-Regular.ttf
+InputFont: YanoneKaffeesatz-Regular.ttf
 InputFontSize: 40
 DefaultLineHeight: 54
 InputPixelInset: 10
