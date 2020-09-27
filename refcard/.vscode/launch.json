@@ -5,31 +5,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Cloud Run: Run/Debug Locally",
-            "type": "cloudcode.cloudrun",
-            "request": "launch",
-            "build": {
-                "buildpacks": {
-                    "path": "go.mod",
-                    "builder": "gcr.io/buildpacks/builder:v1"
-                }
-            },
-            "image": "metarefcard",
-            "service": {
-                "name": "metarefcard",
-                "containerPort": 8080,
-                "resources": {
-                    "limits": {
-                        "memory": "256Mi"
-                    }
-                }
-            },
-            "target": {
-                "minikube": {}
-            },
-            "watch": true
-        },
-        {
             "name": "Samples",
             "type": "go",
             "request": "launch",
@@ -74,7 +49,32 @@
                 // "${workspaceFolder}/samples/default_fs2020/unsupported/VirtualFly_-_RUDDO+.xml",
                 // "${workspaceFolder}/samples/default_fs2020/unsupported/Airbus_T-A320_Quadrant_throttle.xml",
                 // "${workspaceFolder}/samples/default_fs2020/unsupported/T.A320_Pilot.xml",
-           ]
-        }
+            ]
+        },
+        {
+            "name": "Cloud Run: Run/Debug Locally",
+            "type": "cloudcode.cloudrun",
+            "request": "launch",
+            "build": {
+                "buildpacks": {
+                    "path": "go.mod",
+                    "builder": "gcr.io/buildpacks/builder:v1"
+                }
+            },
+            "image": "metarefcard",
+            "service": {
+                "name": "metarefcard",
+                "containerPort": 8080,
+                "resources": {
+                    "limits": {
+                        "memory": "256Mi"
+                    }
+                }
+            },
+            "target": {
+                "minikube": {}
+            },
+            "watch": true
+        },
     ]
 }

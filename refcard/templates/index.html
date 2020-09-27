@@ -6,15 +6,25 @@
     border-top: 1px solid;
   }
 
-  .image-box {
+  .image-box-crop {
     max-width: 1000px;
     height: 250px;
   }
 
-  .image-box img {
+  .image-box-crop img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  .image-box-fill {
+    max-width: 1000px;
+    height: 250px;
+  }
+
+  .image-box-fill img {
+    height: 100%;
+    object-fit: contain;
   }
 </style>
 
@@ -30,27 +40,24 @@
 </head>
 
 <body style="background-color: #e9ecef">
-  <nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-primary">
-    <a class="navbar-brand" href="/"><b>{{ .title }}</b> ({{ .version }})</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <a class="navbar-brand" href="#">{{ .title }} ({{ .version }})</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+      aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarColor01">
-      <ul class="navbar-nav mr-auto">
-        <!-- <li class="nav-item active">
-          <a class="nav-link" href="#">Flight Simulator 2020 <span class="sr-only">(current)</span></a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link">Elite Dangerous (coming soon)</a>
-        </li> -->
-      </ul>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav nav">
+        <!-- <a class="nav-item nav-link active" data-toggle="tab" href="#fs2020">Flight Simulator 2020</a>
+        <a class="nav-item nav-link" data-toggle="tab" href="#ed">Elite Dangerous</a>
+        <a class="nav-item nav-link" data-toggle="tab" href="#sws">Star Wars Squadrons</a> -->
+      </div>
     </div>
   </nav>
 
-  <div id="fs2020">
-    <div class="jumbotron">
-      <div class="image-box">
+  <div class="container-fluid tab-content jumbotron">
+    <div id="fs2020" class="tab-pane fade show active">
+      <div class="image-box-crop">
         <img src="https://assets-prd.ignimgs.com/2020/07/13/microsoft-flight-simulator-button-01b-1594670655053.jpg" />
       </div>
       <div class="form-group">
@@ -63,18 +70,51 @@
         <button class="btn btn-dark" onclick="copyTextFromElement(fs2020MsStorePath, console.error)">Copy path to
           clipboard</button>
         <p></p>
-        <select multiple="" class="form-control col-sm-4" id="files" rows="3">
+        <select multiple="" class="form-control col-sm-4" id="fs2020Files" rows="3">
         </select>
-        <div id="progressbar" style="display: none" class="progress">
+        <div id="fs2020Progressbar" style="display: none" class="progress">
           <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated col-sm-4" role="progressbar"
             aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
         </div>
       </div>
-      <input id="filesInput" type="file" multiple style="display:none" />
-      <button id="addButton" type="button" class="btn btn-success">Add File(s)</button>
+      <input id="fs2020FilesInput" type="file" multiple style="display:none" />
+      <button id="fs2020AddButton" type="button" class="btn btn-success">Add File(s)</button>
       &emsp;
-      <button id="generateButton" type="button" class="btn btn-primary" disabled>Generate Reference Card</button>
-      <div id="images" />
+      <button id="fs2020GenerateButton" type="button" class="btn btn-primary" disabled>Generate Reference
+        Card</button>
+      <div id="fs2020Images" />
+    </div>
+
+
+    <div id="ed" class="tab-pane fade">
+      <div class="image-box-fill">
+        <img src="https://www.logolynx.com/images/logolynx/9f/9f906b067c19733515c6f80c149af188.png" />
+      </div>
+      <!-- <div class="form-group">
+        Add input configuration files from
+        <b>
+          <span id="edPath">TODO</span>
+        </b>
+        <br>
+        <button class="btn btn-dark" onclick="copyTextFromElement(esPath, console.error)">Copy path to
+          clipboard</button>
+        <p></p>
+        <select multiple="" class="form-control col-sm-4" id="files" rows="3">
+        </select>
+        <div id="edProgressbar" style="display: none" class="progress">
+          <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated col-sm-4" role="progressbar"
+            aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+        </div>
+      </div>
+      <input id="edFilesInput" type="file" multiple style="display:none" />
+      <button id="edAddButton" type="button" class="btn btn-success">Add File(s)</button>
+      &emsp;
+      <button id="edGenerateButton" type="button" class="btn btn-primary" disabled>Generate Reference Card</button>
+      <div id="edImages" /> -->
+    </div>
+
+    <div id="sws" class="tab-pang fade">
+      <h1>Star Wars Squadrons</h1>
     </div>
   </div>
 
