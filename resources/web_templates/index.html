@@ -50,22 +50,37 @@
 </head>
 
 <body style="background-color: #e9ecef">
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
     <a class="navbar-brand" href="#">{{ .title }} ({{ .version }})</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
       aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav nav">
+      <div class="navbar-nav mr-auto">
         <!-- <a class="nav-item nav-link active" data-toggle="tab" href="#fs2020">Flight Simulator 2020</a>
         <a class="nav-item nav-link" data-toggle="tab" href="#ed">Elite Dangerous</a>
         <a class="nav-item nav-link" data-toggle="tab" href="#sws">Star Wars Squadrons</a> -->
       </div>
     </div>
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" href="https://github.com/ankurkotwal/MetaRefCard" target="_blank" rel="noopener"
+          aria-label="GitHub">
+          <button class="btn btn-primary"><img class="navbar-nav-svg" height="25" alt="GitHub Repo"
+              src="https://www.iconninja.com/files/604/580/1001/github-development-code-coding-program-programming-icon.svg"></button>
+        </a>
+      </li>
+    </ul>
   </nav>
 
   <div class="container-fluid tab-content jumbotron">
+    <blockquote class=" blockquote">
+      <br>
+      <p class="text-danger" class="mb-0">MetaRefCard is in early access. Please file bugs <a
+          href="https://github.com/ankurkotwal/MetaRefCard/issues/new?assignees=&labels=&template=bug_report.md&title=">here</a>.
+      </p>
+    </blockquote>
     <div id="fs2020" class="tab-pane fade show active">
       <div class="image-box-crop">
         <img src="https://assets-prd.ignimgs.com/2020/07/13/microsoft-flight-simulator-button-01b-1594670655053.jpg" />
@@ -123,7 +138,7 @@
       <div id="edImages" /> -->
     </div>
 
-    <div id="sws" class="tab-pang fade">
+    <div id="sws" class="tab-pane fade">
       <h1>Star Wars Squadrons</h1>
     </div>
   </div>
