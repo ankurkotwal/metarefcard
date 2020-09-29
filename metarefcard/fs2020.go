@@ -289,6 +289,7 @@ func populateImageOverlays(deviceIndex DeviceModel, gameBinds gameBindsByDevice,
 					if label, found := (*gameData).InputLabels[actionName]; found {
 						text = label
 					} else {
+						text = actionName
 						log.Printf("Unknown action %s context %s device %s", actionName, context, deviceName)
 					}
 					texts := make([]string, 1)
