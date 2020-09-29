@@ -1,4 +1,4 @@
-package main
+package metarefcard
 
 import (
 	"bytes"
@@ -15,33 +15,42 @@ import (
 	"path/filepath"
 	"sort"
 
-	"github.com/ankurkotwal/MetaRef/refcard/data"
-	"github.com/ankurkotwal/MetaRef/refcard/fs2020"
-	"github.com/ankurkotwal/MetaRef/refcard/util"
 	"github.com/fogleman/gg"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/image/font"
 )
 
-type requestHandler func(files [][]byte, deviceMap data.DeviceMap,
-	config *data.Config) (data.OverlaysByImage, map[string]string)
+type requestHandler func(files [][]byte, deviceMap DeviceMap,
+	config *Config) (OverlaysByImage, map[string]string)
 
-var configFile = "configs/config.yaml"
-var config data.Config
-var deviceMap data.DeviceMap
+var configFile = "config/config.yaml"
+var config Config
+var deviceMap DeviceMap
+var exposeGetHandler = false
 
-func main() {
-	exposeGetHandler := false
+// Initialise the package
+func initialise() {
 	parseCliArgs(&exposeGetHandler)
 
 	// Load the configuration
-	util.LoadYaml(configFile, &config, "Config")
+	LoadYaml(configFile, &config, "Config")
 
 	// Load the device model (i.e. non-game specific) based on the devices in our game files
-	util.LoadYaml(config.DevicesModel, &deviceMap, "Full Device Map")
+	LoadYaml(config.DevicesModel, &deviceMap, "Full Device Map")
+}
+
+// RunLocal will run local files
+func RunLocal(files []string) {
+	initialise()
+	sendResponse(loadLocalFiles(files), FS2020HandleRequest, nil)
+}
+
+// RunServer will run the server
+func RunServer() {
+	initialise()
 
 	router := gin.Default()
-	router.LoadHTMLGlob("templates/*")
+	router.LoadHTMLGlob("resources/web_templates/*")
 	router.StaticFile("/script.js", "resources/www/script.js")
 
 	// Index page
@@ -55,12 +64,12 @@ func main() {
 	// Flight simulator endpoint
 	router.POST("/fs2020", func(c *gin.Context) {
 		// Use the posted form data
-		sendResponse(loadFormFiles(c), fs2020.HandleRequest, c)
+		sendResponse(loadFormFiles(c), FS2020HandleRequest, c)
 	})
 	if exposeGetHandler {
 		router.GET("/fs2020", func(c *gin.Context) {
 			// Use local files (specified on the command line)
-			sendResponse(loadLocalFiles(), fs2020.HandleRequest, c)
+			sendResponse(loadLocalFiles(flag.Args()), FS2020HandleRequest, c)
 		})
 	}
 
@@ -83,10 +92,10 @@ func parseCliArgs(exposeGetHandler *bool) {
 	flag.Parse()
 }
 
-func loadLocalFiles() [][]byte {
+func loadLocalFiles(files []string) [][]byte {
 	// On the GET route, we'll load our own files (for testing purposes)
 	var inputFiles [][]byte
-	for _, filename := range flag.Args() {
+	for _, filename := range files {
 		file, err := ioutil.ReadFile(filename)
 		if err != nil {
 			log.Printf("Error reading file. %s\n", err)
@@ -126,12 +135,14 @@ func sendResponse(loadedFiles [][]byte, handler requestHandler, c *gin.Context) 
 	generatedFiles := generateImages(overlaysByImage, categories)
 
 	// Generate HTML
-	tmplFilename := "templates/refcard.tmpl"
+	tmplFilename := "resources/web_templates/refcard.tmpl"
 	t, err := template.New(path.Base(tmplFilename)).ParseFiles(tmplFilename)
 	if err != nil {
 		s := fmt.Sprintf("Error parsing image template - %s\n", err)
 		log.Print(s)
-		c.Data(http.StatusInternalServerError, "text/html; charset=utf-8", []byte(s))
+		if c != nil {
+			c.Data(http.StatusInternalServerError, "text/html; charset=utf-8", []byte(s))
+		}
 		return
 	}
 	imagesAsHTML := []byte{}
@@ -149,7 +160,9 @@ func sendResponse(loadedFiles [][]byte, handler requestHandler, c *gin.Context) 
 		}
 		imagesAsHTML = append(imagesAsHTML, tpl.Bytes()...)
 	}
-	c.Data(http.StatusOK, "text/html; charset=utf-8", imagesAsHTML)
+	if c != nil {
+		c.Data(http.StatusOK, "text/html; charset=utf-8", imagesAsHTML)
+	}
 }
 
 // Return the multiplier/scale of image based on actual width vs default width
@@ -167,13 +180,13 @@ func getFontBySize(size float64) font.Face {
 	font, found := fontBySize[size]
 	if !found {
 		name := fmt.Sprintf("%s/%s", config.FontsDir, config.InputFont)
-		font = util.LoadFont(name, size)
+		font = LoadFont(name, size)
 		fontBySize[size] = font
 	}
 	return font
 }
 
-func prepareGeneratorData(overlaysByImage data.OverlaysByImage) []string {
+func prepareGeneratorData(overlaysByImage OverlaysByImage) []string {
 	// Generate sorted list of image names
 	imageNames := make([]string, 0)
 	for name := range overlaysByImage {
@@ -193,7 +206,7 @@ func prepareContexts(contextToTexts map[string][]string) []string {
 	return contexts
 }
 
-func generateImages(overlaysByImage data.OverlaysByImage, categories map[string]string) []*bytes.Buffer {
+func generateImages(overlaysByImage OverlaysByImage, categories map[string]string) []*bytes.Buffer {
 	var files []*bytes.Buffer = nil
 
 	imageNames := prepareGeneratorData(overlaysByImage)

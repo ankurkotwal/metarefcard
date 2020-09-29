@@ -1,4 +1,4 @@
-package data
+package metarefcard
 
 // Config contains all the configuration data for the app
 type Config struct {

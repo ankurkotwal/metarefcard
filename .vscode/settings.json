@@ -5,4 +5,12 @@
     "python.analysis.extraPaths": [
         "3rdparty/edrefcard"
     ],
+    "[yaml]": {
+        "editor.tabSize": 2,
+        "editor.quickSuggestions": {
+            "other": true,
+            "comments": false,
+            "strings": true
+        }
+    }
 }

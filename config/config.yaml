@@ -3,7 +3,7 @@ AppName: MetaRefCard
 Version: v0.1
 DebugOutput: false
 VerboseOutput: false
-DevicesModel: configs/generatedDevices.yaml
+DevicesModel: config/generatedDevices.yaml
 FontsDir: resources/fonts
 InputFont: YanoneKaffeesatz-Regular.ttf
 InputFontSize: 40

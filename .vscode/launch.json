@@ -5,11 +5,127 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "samples_x55",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/main.go",
+            "env": {},
+            "args": [
+                "-g", // Expose GET Handlers
+                // "${workspaceFolder}/testdata/debug.xml",
+                "${workspaceFolder}/testdata/x55_stick.xml",
+                "${workspaceFolder}/testdata/x55_throttle.xml",
+            ]
+        },
+        {
+            "name": "samples_debug",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/main.go",
+            "env": {},
+            "args": [
+                "-g", // Expose GET Handlers
+                "${workspaceFolder}/testdata/debug.xml",
+            ]
+        },
+        {
+            "name": "samples_all",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/main.go",
+            "env": {},
+            "args": [
+                "-g", // Expose GET Handlers
+                // "${workspaceFolder}/testdata/debug.xml",
+                "${workspaceFolder}/testdata/x55_stick.xml",
+                "${workspaceFolder}/testdata/x55_throttle.xml",
+                "${workspaceFolder}/testdata/default_fs2020/Joystick_-_HOTAS_Warthog.xml",
+                "${workspaceFolder}/testdata/default_fs2020/Logitech_Extreme_3D.xml",
+                "${workspaceFolder}/testdata/default_fs2020/Saitek_Pro_Flight_Rudder_Pedals.xml",
+                "${workspaceFolder}/testdata/default_fs2020/Saitek_Pro_Flight_X-56_Rhino_Stick.xml",
+                "${workspaceFolder}/testdata/default_fs2020/Saitek_Pro_Flight_X-56_Rhino_Throttle.xml",
+                "${workspaceFolder}/testdata/default_fs2020/Saitek_X52_Flight_Control_System.xml",
+                "${workspaceFolder}/testdata/default_fs2020/Saitek_X52_Pro_Flight_Control_System.xml",
+                "${workspaceFolder}/testdata/default_fs2020/Throttle_-_HOTAS_Warthog.xml",
+                "${workspaceFolder}/testdata/default_fs2020/TWCS_Throttle.xml",
+                "${workspaceFolder}/testdata/default_fs2020/T.16000M.xml",
+                "${workspaceFolder}/testdata/default_fs2020/T.Flight_Hotas_4.xml",
+                "${workspaceFolder}/testdata/default_fs2020/T.Flight_Hotas_One.xml",
+                "${workspaceFolder}/testdata/default_fs2020/T.Flight_Stick_X.xml",
+                "${workspaceFolder}/testdata/default_fs2020/T.Flight_Rudder_Pedals.xml",
+                "${workspaceFolder}/testdata/default_fs2020/T.Flight_Hotas_X.xml",
+                // TODO  "${workspaceFolder}/testdata/default_fs2020/Keyboard_(FSX).xml",
+                // TODO "${workspaceFolder}/testdata/default_fs2020/Mouse.xml",
+                // TODO "${workspaceFolder}/testdata/default_fs2020/PS4.xml",
+                // TODO  "${workspaceFolder}/testdata/default_fs2020/XInput_Gamepad.xml",
+                // "${workspaceFolder}/testdata/default_fs2020/unsupported/BU0836X_Interface_1.xml",
+                // "${workspaceFolder}/testdata/default_fs2020/unsupported/BU0836X_Interface.xml",
+                // "${workspaceFolder}/testdata/default_fs2020/unsupported/Saitek_Pro_Flight_Quadrant.xml",
+                // "${workspaceFolder}/testdata/default_fs2020/unsupported/VirtualFly_-_TQ6+.xml",
+                // "${workspaceFolder}/testdata/default_fs2020/unsupported/VirtualFly_-_YOKO+.xml",
+                // "${workspaceFolder}/testdata/default_fs2020/unsupported/Saitek_Pro_Flight_Yoke.xml",
+                // "${workspaceFolder}/testdata/default_fs2020/unsupported/VF_-_TPM_V3RNIO.xml",
+                // "${workspaceFolder}/testdata/default_fs2020/unsupported/T-Pendular-Rudder.xml",
+                // "${workspaceFolder}/testdata/default_fs2020/unsupported/VirtualFly_-_TQ3+.xml",
+                // "${workspaceFolder}/testdata/default_fs2020/unsupported/Alpha_Flight_Controls.xml",
+                // "${workspaceFolder}/testdata/default_fs2020/unsupported/T.A320_CoPilot.xml",
+                // "${workspaceFolder}/testdata/default_fs2020/unsupported/VirtualFly_-_RUDDO+.xml",
+                // "${workspaceFolder}/testdata/default_fs2020/unsupported/Airbus_T-A320_Quadrant_throttle.xml",
+                // "${workspaceFolder}/testdata/default_fs2020/unsupported/T.A320_Pilot.xml",
+            ]
+        },
+        {
+            "name": "go_test",
+            "type": "go",
+            "request": "launch",
+            "mode": "test",
+            "program": "${workspaceFolder}",
+            "args": []
+        },
+        {
+            "name": "go_bench",
+            "type": "go",
+            "request": "launch",
+            "mode": "test",
+            "program": "${workspaceFolder}",
+            "args": [
+                "-bench=."
+            ]
+        },
+        {
             "name": "Python",
             "type": "python",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-        }
+        },
+        {
+            "name": "Cloud Run: Run/Debug Locally",
+            "type": "cloudcode.cloudrun",
+            "request": "launch",
+            "build": {
+                "buildpacks": {
+                    "path": "go.mod",
+                    "builder": "gcr.io/buildpacks/builder:v1"
+                }
+            },
+            "image": "metarefcard",
+            "service": {
+                "name": "metarefcard",
+                "containerPort": 8080,
+                "resources": {
+                    "limits": {
+                        "memory": "256Mi"
+                    }
+                }
+            },
+            "target": {
+                "minikube": {}
+            },
+            "watch": true
+        },
     ]
 }

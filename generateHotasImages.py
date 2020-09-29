@@ -11,7 +11,7 @@ DEBUG_OUTPUT = False
 def initialise():
     # Load configuration
     config = {}
-    with open("refcard/configs/config.yaml", "r") as stream:
+    with open("config/config.yaml", "r") as stream:
         try:
             config = yaml.safe_load(stream)
         except yaml.YAMLError as exc:
@@ -37,7 +37,7 @@ def initialise():
         print("Found Inkscape at {i}".format(i=inkscape))
 
     # Confirm destination directory
-    dir_out = "refcard/" + config["ImagesDir"]
+    dir_out = config["ImagesDir"]
     if False == os.path.isdir(dir_out):
         os.mkdir(dir_out)
         # Check that mkdir succeeded

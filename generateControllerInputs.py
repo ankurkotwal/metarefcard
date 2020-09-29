@@ -5,7 +5,7 @@ sys.path.append("3rdparty/edrefcard")
 
 from bindingsData import *
 
-outFilename = 'refcard/configs/generatedDevices.yaml'
+outFilename = 'config/generatedDevices.yaml'
 
 outFile = open(outFilename, "w")
 outFile.write('''#################################################################

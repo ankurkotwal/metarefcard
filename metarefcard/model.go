@@ -1,8 +1,4 @@
-package data
-
-import (
-	"github.com/ankurkotwal/MetaRef/refcard/util"
-)
+package metarefcard
 
 // FilterDevices - Returns only the devices that the caller is asking for
 func FilterDevices(deviceMap DeviceMap, neededDevices map[string]bool, debugOutput bool) DeviceModel {
@@ -20,7 +16,7 @@ func FilterDevices(deviceMap DeviceMap, neededDevices map[string]bool, debugOutp
 	}
 
 	if debugOutput {
-		util.PrintYamlObject(&deviceModel, "Targeted Device Map")
+		PrintYamlObject(&deviceModel, "Targeted Device Map")
 	}
 	return deviceModel
 }
