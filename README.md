@@ -15,12 +15,13 @@
 12. ~~Build container image~~
 13. ~~Publish on Cloud Run~~
 14. ~~Add Google Analytics~~
-15. Add a message for unsupported devices. Maybe capture those configs to process later?
-16. Add early testing info text, Github repo, how to report an issue
-17. Watermark
-18. Generate game name + device name
-19. Keyboard & mouse
-20. Extend to Elite Dangerous
+15. ~~Add early testing info text, Github repo, how to report an issue~~
+16. Add a message for unsupported devices. Maybe capture those configs to process later?
+17. Steam path
+18. Watermark
+19. Generate game name + device name
+20. Keyboard & mouse
+21. Extend to Elite Dangerous
 
 
 # Setup
