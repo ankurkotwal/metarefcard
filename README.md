@@ -16,12 +16,16 @@
 13. ~~Publish on Cloud Run~~
 14. ~~Add Google Analytics~~
 15. ~~Add early testing info text, Github repo, how to report an issue~~
-16. Add a message for unsupported devices. Maybe capture those configs to process later?
-17. Steam path
-18. Watermark
-19. Generate game name + device name
-20. Keyboard & mouse
-21. Extend to Elite Dangerous
+16. Performance improvement - go functions for font size / measuring
+17. Performance improvement - parallelise image processing
+18. Add a message for unsupported devices. Maybe capture those configs to process later?
+19. Add a message for unknown input
+20. Add a message for unknown action
+21. Steam path
+22. Watermark
+23. Generate game name + device name
+24. Keyboard & mouse
+25. Extend to Elite Dangerous
 
 
 # Setup
