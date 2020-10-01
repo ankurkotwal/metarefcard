@@ -145,6 +145,8 @@ InputLabels:
   KEY_COCKPIT_BACKCYCLE : "Previous Instrument"
   KEY_COCKPIT_CAMERA_HEIGHT_DEC : "Cockpit Move Down"
   KEY_COCKPIT_CAMERA_HEIGHT_INC : "Cockpit Move Up"
+  KEY_COCKPIT_CAMERA_SLIDE_BACK : "Cockpit Move Back"
+  KEY_COCKPIT_CAMERA_SLIDE_FRONT : "Cockpit Move Forward"
   KEY_COCKPIT_CAMERA_SLIDE_LEFT : "Cockpit Move Left"
   KEY_COCKPIT_CAMERA_SLIDE_RIGHT : "Cockpit Move Right"
   KEY_COCKPIT_CYCLE : "Next Instrument"
