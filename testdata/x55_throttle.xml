@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Version Num="1238"/>
-<FriendlyName>omg it works</FriendlyName>
+<Version Num="1313"/>
+<FriendlyName>MetaRefCard</FriendlyName>
 <Device DeviceName="Saitek Pro Flight X-55 Rhino Throttle" GUID="{4BF4B930-725A-11E4-8003-444553540000}" ProductID="41493">
 	<Axes>
 		<Axis AxisName="X" AxisSensitivy="0" AxisDeadZone="0"/>
 		<Axis AxisName="Y" AxisSensitivy="0" AxisDeadZone="0"/>
-		<Axis AxisName="Z" AxisSensitivy="-82" AxisDeadZone="0"/>
+		<Axis AxisName="Z" AxisSensitivy="0" AxisDeadZone="0"/>
 		<Axis AxisName="rX" AxisSensitivy="0" AxisDeadZone="0"/>
 		<Axis AxisName="rY" AxisSensitivy="0" AxisDeadZone="0"/>
 		<Axis AxisName="rZ" AxisSensitivy="0" AxisDeadZone="0"/>
 	</Axes>
 	<Context ContextName="PLANE">
-		<Action ActionName="KEY_GEAR_TOGGLE" Flag="2">
+		<Action ActionName="KEY_AP_MASTER" Flag="2">
 			<Primary>
-				<KEY Information="Joystick Button 8">7</KEY>
+				<KEY Information="Joystick Button 1">0</KEY>
 			</Primary>
 		</Action>
 		<Action ActionName="KEY_FLAPS_UP" Flag="2">
 			<Primary>
-				<KEY Information="Joystick Button 2">1</KEY>
+				<KEY Information="Joystick Button 6">5</KEY>
 			</Primary>
 		</Action>
 		<Action ActionName="KEY_FLAPS_DOWN" Flag="2">
 			<Primary>
-				<KEY Information="Joystick Button 3">2</KEY>
+				<KEY Information="Joystick Button 7">6</KEY>
 			</Primary>
 		</Action>
 		<Action ActionName="KEY_PARKING_BRAKES" Flag="2">
@@ -33,17 +33,17 @@
 		</Action>
 		<Action ActionName="KEY_AXIS_ELEV_TRIM_SET" Flag="132">
 			<Primary>
-				<KEY Information="Joystick L-Axis Z ">1058</KEY>
+				<KEY Information="Joystick R-Axis Y ">786</KEY>
 			</Primary>
 		</Action>
 		<Action ActionName="KEY_GEAR_UP" Flag="2">
 			<Primary>
-				<KEY Information="Joystick Button 6">5</KEY>
+				<KEY Information="Joystick Button 2">1</KEY>
 			</Primary>
 		</Action>
 		<Action ActionName="KEY_GEAR_DOWN" Flag="2">
 			<Primary>
-				<KEY Information="Joystick Button 7">6</KEY>
+				<KEY Information="Joystick Button 3">2</KEY>
 			</Primary>
 		</Action>
 		<Action ActionName="KEY_ENGINE_AUTO_START" Flag="2">
@@ -58,17 +58,17 @@
 		</Action>
 		<Action ActionName="KEY_AXIS_FLAPS_SET" Flag="4">
 			<Primary>
-				<KEY Information="Joystick R-Axis X ">770</KEY>
+				<KEY Information="Joystick R-Axis Z ">802</KEY>
+			</Primary>
+		</Action>
+		<Action ActionName="KEY_THROTTLE_REVERSE_THRUST_HOLD" Flag="2">
+			<Primary>
+				<KEY Information="Joystick Button 35">34</KEY>
 			</Primary>
 		</Action>
 		<Action ActionName="KEY_THROTTLE_AXIS_SET_EX1" Flag="4">
 			<Primary>
 				<KEY Information="Joystick L-Axis Y ">1042</KEY>
-			</Primary>
-		</Action>
-		<Action ActionName="KEY_PROP_PITCH_AXIS_SET_EX1" Flag="4">
-			<Primary>
-				<KEY Information="Joystick R-Axis Z ">802</KEY>
 			</Primary>
 		</Action>
 		<Action ActionName="KEY_ACTIVE_PAUSE_TOGGLE" Flag="2">
@@ -101,26 +101,55 @@
 		</Action>
 	</Context>
 	<Context ContextName="MODES">
-		<Action ActionName="KEY_SIM_RATE" Flag="2">
+		<Action ActionName="KEY_VIEW_MODE" Flag="2">
 			<Primary>
 				<KEY Information="Joystick Button 5">4</KEY>
 			</Primary>
 		</Action>
-		<Action ActionName="KEY_VIEW_MODE" Flag="2">
+		<Action ActionName="KEY_COCKPIT_RESET" Flag="2">
 			<Primary>
-				<KEY Information="Joystick Button 4">3</KEY>
+				<KEY Information="Joystick Button 12">11</KEY>
+			</Primary>
+			<Secondary>
+				<KEY Information="Joystick Button 13">12</KEY>
+			</Secondary>
+		</Action>
+	</Context>
+	<Context ContextName="COCKPIT_GLOBAL_CAMERA">
+		<Action ActionName="KEY_COCKPIT_CAMERA_HEIGHT_DEC" Flag="1">
+			<Primary>
+				<KEY Information="Joystick Button 22">21</KEY>
 			</Primary>
 		</Action>
-		<Action ActionName="KEY_SIM_RATE_INCR" Flag="2">
+		<Action ActionName="KEY_COCKPIT_CAMERA_HEIGHT_INC" Flag="1">
 			<Primary>
-				<KEY Information="Joystick Button 29">28</KEY>
+				<KEY Information="Joystick Button 20">19</KEY>
 			</Primary>
 		</Action>
-		<Action ActionName="KEY_SIM_RATE_DECR" Flag="2">
+		<Action ActionName="KEY_COCKPIT_FREELOOK_HRZ_SET" Flag="132">
 			<Primary>
-				<KEY Information="Joystick Button 28">27</KEY>
+				<KEY Information="Joystick L-Axis Z ">1058</KEY>
+			</Primary>
+		</Action>
+		<Action ActionName="KEY_COCKPIT_CAMERA_SLIDE_FRONT" Flag="2">
+			<Primary>
+				<KEY Information="Joystick Button 21">20</KEY>
+			</Primary>
+		</Action>
+		<Action ActionName="KEY_COCKPIT_CAMERA_SLIDE_BACK" Flag="2">
+			<Primary>
+				<KEY Information="Joystick Button 23">22</KEY>
 			</Primary>
 		</Action>
 	</Context>
+	<Context ContextName="EXTERNAL_CAMERA">
+		<Action ActionName="KEY_CAMERACHASE_RESET" Flag="2">
+			<Primary>
+				<KEY Information="Joystick Button 12">11</KEY>
+			</Primary>
+			<Secondary>
+				<KEY Information="Joystick Button 13">12</KEY>
+			</Secondary>
+		</Action>
+	</Context>
 </Device>
-
