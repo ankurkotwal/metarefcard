@@ -13,7 +13,6 @@
             "env": {},
             "args": [
                 "-g", // Expose GET Handlers
-                // "${workspaceFolder}/testdata/debug.xml",
                 "${workspaceFolder}/testdata/x55_stick.xml",
                 "${workspaceFolder}/testdata/x55_throttle.xml",
             ]

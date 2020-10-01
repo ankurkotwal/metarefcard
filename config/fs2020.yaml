@@ -98,7 +98,7 @@ InputOverrides:
       35:
         IsDigital: true
         OffsetX: 104
-        OffsetY: 1744
+        OffsetY: 416
         Width: 852
         Height: 54
       XAxis:
