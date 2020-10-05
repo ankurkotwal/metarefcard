@@ -1,0 +1,46 @@
+---
+Regexes:
+  GstInputJoystick: GstInput.JoystickDevice(\d+)(?:\s+(.*))$
+  GstKeyBindingDefault: ^GstKeyBinding\.IncomDefaultInputConcepts\.(.+)\.(\d+)\.(.+)\s+(.+)$
+  GstKeyBindingSoldier: ^GstKeyBinding\.IncomSoldierInputConcepts\.(.+)\.(\d+)\.(.+)\s+(.+)$
+  GstKeyBindingStarship: ^GstKeyBinding\.IncomStarshipInputConcepts\.(.+)\.(\d+)\.(.+)\s+(.+)$
+  GstKeyBindingVersion: ^GstKeyBinding.InputDataVersion\s+(\d+)
+DeviceNameMap:
+  Airbus T-A320 Quadrant throttle:
+  Alpha Flight Controls:
+  BU0836X Interface:
+  BU0836X Interface_1:
+  Joystick - HOTAS Warthog: ThrustMasterWarthogJoystick
+  Keyboard (FSX): # TODO Keyboad
+  Logitech Extreme 3D: LogitechExtreme3DPro
+  Mouse: # TODO Mouse
+  PS4: DualShock4
+  Saitek Pro Flight Quadrant:
+  Saitek Pro Flight Rudder Pedals: SaitekProFlightCombatRudderPedals
+  Saitek Pro Flight X-55 Rhino Stick: SaitekX55Joystick
+  Saitek Pro Flight X-55 Rhino Throttle: SaitekX55Throttle
+  Saitek Pro Flight X-56 Rhino Stick: SaitekX56Joystick
+  Saitek Pro Flight X-56 Rhino Throttle: SaitekX56Throttle
+  Saitek Pro Flight Yoke:
+  Saitek X52 Flight Control System: SaitekX52
+  Saitek X52 Pro Flight Control System: SaitekX52Pro
+  T.16000M: T16000M
+  T.A320 CoPilot:
+  T.A320 Pilot:
+  T.Flight Hotas 4: ThrustMasterHOTAS4
+  T.Flight Hotas One: ThrustMasterHOTAS4
+  T.Flight Hotas X: ThrustMasterTFlightHOTASX
+  T.Flight Rudder Pedals: T-Rudder
+  T.Flight Stick X: 044FB106
+  Throttle - HOTAS Warthog: ThrustMasterWarthogThrottle
+  TWCS Throttle: T16000MTHROTTLE
+  T-Pendular-Rudder:
+  VF - TPM V3RNIO:
+  VirtualFly - RUDDO+:
+  VirtualFly - TQ3+:
+  VirtualFly - TQ6+:
+  VirtualFly - YOKO+:
+  XInput Gamepad: GamePad
+InputMapping: # Devices with known game inputs and which model input they map to
+InputOverrides:
+InputLabels:

@@ -17,6 +17,7 @@ import (
 
 	"github.com/ankurkotwal/MetaRefCard/metarefcard/common"
 	"github.com/ankurkotwal/MetaRefCard/metarefcard/fs2020"
+	"github.com/ankurkotwal/MetaRefCard/metarefcard/sws"
 	"github.com/fogleman/gg"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/image/font"
@@ -72,6 +73,18 @@ func RunServer() {
 		router.GET("/fs2020", func(c *gin.Context) {
 			// Use local files (specified on the command line)
 			sendResponse(loadLocalFiles(flag.Args()), fs2020.HandleRequest, c)
+		})
+	}
+
+	// Flight simulator endpoint
+	router.POST("/sws", func(c *gin.Context) {
+		// Use the posted form data
+		sendResponse(loadFormFiles(c), sws.HandleRequest, c)
+	})
+	if exposeGetHandler {
+		router.GET("/sws", func(c *gin.Context) {
+			// Use local files (specified on the command line)
+			sendResponse(loadLocalFiles(flag.Args()), sws.HandleRequest, c)
 		})
 	}
 
