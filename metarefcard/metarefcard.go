@@ -100,7 +100,7 @@ func RunServer() {
 func parseCliArgs(exposeGetHandler *bool) {
 	flag.Usage = func() {
 		fmt.Printf("Usage: %s file...\n\n", filepath.Base(os.Args[0]))
-		fmt.Printf("file\tFlight Simulator 2020 input configration (XML).\n")
+		fmt.Printf("file\tSupported game input configration.\n")
 		flag.PrintDefaults()
 	}
 	flag.BoolVar(exposeGetHandler, "g", false, "Deploy GET handlers.")

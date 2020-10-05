@@ -1,10 +1,9 @@
 ---
 Regexes:
-  GstInputJoystick: GstInput.JoystickDevice(\d+)(?:\s+(.*))$
-  GstKeyBindingDefault: ^GstKeyBinding\.IncomDefaultInputConcepts\.(.+)\.(\d+)\.(.+)\s+(.+)$
-  GstKeyBindingSoldier: ^GstKeyBinding\.IncomSoldierInputConcepts\.(.+)\.(\d+)\.(.+)\s+(.+)$
-  GstKeyBindingStarship: ^GstKeyBinding\.IncomStarshipInputConcepts\.(.+)\.(\d+)\.(.+)\s+(.+)$
-  GstKeyBindingVersion: ^GstKeyBinding.InputDataVersion\s+(\d+)
+  Joystick: ^GstInput.JoystickDevice(\d+)(?:\s+(.*))$
+  BindDefault: ^GstKeyBinding\.IncomDefaultInputConcepts\.(.+)\.(\d+)\.(.+)\s+(.+)$
+  BindSoldier: ^GstKeyBinding\.IncomSoldierInputConcepts\.(.+)\.(\d+)\.(.+)\s+(.+)$
+  BindStarship: ^GstKeyBinding\.IncomStarshipInputConcepts\.(.+)\.(\d+)\.(.+)\s+(.+)$
 DeviceNameMap:
   Airbus T-A320 Quadrant throttle:
   Alpha Flight Controls:
