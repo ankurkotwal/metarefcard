@@ -1,4 +1,4 @@
-package metarefcard
+package common
 
 import (
 	"fmt"

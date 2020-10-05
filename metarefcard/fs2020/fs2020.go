@@ -1,4 +1,4 @@
-package metarefcard
+package fs2020
 
 import (
 	"bytes"
@@ -11,14 +11,17 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/ankurkotwal/MetaRefCard/metarefcard/common"
 )
 
 var initiliased bool = false
 var gameData *fs2020Data
 var regexes map[string]*regexp.Regexp
 
-// FS2020HandleRequest services the request to load files
-func FS2020HandleRequest(files [][]byte, deviceMap DeviceMap, config *Config) (OverlaysByImage, map[string]string) {
+// HandleRequest services the request to load files
+func HandleRequest(files [][]byte, deviceMap common.DeviceMap,
+	config *common.Config) (common.OverlaysByImage, map[string]string) {
 	if !initiliased {
 		gameData = loadGameModel(config.DebugOutput)
 		regexes = make(map[string]*regexp.Regexp)
@@ -27,13 +30,14 @@ func FS2020HandleRequest(files [][]byte, deviceMap DeviceMap, config *Config) (O
 		}
 		initiliased = true
 	}
-	gameBinds, contexts := loadInputFiles(files, gameData.DeviceNameMap, config.DebugOutput, config.VerboseOutput)
+	gameBinds, contexts := loadInputFiles(files, gameData.DeviceNameMap,
+		config.DebugOutput, config.VerboseOutput)
 
 	neededDevices := make(map[string]bool)
 	for device := range gameBinds {
 		neededDevices[device] = true
 	}
-	deviceIndex := FilterDevices(deviceMap, neededDevices, config.DebugOutput)
+	deviceIndex := common.FilterDevices(deviceMap, neededDevices, config.DebugOutput)
 	// Add device additions to the main device index
 	for deviceName, deviceInputData := range gameData.InputOverrides {
 		if deviceData, found := deviceIndex[deviceName]; found {
@@ -62,10 +66,11 @@ func FS2020HandleRequest(files [][]byte, deviceMap DeviceMap, config *Config) (O
 	return populateImageOverlays(deviceIndex, gameBinds, gameData), categories
 }
 
-// Load FS2020 specific data from our model. Update the device names (map game device name to our model names)
+// Load FS2020 specific data from our model. Update the device names
+// (map game device name to our model names)
 func loadGameModel(debugOutput bool) *fs2020Data {
 	data := fs2020Data{}
-	LoadYaml("config/fs2020.yaml", &data, "FS2020 Data")
+	common.LoadYaml("config/fs2020.yaml", &data, "FS2020 Data")
 
 	fullToShort := deviceNameFullToShort{}
 	// Update map of game device names to our model device names
@@ -138,7 +143,8 @@ func loadInputFiles(files [][]byte, deviceNameMap deviceNameFullToShort,
 						if shortName, ok := deviceNameMap[aDevice.DeviceName]; ok {
 							gameBinds[shortName] = currentDevice
 							if shortName == deviceMissingInfo {
-								log.Printf("Error: Missing info for device '%s'\n", aDevice.DeviceName)
+								log.Printf("Error: Missing info for device '%s'\n",
+									aDevice.DeviceName)
 							}
 						} else {
 							deviceNameMap[shortName] = deviceUnknown
@@ -261,10 +267,10 @@ func loadInputFiles(files [][]byte, deviceNameMap deviceNameFullToShort,
 	return gameBinds, contexts
 }
 
-func populateImageOverlays(deviceIndex DeviceModel, gameBinds gameBindsByDevice,
-	gameData *fs2020Data) OverlaysByImage {
+func populateImageOverlays(deviceIndex common.DeviceModel, gameBinds gameBindsByDevice,
+	gameData *fs2020Data) common.OverlaysByImage {
 	// Iterate through our game binds
-	overlaysByImage := make(OverlaysByImage)
+	overlaysByImage := make(common.OverlaysByImage)
 	for deviceName, gameDevice := range gameBinds {
 		modelDevice := deviceIndex[deviceName]
 		image := modelDevice.Image
@@ -275,13 +281,15 @@ func populateImageOverlays(deviceIndex DeviceModel, gameBinds gameBindsByDevice,
 				for _, input := range inputLookups {
 					inputData, found := modelDevice.Inputs[input]
 					if !found {
-						log.Printf("Error: Unknown input to lookup %s for device %s\n", input, deviceName)
+						log.Printf("Error: Unknown input to lookup %s for device %s\n",
+							input, deviceName)
 					}
 					if inputData.ImageX == 0 && inputData.ImageY == 0 {
-						log.Printf("Error: Location 0,0 for %s device %s %v ", actionName, deviceName, inputData)
+						log.Printf("Error: Location 0,0 for %s device %s %v ",
+							actionName, deviceName, inputData)
 						continue
 					}
-					var overlayData OverlayData
+					var overlayData common.OverlayData
 					overlayData.ContextToTexts = make(map[string][]string)
 					overlayData.PosAndSize = &inputData
 					var text string
@@ -290,7 +298,8 @@ func populateImageOverlays(deviceIndex DeviceModel, gameBinds gameBindsByDevice,
 						text = label
 					} else {
 						text = actionName
-						log.Printf("Unknown action %s context %s device %s", actionName, context, deviceName)
+						log.Printf("Unknown action %s context %s device %s",
+							actionName, context, deviceName)
 					}
 					texts := make([]string, 1)
 					texts[0] = text
@@ -300,7 +309,7 @@ func populateImageOverlays(deviceIndex DeviceModel, gameBinds gameBindsByDevice,
 					deviceAndInput := fmt.Sprintf("%s:%s", deviceName, input)
 					if overlay, found := overlaysByImage[image]; !found {
 						// First time adding this image
-						overlay := make(map[string]*OverlayData)
+						overlay := make(map[string]*common.OverlayData)
 						overlaysByImage[image] = overlay
 						overlay[deviceAndInput] = &overlayData
 					} else {
@@ -325,8 +334,8 @@ func populateImageOverlays(deviceIndex DeviceModel, gameBinds gameBindsByDevice,
 
 // findMatchingInputModels takes the game provided bindings with the internal device map to
 // build a list of image overlays.
-func findMatchingInputModels(deviceName string, actionData *gameAction, inputs InputsMap,
-	gameInputMap inputTypeMapping) []string {
+func findMatchingInputModels(deviceName string, actionData *gameAction,
+	inputs common.InputsMap, gameInputMap inputTypeMapping) []string {
 	inputLookups := make([]string, 0)
 
 	input := findMatchingInputModelsInner(deviceName,
@@ -337,19 +346,21 @@ func findMatchingInputModels(deviceName string, actionData *gameAction, inputs I
 		log.Printf("Error: Did not find primary input for %s\n", (*actionData).PrimaryInfo)
 	}
 	if len((*actionData).SecondaryInfo) > 0 {
-		input := findMatchingInputModelsInner(deviceName, (*actionData).SecondaryInfo, inputs, gameInputMap)
+		input := findMatchingInputModelsInner(deviceName, (*actionData).SecondaryInfo,
+			inputs, gameInputMap)
 		if input != "" {
 			inputLookups = append(inputLookups, input)
 		} else {
-			log.Printf("Error: Did not find secondary input for %s\n", (*actionData).SecondaryInfo)
+			log.Printf("Error: Did not find secondary input for %s\n",
+				(*actionData).SecondaryInfo)
 		}
 	}
 	return inputLookups
 }
 
 // Matches an action to a device's inputs using regexes. Returns string to lookup input
-func findMatchingInputModelsInner(deviceName string, action string, inputs InputsMap,
-	gameInputMap inputTypeMapping) string {
+func findMatchingInputModelsInner(deviceName string, action string,
+	inputs common.InputsMap, gameInputMap inputTypeMapping) string {
 	var matches [][]string
 
 	matches = regexes["Button"].FindAllStringSubmatch(action, -1)
@@ -411,11 +422,11 @@ func findMatchingInputModelsInner(deviceName string, action string, inputs Input
 }
 
 type fs2020Data struct {
-	DeviceNameMap  deviceNameFullToShort      `yaml:"DeviceNameMap"`
-	InputMap       deviceInputTypeMapping     `yaml:"InputMapping"`
-	InputOverrides map[string]DeviceInputData `yaml:"InputOverrides"`
-	InputLabels    map[string]string          `yaml:"InputLabels"`
-	Regexes        map[string]string          `yaml:"Regexes"`
+	DeviceNameMap  deviceNameFullToShort             `yaml:"DeviceNameMap"`
+	InputMap       deviceInputTypeMapping            `yaml:"InputMapping"`
+	InputOverrides map[string]common.DeviceInputData `yaml:"InputOverrides"`
+	InputLabels    map[string]string                 `yaml:"InputLabels"`
+	Regexes        map[string]string                 `yaml:"Regexes"`
 }
 type deviceNameFullToShort map[string]string
 type deviceInputTypeMapping map[string]inputTypeMapping

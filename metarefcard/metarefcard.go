@@ -15,17 +15,19 @@ import (
 	"path/filepath"
 	"sort"
 
+	"github.com/ankurkotwal/MetaRefCard/metarefcard/common"
+	"github.com/ankurkotwal/MetaRefCard/metarefcard/fs2020"
 	"github.com/fogleman/gg"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/image/font"
 )
 
-type requestHandler func(files [][]byte, deviceMap DeviceMap,
-	config *Config) (OverlaysByImage, map[string]string)
+type requestHandler func(files [][]byte, deviceMap common.DeviceMap,
+	config *common.Config) (common.OverlaysByImage, map[string]string)
 
 var configFile = "config/config.yaml"
-var config Config
-var deviceMap DeviceMap
+var config common.Config
+var deviceMap common.DeviceMap
 var exposeGetHandler = false
 
 // Initialise the package
@@ -33,16 +35,16 @@ func initialise() {
 	parseCliArgs(&exposeGetHandler)
 
 	// Load the configuration
-	LoadYaml(configFile, &config, "Config")
+	common.LoadYaml(configFile, &config, "Config")
 
 	// Load the device model (i.e. non-game specific) based on the devices in our game files
-	LoadYaml(config.DevicesModel, &deviceMap, "Full Device Map")
+	common.LoadYaml(config.DevicesModel, &deviceMap, "Full Device Map")
 }
 
 // RunLocal will run local files
 func RunLocal(files []string) {
 	initialise()
-	sendResponse(loadLocalFiles(files), FS2020HandleRequest, nil)
+	sendResponse(loadLocalFiles(files), fs2020.HandleRequest, nil)
 }
 
 // RunServer will run the server
@@ -64,12 +66,12 @@ func RunServer() {
 	// Flight simulator endpoint
 	router.POST("/fs2020", func(c *gin.Context) {
 		// Use the posted form data
-		sendResponse(loadFormFiles(c), FS2020HandleRequest, c)
+		sendResponse(loadFormFiles(c), fs2020.HandleRequest, c)
 	})
 	if exposeGetHandler {
 		router.GET("/fs2020", func(c *gin.Context) {
 			// Use local files (specified on the command line)
-			sendResponse(loadLocalFiles(flag.Args()), FS2020HandleRequest, c)
+			sendResponse(loadLocalFiles(flag.Args()), fs2020.HandleRequest, c)
 		})
 	}
 
@@ -180,13 +182,13 @@ func getFontBySize(size float64) font.Face {
 	font, found := fontBySize[size]
 	if !found {
 		name := fmt.Sprintf("%s/%s", config.FontsDir, config.InputFont)
-		font = LoadFont(name, size)
+		font = common.LoadFont(name, size)
 		fontBySize[size] = font
 	}
 	return font
 }
 
-func prepareGeneratorData(overlaysByImage OverlaysByImage) []string {
+func prepareGeneratorData(overlaysByImage common.OverlaysByImage) []string {
 	// Generate sorted list of image names
 	imageNames := make([]string, 0)
 	for name := range overlaysByImage {
@@ -206,7 +208,7 @@ func prepareContexts(contextToTexts map[string][]string) []string {
 	return contexts
 }
 
-func generateImages(overlaysByImage OverlaysByImage, categories map[string]string) []*bytes.Buffer {
+func generateImages(overlaysByImage common.OverlaysByImage, categories map[string]string) []*bytes.Buffer {
 	var files []*bytes.Buffer = nil
 
 	imageNames := prepareGeneratorData(overlaysByImage)

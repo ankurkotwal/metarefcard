@@ -1,4 +1,4 @@
-package metarefcard
+package common
 
 // FilterDevices - Returns only the devices that the caller is asking for
 func FilterDevices(deviceMap DeviceMap, neededDevices map[string]bool, debugOutput bool) DeviceModel {
