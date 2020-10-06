@@ -86,33 +86,6 @@ InputMapping: # Devices with known game inputs and which model input they map to
       Y: Y
     Slider:
       Y: Z
-InputOverrides:
-  SaitekX55Throttle:
-    Inputs:
-      1:
-        IsDigital: true
-        OffsetX: 45
-        OffsetY: 496
-        Width: 852
-        Height: 54
-      35:
-        IsDigital: true
-        OffsetX: 104
-        OffsetY: 416
-        Width: 852
-        Height: 54
-      XAxis:
-        IsDigital: false
-        OffsetX: 166
-        OffsetY: 681
-        Width: 570
-        Height: 54
-      YAxis:
-        IsDigital: false
-        OffsetX: 238
-        OffsetY: 588
-        Width: 570
-        Height: 54
 InputLabels:
   KEY_ACTIVE_PAUSE_TOGGLE : "Active Pause"
   KEY_AILERON_TRIM_LEFT : "Aileron Trim Left"

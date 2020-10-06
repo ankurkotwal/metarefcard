@@ -41,7 +41,7 @@ func HandleRequest(files [][]byte, deviceMap common.DeviceMap,
 	}
 	deviceIndex := common.FilterDevices(deviceMap, neededDevices, config.DebugOutput)
 	// Add device additions to the main device index
-	for deviceName, deviceInputData := range gameData.InputOverrides {
+	for deviceName, deviceInputData := range config.InputOverrides {
 		if deviceData, found := deviceIndex[deviceName]; found {
 			for additionInput, additionData := range deviceInputData.Inputs {
 				deviceData.Inputs[additionInput] = additionData

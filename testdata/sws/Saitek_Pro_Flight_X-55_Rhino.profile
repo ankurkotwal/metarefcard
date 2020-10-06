@@ -1946,7 +1946,7 @@ GstKeyBinding.IncomStarshipInputConcepts.ConceptCommunication.0.negate 0
 GstKeyBinding.IncomStarshipInputConcepts.ConceptCommunication.0.type 1
 GstKeyBinding.IncomStarshipInputConcepts.ConceptCommunication.1.altbutton 0
 GstKeyBinding.IncomStarshipInputConcepts.ConceptCommunication.1.axis 26
-GstKeyBinding.IncomStarshipInputConcepts.ConceptCommunication.1.button 86
+GstKeyBinding.IncomStarshipInputConcepts.ConceptCommunication.1.button 27
 GstKeyBinding.IncomStarshipInputConcepts.ConceptCommunication.1.deviceid 0
 GstKeyBinding.IncomStarshipInputConcepts.ConceptCommunication.1.identifier -1489294568
 GstKeyBinding.IncomStarshipInputConcepts.ConceptCommunication.1.modifier 0
@@ -2368,6 +2368,14 @@ GstKeyBinding.IncomStarshipInputConcepts.ConceptMaximizeWeaponPower.0.identifier
 GstKeyBinding.IncomStarshipInputConcepts.ConceptMaximizeWeaponPower.0.modifier 29
 GstKeyBinding.IncomStarshipInputConcepts.ConceptMaximizeWeaponPower.0.negate 0
 GstKeyBinding.IncomStarshipInputConcepts.ConceptMaximizeWeaponPower.0.type 2
+GstKeyBinding.IncomStarshipInputConcepts.ConceptMaximizeWeaponPower.1.altbutton 0
+GstKeyBinding.IncomStarshipInputConcepts.ConceptMaximizeWeaponPower.1.axis 26
+GstKeyBinding.IncomStarshipInputConcepts.ConceptMaximizeWeaponPower.1.button 34
+GstKeyBinding.IncomStarshipInputConcepts.ConceptMaximizeWeaponPower.1.deviceid 1
+GstKeyBinding.IncomStarshipInputConcepts.ConceptMaximizeWeaponPower.1.identifier 0
+GstKeyBinding.IncomStarshipInputConcepts.ConceptMaximizeWeaponPower.1.modifier 0
+GstKeyBinding.IncomStarshipInputConcepts.ConceptMaximizeWeaponPower.1.negate 0
+GstKeyBinding.IncomStarshipInputConcepts.ConceptMaximizeWeaponPower.1.type 3
 GstKeyBinding.IncomStarshipInputConcepts.ConceptMouseRecenter.0.altbutton 0
 GstKeyBinding.IncomStarshipInputConcepts.ConceptMouseRecenter.0.axis 0
 GstKeyBinding.IncomStarshipInputConcepts.ConceptMouseRecenter.0.button 45
@@ -2714,8 +2722,8 @@ GstKeyBinding.IncomStarshipInputConcepts.ConceptScoreboard.1.negate 0
 GstKeyBinding.IncomStarshipInputConcepts.ConceptScoreboard.1.type 1
 GstKeyBinding.IncomStarshipInputConcepts.ConceptScoreboard.2.altbutton 0
 GstKeyBinding.IncomStarshipInputConcepts.ConceptScoreboard.2.axis 26
-GstKeyBinding.IncomStarshipInputConcepts.ConceptScoreboard.2.button 27
-GstKeyBinding.IncomStarshipInputConcepts.ConceptScoreboard.2.deviceid 0
+GstKeyBinding.IncomStarshipInputConcepts.ConceptScoreboard.2.button 23
+GstKeyBinding.IncomStarshipInputConcepts.ConceptScoreboard.2.deviceid 1
 GstKeyBinding.IncomStarshipInputConcepts.ConceptScoreboard.2.identifier 0
 GstKeyBinding.IncomStarshipInputConcepts.ConceptScoreboard.2.modifier 0
 GstKeyBinding.IncomStarshipInputConcepts.ConceptScoreboard.2.negate 0

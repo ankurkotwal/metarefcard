@@ -113,11 +113,10 @@ type OverlayData struct {
 
 // GameData holds the game's parsed data
 type GameData struct {
-	DeviceNameMap  DeviceNameFullToShort      `yaml:"DeviceNameMap"`
-	InputMap       DeviceInputTypeMapping     `yaml:"InputMapping"`
-	InputOverrides map[string]DeviceInputData `yaml:"InputOverrides"`
-	InputLabels    map[string]string          `yaml:"InputLabels"`
-	Regexes        map[string]string          `yaml:"Regexes"`
+	DeviceNameMap DeviceNameFullToShort  `yaml:"DeviceNameMap"`
+	InputMap      DeviceInputTypeMapping `yaml:"InputMapping"`
+	InputLabels   map[string]string      `yaml:"InputLabels"`
+	Regexes       map[string]string      `yaml:"Regexes"`
 }
 
 // DeviceNameFullToShort maps game device full names to MetaRefCard short names

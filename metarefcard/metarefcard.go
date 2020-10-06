@@ -270,7 +270,7 @@ func generateImages(overlaysByImage common.OverlaysByImage, categories map[strin
 			}
 			fontSize = calcFontSize(fullText, fontSize, targetWidth, targetHeight)
 			// Now create overlays for each text
-			// Uggh, second loop through texts
+			// Ugh, second loop through texts
 			idx := 0
 			for _, context := range prepareContexts(overlayData.ContextToTexts) {
 				texts := overlayData.ContextToTexts[context]
