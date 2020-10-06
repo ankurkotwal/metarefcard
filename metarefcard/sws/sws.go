@@ -25,12 +25,8 @@ func HandleRequest(files [][]byte, deviceMap common.DeviceMap,
 			"StarWarsSquadrons Data", config.DebugOutput)
 		for name, pattern := range gameData.Regexes {
 			switch name {
-			case "BindStarship":
-				regexes.BindStarship = regexp.MustCompile(pattern)
-			case "BindSoldier":
-				regexes.BindSoldier = regexp.MustCompile(pattern)
-			case "BindDefault":
-				regexes.BindDefault = regexp.MustCompile(pattern)
+			case "Bind":
+				regexes.Bind = regexp.MustCompile(pattern)
 			case "Joystick":
 				regexes.Joystick = regexp.MustCompile(pattern)
 			default:
@@ -80,20 +76,10 @@ func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
 		for scanner.Scan() {
 			line := scanner.Text()
 
-			matches = regexes.BindStarship.FindAllStringSubmatch(line, -1)
+			matches = regexes.Bind.FindAllStringSubmatch(line, -1)
 			if matches != nil {
-				addAction(contextActionIndex, "Starship", contexts, matches[0][1],
-					matches[0][2], matches[0][3], matches[0][4])
-			}
-			matches = regexes.BindSoldier.FindAllStringSubmatch(line, -1)
-			if matches != nil {
-				addAction(contextActionIndex, "Soldier", contexts, matches[0][1],
-					matches[0][2], matches[0][3], matches[0][4])
-			}
-			matches = regexes.BindDefault.FindAllStringSubmatch(line, -1)
-			if matches != nil {
-				addAction(contextActionIndex, "Default", contexts, matches[0][1],
-					matches[0][2], matches[0][3], matches[0][4])
+				addAction(contextActionIndex, matches[0][1], contexts, matches[0][2],
+					matches[0][3], matches[0][4], matches[0][5])
 			}
 			matches = regexes.Joystick.FindAllStringSubmatch(line, -1)
 			if matches != nil && len(matches[0][2]) > 0 {
@@ -327,10 +313,8 @@ func populateImageOverlays(deviceIndex common.DeviceModel, gameBinds swsBindsByD
 type swsContextActionIndex map[string]map[string]map[string]string
 
 type swsRegexes struct {
-	BindStarship *regexp.Regexp
-	BindSoldier  *regexp.Regexp
-	BindDefault  *regexp.Regexp
-	Joystick     *regexp.Regexp
+	Bind     *regexp.Regexp
+	Joystick *regexp.Regexp
 }
 
 // Device short name -> ContextAction
