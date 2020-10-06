@@ -24,11 +24,12 @@ import (
 )
 
 type requestHandler func(files [][]byte, deviceMap common.DeviceMap,
+	deviceNameToImage common.DeviceNameToImage,
 	config *common.Config) (common.OverlaysByImage, map[string]string)
 
-var configFile = "config/config.yaml"
 var config common.Config
 var deviceMap common.DeviceMap
+var deviceNameToImage common.DeviceNameToImage
 var exposeGetHandler = false
 
 // Initialise the package
@@ -36,10 +37,18 @@ func initialise() {
 	parseCliArgs(&exposeGetHandler)
 
 	// Load the configuration
-	common.LoadYaml(configFile, &config, "Config")
+	common.LoadYaml("config/config.yaml", &config, "Config")
 
 	// Load the device model (i.e. non-game specific) based on the devices in our game files
 	common.LoadYaml(config.DevicesModel, &deviceMap, "Full Device Map")
+
+	// Generate mapping of device short names to image names
+	deviceNameToImage = make(common.DeviceNameToImage)
+	for _, deviceGroup := range deviceMap {
+		for deviceName := range deviceGroup.Devices {
+			deviceNameToImage[deviceName] = deviceGroup.Image
+		}
+	}
 }
 
 // RunLocal will run local files
@@ -146,7 +155,10 @@ func loadFormFiles(c *gin.Context) [][]byte {
 }
 
 func sendResponse(loadedFiles [][]byte, handler requestHandler, c *gin.Context) {
-	overlaysByImage, categories := handler(loadedFiles, deviceMap, &config)
+	// Call game handler to generate image overlayes
+	overlaysByImage, categories := handler(loadedFiles, deviceMap, deviceNameToImage, &config)
+
+	// Now generate images from the overlays
 	generatedFiles := generateImages(overlaysByImage, categories)
 
 	// Generate HTML

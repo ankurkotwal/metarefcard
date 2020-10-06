@@ -25,13 +25,13 @@ func LoadGameModel(filename string, label string, debugOutput bool) *GameData {
 	return &data
 }
 
-// FilterDevices - Returns only the devices that the caller is asking for
-func FilterDevices(deviceMap DeviceMap, neededDevices map[string]bool, debugOutput bool) DeviceModel {
+// OrgDeviceModel - Returns only the devices that the caller is asking for
+func OrgDeviceModel(deviceMap DeviceMap, neededDevices MockSet, config *Config) DeviceModel {
 	deviceModel := make(DeviceModel)
 	// Filter for only the device groups we're interested in
 	for _, groupData := range deviceMap {
 		for shortName, inputData := range groupData.Devices {
-			if neededDevices[shortName] {
+			if _, found := neededDevices[shortName]; found {
 				deviceData := new(DeviceData)
 				deviceModel[shortName] = deviceData
 				deviceData.Image = groupData.Image
@@ -40,33 +40,42 @@ func FilterDevices(deviceMap DeviceMap, neededDevices map[string]bool, debugOutp
 		}
 	}
 
-	if debugOutput {
+	// Add device additions to the main device index
+	for deviceName, deviceInputData := range config.InputOverrides {
+		if deviceData, found := deviceModel[deviceName]; found {
+			for additionInput, additionData := range deviceInputData.Inputs {
+				deviceData.Inputs[additionInput] = additionData
+			}
+		}
+	}
+
+	if config.DebugOutput {
 		PrintYamlObject(&deviceModel, "Targeted Device Map")
 	}
 	return deviceModel
 }
 
 // GenerateContextColours - basic utility function to generate colours
-func GenerateContextColours(contexts []string, config *Config) map[string]string {
-	sort.Strings(contexts)
-	categories := make(map[string]string) // Context -> Colour
+func GenerateContextColours(contexts MockSet, config *Config) {
+	contextKeys := contexts.Keys()
+	sort.Strings(contextKeys)
 	i := 0
-	for _, category := range contexts {
+	for _, context := range contextKeys {
 		if i >= len(config.AlternateColours) {
 			// Ran out of colours, repeat
 			i = 0
 		}
-		if _, found := categories[category]; !found {
-			// Only move to next colour if this is an unseen category
-			categories[category] = config.AlternateColours[i]
-			i++
-		}
+		// Only move to next colour if this is an unseen category
+		contexts[context] = config.AlternateColours[i]
+		i++
 	}
-	return categories
 }
 
 // RegexByName - map of named regex strings
 type RegexByName map[string]*regexp.Regexp
+
+// DeviceNameToImage - contains device short name -> image name
+type DeviceNameToImage map[string]string
 
 // DeviceMap - structure of devices (by group name)
 type DeviceMap map[string]struct {
@@ -89,7 +98,7 @@ type InputData struct {
 	Height    int  `yaml:"Height"`
 }
 
-// DeviceModel - structure to store image and inputs
+// DeviceModel - structure to store image and inputs, keyed by device shortname
 type DeviceModel map[string]*DeviceData
 
 // DeviceData - information about a device

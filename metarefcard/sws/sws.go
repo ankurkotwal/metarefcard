@@ -19,51 +19,30 @@ var gameData *common.GameData
 
 // HandleRequest services the request to load files
 func HandleRequest(files [][]byte, deviceMap common.DeviceMap,
+	deviceNameToImage common.DeviceNameToImage,
 	config *common.Config) (common.OverlaysByImage, map[string]string) {
 	if !initiliased {
 		gameData = common.LoadGameModel("config/sws.yaml",
 			"StarWarsSquadrons Data", config.DebugOutput)
-		for name, pattern := range gameData.Regexes {
-			switch name {
-			case "Bind":
-				regexes.Bind = regexp.MustCompile(pattern)
-			case "Joystick":
-				regexes.Joystick = regexp.MustCompile(pattern)
-			default:
-				log.Printf("Error: SWS Unknown Regex %s pattern %s\n", name, pattern)
-			}
-		}
+		regexes.Bind = regexp.MustCompile(gameData.Regexes["Bind"])
+		regexes.Joystick = regexp.MustCompile(gameData.Regexes["Joystick"])
 		initiliased = true
 	}
 
-	gameBinds, contexts := loadInputFiles(files, gameData.DeviceNameMap,
+	gameBinds, devices, contexts := loadInputFiles(files, gameData.DeviceNameMap,
 		config.DebugOutput, config.VerboseOutput)
-
-	neededDevices := make(map[string]bool)
-	for device := range gameBinds {
-		neededDevices[device] = true
-	}
-	deviceIndex := common.FilterDevices(deviceMap, neededDevices, config.DebugOutput)
-	// Add device additions to the main device index
-	for deviceName, deviceInputData := range config.InputOverrides {
-		if deviceData, found := deviceIndex[deviceName]; found {
-			for additionInput, additionData := range deviceInputData.Inputs {
-				deviceData.Inputs[additionInput] = additionData
-			}
-		}
-	}
-
+	deviceIndex := common.OrgDeviceModel(deviceMap, devices, config)
 	// Generate colours for contexts here
-	categories := common.GenerateContextColours(contexts, config)
-
-	return populateImageOverlays(deviceIndex, gameBinds, gameData), categories
+	common.GenerateContextColours(contexts, config)
+	return populateImageOverlays(deviceIndex, gameBinds, gameData), contexts
 }
 
 // Load the game config files (provided by user)
 func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
-	debugOutput bool, verboseOutput bool) (swsBindsByDevice, []string) {
+	debugOutput bool, verboseOutput bool) (swsBindsByDevice, common.MockSet, common.MockSet) {
 	gameBinds := make(swsBindsByDevice)
-	contexts := make(map[string]bool)
+	deviceNames := make(common.MockSet)
+	contexts := make(common.MockSet)
 
 	// deviceIndex: deviceId -> full name
 	deviceIndex := make(map[string]string)
@@ -92,6 +71,7 @@ func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
 					num--
 					if err == nil && num >= 0 {
 						deviceIndex[strconv.Itoa(num)] = shortName
+						deviceNames[shortName] = ""
 					} else {
 						log.Printf("Error: SWS unexpected device number %s\n", matches[0][1])
 					}
@@ -153,21 +133,14 @@ func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
 		}
 	}
 
-	contextsArray := make([]string, 0, len(contexts))
-	for context := range contexts {
-		contextsArray = append(contextsArray, context)
-	}
-
-	return gameBinds, contextsArray
+	return gameBinds, deviceNames, contexts
 }
 
 func addAction(contextActionIndex swsContextActionIndex,
-	context string, contexts map[string]bool, action string, deviceNum string,
+	context string, contexts common.MockSet, action string, deviceNum string,
 	actionSub string, value string) {
-	contexts[context] = true
-	if context == "" {
-		log.Printf("blah\n")
-	}
+	contexts[context] = ""
+
 	var found bool
 	var actionMap map[string]map[string]string
 	if actionMap, found = contextActionIndex[context]; !found {
@@ -263,7 +236,7 @@ func populateImageOverlays(deviceIndex common.DeviceModel, gameBinds swsBindsByD
 						input, deviceName)
 				}
 				if inputData.ImageX == 0 && inputData.ImageY == 0 {
-					log.Printf("Error: Location 0,0 for %s device %s %v ",
+					log.Printf("Error: SWS location 0,0 for %s device %s %v\n",
 						action, deviceName, inputData)
 					continue
 				}
@@ -276,7 +249,7 @@ func populateImageOverlays(deviceIndex common.DeviceModel, gameBinds swsBindsByD
 					text = label
 				} else {
 					text = action
-					log.Printf("Unknown action %s context %s device %s",
+					log.Printf("Error: SWS Unknown action %s context %s device %s\n",
 						action, context, deviceName)
 				}
 				texts := make([]string, 1)

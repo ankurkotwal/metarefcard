@@ -21,6 +21,7 @@ var regexes common.RegexByName
 
 // HandleRequest services the request to load files
 func HandleRequest(files [][]byte, deviceMap common.DeviceMap,
+	deviceNameToImage common.DeviceNameToImage,
 	config *common.Config) (common.OverlaysByImage, map[string]string) {
 	if !initiliased {
 		gameData = common.LoadGameModel("config/fs2020.yaml",
@@ -32,47 +33,20 @@ func HandleRequest(files [][]byte, deviceMap common.DeviceMap,
 		}
 		initiliased = true
 	}
-	gameBinds, contexts := loadInputFiles(files, gameData.DeviceNameMap,
+	gameBinds, neededDevices, contexts := loadInputFiles(files, gameData.DeviceNameMap,
 		config.DebugOutput, config.VerboseOutput)
-
-	neededDevices := make(map[string]bool)
-	for device := range gameBinds {
-		neededDevices[device] = true
-	}
-	deviceIndex := common.FilterDevices(deviceMap, neededDevices, config.DebugOutput)
-	// Add device additions to the main device index
-	for deviceName, deviceInputData := range config.InputOverrides {
-		if deviceData, found := deviceIndex[deviceName]; found {
-			for additionInput, additionData := range deviceInputData.Inputs {
-				deviceData.Inputs[additionInput] = additionData
-			}
-		}
-	}
-
-	// Generate colours for contexts here
-	sort.Strings(contexts)
-	categories := make(map[string]string) // Context -> Colour
-	i := 0
-	for _, category := range contexts {
-		if i >= len(config.AlternateColours) {
-			// Ran out of colours, repeat
-			i = 0
-		}
-		if _, found := categories[category]; !found {
-			// Only move to next colour if this is an unseen category
-			categories[category] = config.AlternateColours[i]
-			i++
-		}
-	}
-
-	return populateImageOverlays(deviceIndex, gameBinds, gameData), categories
+	deviceIndex := common.OrgDeviceModel(deviceMap, neededDevices, config)
+	common.GenerateContextColours(contexts, config)
+	return populateImageOverlays(deviceIndex, gameBinds, gameData), contexts
 }
 
 // Load the game config files (provided by user)
 func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
-	debugOutput bool, verboseOutput bool) (fs2020BindsByDevice, []string) {
+	debugOutput bool, verboseOutput bool) (fs2020BindsByDevice,
+	common.MockSet, common.MockSet) {
 	gameBinds := make(fs2020BindsByDevice)
-	contexts := make([]string, 0)
+	devices := make(common.MockSet)
+	contexts := make(common.MockSet)
 
 	// XML state variables
 	var currentDevice *fs2020Device
@@ -89,7 +63,7 @@ func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
 				// EOF means we're done.
 				break
 			} else if err != nil {
-				log.Fatalf("Error decoding token: %s", err)
+				log.Fatalf("Error: FS2020 decoding token: %s", err)
 			}
 
 			switch ty := token.(type) {
@@ -115,22 +89,23 @@ func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
 					currentDevice, found = gameBinds[aDevice.DeviceName]
 					out, _ := json.Marshal(aDevice)
 					if found {
-						log.Printf("Duplicate device: %s\n", out)
+						log.Printf("Error: FS2020 duplicate device: %s\n", out)
 					} else {
 						if debugOutput {
-							log.Printf("New device: %s\n", out)
+							log.Printf("Error: FS2020 new device: %s\n", out)
 						}
 						currentDevice = &aDevice
 						currentDevice.ContextActions = make(map[string]map[string]*fs2020Action)
 						if shortName, ok := deviceNameMap[aDevice.DeviceName]; ok {
+							devices[shortName] = ""
 							gameBinds[shortName] = currentDevice
 							if shortName == common.DeviceMissingInfo {
-								log.Printf("Error: Missing info for device '%s'\n",
+								log.Printf("Error: FS2020 missing info for device '%s'\n",
 									aDevice.DeviceName)
 							}
 						} else {
 							deviceNameMap[shortName] = common.DeviceUnknown
-							log.Printf("Error: Unknown device '%s'\n", aDevice.DeviceName)
+							log.Printf("Error: FS2020 unknown device '%s'\n", aDevice.DeviceName)
 						}
 					}
 				case "Context":
@@ -139,17 +114,17 @@ func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
 					for _, attr := range ty.Attr {
 						if attr.Name.Local == "ContextName" {
 							contextName = attr.Value
-							contexts = append(contexts, contextName)
+							contexts[contextName] = ""
 							break
 						}
 					}
 					var found bool
 					currentContext, found = currentDevice.ContextActions[contextName]
 					if found {
-						log.Printf("Error: Duplicate context: %s\n", contextName)
+						log.Printf("Error: FS2020 duplicate context: %s\n", contextName)
 					} else {
 						if debugOutput {
-							log.Printf("New context: %s\n", contextName)
+							log.Printf("FS2020 new context: %s\n", contextName)
 						}
 						currentContext = make(map[string]*fs2020Action)
 						currentDevice.ContextActions[contextName] = currentContext
@@ -165,17 +140,17 @@ func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
 						} else if attr.Name.Local == "Flag" {
 							action.Flag, err = strconv.Atoi(attr.Value)
 							if err != nil {
-								log.Printf("Error: Action %s flag parsing error\n", actionName)
+								log.Printf("Error: FS2020 action %s flag parsing error\n", actionName)
 							}
 						}
 					}
 					var found bool
 					currentAction, found = currentContext[actionName]
 					if found {
-						log.Printf("Error: Duplicate action: %s\n", actionName)
+						log.Printf("Error: FS2020 duplicate action: %s\n", actionName)
 					} else {
 						if debugOutput {
-							log.Printf("New action: %s\n", actionName)
+							log.Printf("FS2020 new action: %s\n", actionName)
 						}
 						currentAction = &action
 						currentContext[actionName] = currentAction
@@ -204,7 +179,7 @@ func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
 					value := string([]byte(ty))
 					*currentKey, err = strconv.Atoi(value)
 					if err != nil {
-						log.Printf("Error: Primary key value %s parsing error\n", value)
+						log.Printf("Error: FS2020 primary key value %s parsing error\n", value)
 					}
 				}
 			case xml.EndElement:
@@ -246,7 +221,7 @@ func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
 		}
 	}
 
-	return gameBinds, contexts
+	return gameBinds, devices, contexts
 }
 
 func populateImageOverlays(deviceIndex common.DeviceModel, gameBinds fs2020BindsByDevice,
@@ -263,11 +238,11 @@ func populateImageOverlays(deviceIndex common.DeviceModel, gameBinds fs2020Binds
 				for _, input := range inputLookups {
 					inputData, found := modelDevice.Inputs[input]
 					if !found {
-						log.Printf("Error: Unknown input to lookup %s for device %s\n",
+						log.Printf("Error: FS2020 unknown input to lookup %s for device %s\n",
 							input, deviceName)
 					}
 					if inputData.ImageX == 0 && inputData.ImageY == 0 {
-						log.Printf("Error: Location 0,0 for %s device %s %v ",
+						log.Printf("Error: FS2020 location 0,0 for %s device %s %v\n",
 							actionName, deviceName, inputData)
 						continue
 					}
@@ -280,7 +255,7 @@ func populateImageOverlays(deviceIndex common.DeviceModel, gameBinds fs2020Binds
 						text = label
 					} else {
 						text = actionName
-						log.Printf("Unknown action %s context %s device %s",
+						log.Printf("Error: FS2020 Unknown action %s context %s device %s\n",
 							actionName, context, deviceName)
 					}
 					texts := make([]string, 1)
@@ -325,7 +300,7 @@ func findMatchingInputModels(deviceName string, actionData *fs2020Action,
 	if input != "" {
 		inputLookups = append(inputLookups, input)
 	} else {
-		log.Printf("Error: Did not find primary input for %s\n", (*actionData).PrimaryInfo)
+		log.Printf("Error: FS2020 did not find primary input for %s\n", (*actionData).PrimaryInfo)
 	}
 	if len((*actionData).SecondaryInfo) > 0 {
 		input := findMatchingInputModelsByRegex(deviceName, (*actionData).SecondaryInfo,
@@ -333,7 +308,7 @@ func findMatchingInputModels(deviceName string, actionData *fs2020Action,
 		if input != "" {
 			inputLookups = append(inputLookups, input)
 		} else {
-			log.Printf("Error: Did not find secondary input for %s\n",
+			log.Printf("Error: FS2020 did not find secondary input for %s\n",
 				(*actionData).SecondaryInfo)
 		}
 	}
@@ -389,17 +364,17 @@ func findMatchingInputModelsByRegex(deviceName string, action string,
 		if input, ok := gameInputMap["Slider"]; ok {
 			slider = fmt.Sprintf("%sAxis", input[matches[0][1]])
 		} else {
-			log.Printf("Error: Unknown action %s for slider on device %s\n", action, deviceName)
+			log.Printf("Error: FS2020 unknown action %s for slider on device %s\n", action, deviceName)
 			return ""
 		}
 		if _, ok := inputs[slider]; ok {
 			return slider
 		}
-		log.Printf("Error: Couldn't find slider %s on device %s\n", slider, deviceName)
+		log.Printf("Error: FS2020 couldn't find slider %s on device %s\n", slider, deviceName)
 		return ""
 
 	}
-	log.Printf("Error: Could not find matching Action %s on device %s\n", action, deviceName)
+	log.Printf("Error: FS2020 could not find matching Action %s on device %s\n", action, deviceName)
 	return ""
 }
 
