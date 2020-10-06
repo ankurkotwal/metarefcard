@@ -112,10 +112,47 @@ func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
 		}
 	}
 
+	var contextAction swsContextAction
+	var actions swsActions
+	var actionDetails *swsActionDetails
+	for context, actionDeviceMap := range contextActionDeviceMap {
+		for action, deviceMap := range actionDeviceMap {
+			for deviceNum, deviceActionDetails := range deviceMap {
+				var found bool
+				var shortName string
+				if shortName, found = deviceIndex[deviceNum]; !found {
+					continue
+				}
+				if contextAction, found = gameBinds[shortName]; !found {
+					contextAction = make(swsContextAction)
+					gameBinds[shortName] = contextAction
+				}
+				if actions, found = contextAction[context]; !found {
+					actions = make(swsActions)
+					contextAction[context] = actions
+				}
+				if actionDetails, found = actions[action]; !found {
+					actionDetails = &swsActionDetails{}
+					actions[action] = actionDetails
+				}
+				for inputType, value := range deviceActionDetails {
+					field := getInputTypeAsField(inputType, actionDetails)
+					if field == nil {
+						log.Printf("Error: SWS unknown inputType %s value %s", inputType, value)
+					} else {
+						*field = value
+					}
+				}
+			}
+		}
+	}
+
 	contextsArray := make([]string, len(contexts))
 	for context := range contexts {
 		contextsArray = append(contextsArray, context)
 	}
+
+	common.PrintYamlObject(gameBinds, "SWS gamebinds")
 	return gameBinds, contextsArray
 }
 
@@ -145,7 +182,7 @@ func addAction(contextActionDeviceMap map[string]map[string]map[string]map[strin
 	deviceActionDetails[inputType] = value
 }
 
-func getInputTypeField(inputType string, currAction *swsAction) *string {
+func getInputTypeAsField(inputType string, currAction *swsActionDetails) *string {
 	inputType = strings.ToLower(inputType)
 	switch inputType {
 	case "altbutton":
@@ -154,7 +191,7 @@ func getInputTypeField(inputType string, currAction *swsAction) *string {
 		return &currAction.Axis
 	case "button":
 		return &currAction.Button
-	case "deviceId":
+	case "deviceid":
 		return &currAction.DeviceID
 	case "identifier":
 		return &currAction.Identifier
@@ -162,6 +199,8 @@ func getInputTypeField(inputType string, currAction *swsAction) *string {
 		return &currAction.Modifier
 	case "negate":
 		return &currAction.Negate
+	case "type":
+		return &currAction.Type
 	}
 	return nil
 }
@@ -173,14 +212,16 @@ type swsRegexes struct {
 	Joystick     *regexp.Regexp
 }
 
-type swsBindsByDevice map[string]*swsDevice
+// Device short name -> ContextAction
+type swsBindsByDevice map[string]swsContextAction
 
-type swsDevice struct {
-	DeviceName     string
-	ContextActions map[string]map[string]*swsAction // Context -> Device Id -> Action
-}
+// Context -> Actions
+type swsContextAction map[string]swsActions
 
-type swsAction struct {
+// Action -> Details
+type swsActions map[string]*swsActionDetails
+
+type swsActionDetails struct {
 	AltButton  string
 	Axis       string
 	Button     string
@@ -188,4 +229,5 @@ type swsAction struct {
 	Identifier string
 	Modifier   string
 	Negate     string
+	Type       string
 }

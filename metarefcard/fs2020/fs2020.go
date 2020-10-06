@@ -26,6 +26,7 @@ func HandleRequest(files [][]byte, deviceMap common.DeviceMap,
 		gameData = common.LoadGameModel("config/fs2020.yaml",
 			"FS2020 Data", config.DebugOutput)
 		regexes = make(common.RegexByName)
+		// TODO perf - make regexes a struct instead of a map
 		for name, pattern := range gameData.Regexes {
 			regexes[name] = regexp.MustCompile(pattern)
 		}

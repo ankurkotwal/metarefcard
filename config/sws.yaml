@@ -1,9 +1,10 @@
 ---
 Regexes:
   Joystick: ^GstInput.JoystickDevice(\d+)(?:\s+(.*))$
-  BindDefault: ^GstKeyBinding\.IncomDefaultInputConcepts\.(.+)\.(\d+)\.(.+)\s+(.+)$
-  BindSoldier: ^GstKeyBinding\.IncomSoldierInputConcepts\.(.+)\.(\d+)\.(.+)\s+(.+)$
-  BindStarship: ^GstKeyBinding\.IncomStarshipInputConcepts\.(.+)\.(\d+)\.(.+)\s+(.+)$
+  # TODO - Combine bind regexes
+  BindDefault: ^GstKeyBinding\.IncomDefaultInputConcepts\.Concept(.+)\.(\d+)\.(.+)\s+(.+)$
+  BindSoldier: ^GstKeyBinding\.IncomSoldierInputConcepts\.Concept(.+)\.(\d+)\.(.+)\s+(.+)$
+  BindStarship: ^GstKeyBinding\.IncomStarshipInputConcepts\.Concept(.+)\.(\d+)\.(.+)\s+(.+)$
 DeviceNameMap:
   Airbus T-A320 Quadrant throttle:
   Alpha Flight Controls:
