@@ -3,10 +3,8 @@ package sws
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"log"
 	"regexp"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -18,8 +16,7 @@ var regexes swsRegexes
 var gameData *common.GameData
 
 // HandleRequest services the request to load files
-func HandleRequest(files [][]byte, deviceMap common.DeviceMap,
-	deviceNameToImage common.DeviceNameToImage,
+func HandleRequest(files [][]byte,
 	config *common.Config) (common.OverlaysByImage, map[string]string) {
 	if !initiliased {
 		gameData = common.LoadGameModel("config/sws.yaml",
@@ -31,10 +28,9 @@ func HandleRequest(files [][]byte, deviceMap common.DeviceMap,
 
 	gameBinds, devices, contexts := loadInputFiles(files, gameData.DeviceNameMap,
 		config.DebugOutput, config.VerboseOutput)
-	deviceIndex := common.OrgDeviceModel(deviceMap, devices, config)
-	// Generate colours for contexts here
 	common.GenerateContextColours(contexts, config)
-	return populateImageOverlays(deviceIndex, gameBinds, gameData), contexts
+	deviceMap := common.FilterDevices(devices, config)
+	return populateImageOverlays(deviceMap, config.ImageMap, gameBinds, gameData), contexts
 }
 
 // Load the game config files (provided by user)
@@ -221,60 +217,27 @@ func interpretInput(details *swsActionDetails) string {
 	return ""
 }
 
-func populateImageOverlays(deviceIndex common.DeviceModel, gameBinds swsBindsByDevice,
-	data *common.GameData) common.OverlaysByImage {
+func populateImageOverlays(deviceMap common.DeviceMap, imageMap common.ImageMap,
+	gameBinds swsBindsByDevice, data *common.GameData) common.OverlaysByImage {
 	// Iterate through our game binds
 	overlaysByImage := make(common.OverlaysByImage)
-	for deviceName, contextActions := range gameBinds {
-		modelDevice := deviceIndex[deviceName]
-		image := modelDevice.Image
-		for context, actions := range contextActions {
-			for action, input := range actions {
-				inputData, found := modelDevice.Inputs[input]
+	for shortName, gameDevice := range gameBinds {
+		inputs := deviceMap[shortName]
+		image := imageMap[shortName]
+		for context, actions := range gameDevice {
+			for actionName, input := range actions {
+				inputData, found := inputs[input]
 				if !found {
 					log.Printf("Error: SWS unknown input to lookup %s for device %s\n",
-						input, deviceName)
+						input, shortName)
 				}
-				if inputData.ImageX == 0 && inputData.ImageY == 0 {
+				if inputData.X == 0 && inputData.Y == 0 {
 					log.Printf("Error: SWS location 0,0 for %s device %s %v\n",
-						action, deviceName, inputData)
+						actionName, shortName, inputData)
 					continue
 				}
-				var overlayData common.OverlayData
-				overlayData.ContextToTexts = make(map[string][]string)
-				overlayData.PosAndSize = &inputData
-				var text string
-				// Game data might have a better label for this text
-				if label, found := (*data).InputLabels[action]; found {
-					text = label
-				} else {
-					text = action
-					log.Printf("Error: SWS Unknown action %s context %s device %s\n",
-						action, context, deviceName)
-				}
-				texts := make([]string, 1)
-				texts[0] = text
-				overlayData.ContextToTexts[context] = texts
-
-				// Find by Image first
-				deviceAndInput := fmt.Sprintf("%s:%s", deviceName, input)
-				if overlay, found := overlaysByImage[image]; !found {
-					// First time adding this image
-					overlay := make(map[string]*common.OverlayData)
-					overlaysByImage[image] = overlay
-					overlay[deviceAndInput] = &overlayData
-				} else {
-					// Now find by input
-					if previousOverlayData, found := overlay[deviceAndInput]; !found {
-						// Not new image but new overlayData
-						overlay[deviceAndInput] = &overlayData
-					} else {
-						// Concatenate input
-						texts = append(previousOverlayData.ContextToTexts[context], text)
-						sort.Strings(texts)
-						previousOverlayData.ContextToTexts[context] = texts
-					}
-				}
+				common.GenerateImageOverlays(overlaysByImage, input, &inputData,
+					gameData, actionName, context, shortName, image)
 			}
 		}
 	}

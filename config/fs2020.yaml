@@ -8,84 +8,67 @@ Regexes:
   TrimKey: ^KEY_([^\s]+)
   TrimAxis: (.*)AXIS_([^\s]+)
 DeviceNameMap:
-  Airbus T-A320 Quadrant throttle:
-  Alpha Flight Controls:
-  BU0836X Interface:
-  BU0836X Interface_1:
+  # Airbus T-A320 Quadrant throttle:
+  # Alpha Flight Controls:
+  # BU0836X Interface:
+  # BU0836X Interface_1:
   Joystick - HOTAS Warthog: ThrustMasterWarthogJoystick
-  Keyboard (FSX): # TODO Keyboad
+  # Keyboard (FSX): # TODO Keyboad
   Logitech Extreme 3D: LogitechExtreme3DPro
-  Mouse: # TODO Mouse
+  # Mouse: # TODO Mouse
   PS4: DualShock4
-  Saitek Pro Flight Quadrant:
+  # Saitek Pro Flight Quadrant:
   Saitek Pro Flight Rudder Pedals: SaitekProFlightCombatRudderPedals
   Saitek Pro Flight X-55 Rhino Stick: SaitekX55Joystick
   Saitek Pro Flight X-55 Rhino Throttle: SaitekX55Throttle
   Saitek Pro Flight X-56 Rhino Stick: SaitekX56Joystick
   Saitek Pro Flight X-56 Rhino Throttle: SaitekX56Throttle
-  Saitek Pro Flight Yoke:
+  # Saitek Pro Flight Yoke:
   Saitek X52 Flight Control System: SaitekX52
   Saitek X52 Pro Flight Control System: SaitekX52Pro
   T.16000M: T16000M
-  T.A320 CoPilot:
-  T.A320 Pilot:
+  # T.A320 CoPilot:
+  # T.A320 Pilot:
   T.Flight Hotas 4: ThrustMasterHOTAS4
-  T.Flight Hotas One: ThrustMasterHOTAS4
+  T.Flight Hotas One: ThrustMasterHOTASOne
   T.Flight Hotas X: ThrustMasterTFlightHOTASX
   T.Flight Rudder Pedals: T-Rudder
   T.Flight Stick X: 044FB106
   Throttle - HOTAS Warthog: ThrustMasterWarthogThrottle
   TWCS Throttle: T16000MTHROTTLE
-  T-Pendular-Rudder:
-  VF - TPM V3RNIO:
-  VirtualFly - RUDDO+:
-  VirtualFly - TQ3+:
-  VirtualFly - TQ6+:
-  VirtualFly - YOKO+:
+  # T-Pendular-Rudder:
+  # VF - TPM V3RNIO:
+  # VirtualFly - RUDDO+:
+  # VirtualFly - TQ3+:
+  # VirtualFly - TQ6+:
+  # VirtualFly - YOKO+:
   XInput Gamepad: GamePad
-InputMapping: # Devices with known game inputs and which model input they map to
+InputMap: # Devices with known game inputs and which model input they map to
   044FB106:
-    Slider:
-      X: U
+    Slider: { X: U }
   LogitechExtreme3DPro:
-    Slider:
-      X: U
+    Slider: { X: U }
   SaitekX56Throttle:
-    Axis:
-      RX: RZ
-      RY: U
-      RZ: V
-    Slider:
-      X: RX
-      Y: RY
+    Axis: { RX: RZ, RY: U, RZ: V }
+    Slider: { X: RX, Y: RY }
   T16000M:
-    Slider:
-      X: U
+    Slider: { X: U }
   T16000MFCS:
-    Slider:
-      X: U
+    Slider: { X: U }
   T16000MTHROTTLE:
-    Rotation:
-      X: X
-      Y: Y
-    Slider:
-      X: X
-      Y: Y
+    Rotation: { X: X, Y: Y }
+    Slider: { X: X, Y: Y }
   ThrustMasterHOTAS4:
-    Slider:
-      X: Z
+    Slider: { X: Z }
+  ThrustMasterHOTASOne:
+    Slider: { X: Z }
   ThrustMasterTFlightHOTASX:
-    Slider:
-      X: Z
+    Slider: { X: Z }
   ThrustMasterWarthogThrottle:
-    Slider:
-      X: Z
+    Slider: { X: Z }
   T-Rudder:
-    Rotation:
-      X: X
-      Y: Y
-    Slider:
-      Y: Z
+    Rotation: { X: X, Y: Y }
+    Slider: { Y: Z }
 InputLabels:
   KEY_ACTIVE_PAUSE_TOGGLE : "Active Pause"
   KEY_AILERON_TRIM_LEFT : "Aileron Trim Left"

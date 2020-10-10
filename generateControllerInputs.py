@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 
-import sys, re
-sys.path.append("3rdparty/edrefcard")
+from collections import OrderedDict
+import sys
+import re
 
+sys.path.append("3rdparty/edrefcard")
 from bindingsData import *
+
 
 outFilename = 'config/generatedDevices.yaml'
 
@@ -14,41 +17,40 @@ outFile.write('''###############################################################
 ---
 ''')
 
-for name in supportedDevices :
-    group = supportedDevices[name]
-    image = group['Template']
-    devices = group['HandledDevices']
-    outFile.write('{n}:\n'.format(n=name))
-    outFile.write('  Image: {i}.png\n'.format(i=image))
-    outFile.write('  Devices:\n')
-    for device in devices:
+deviceNameMap = OrderedDict()
+imageMap = {}
+for groupName in supportedDevices:
+    for shortName in supportedDevices[groupName]['HandledDevices']:
+        imageMap[shortName] = supportedDevices[groupName]['Template']
+
+
+# TODO - Need to handle "KeyDevice" in grouping
+outFile.write('DeviceMap:\n')
+completedDevices = {}
+for name in supportedDevices:
+    for device in supportedDevices[name]['HandledDevices']:
         if device == 'Keyboard':
             continue
-        outFile.write('    {d}:\n'.format(d=device))
-        displayName = device
-        if 'displayName' in hotasDetails[device]:
-            displayName = hotasDetails[device]['displayName']
-        outFile.write('      DisplayName: {dn}\n'.format(dn=displayName))
-        outFile.write('      Inputs:\n')
-        
+        if device in completedDevices:
+            continue
+        completedDevices[device] = True
+        outFile.write('  {d}:\n'.format(d=device))
+
         for key in hotasDetails[device]:
             if key == 'displayName':
                 continue
             shortKey = re.sub('^Joy_', '', key)
-            outFile.write('        {k}:\n'.format(k=shortKey))
             data = hotasDetails[device][key]
-            if data['Type'] == 'Digital':
-                outFile.write('          IsDigital: true\n')
-            else:
-                outFile.write('          IsDigital: false\n')
-            outFile.write('          OffsetX: {x}\n'.format(x=data['x']))
-            outFile.write('          OffsetY: {y}\n'.format(y=data['y']))
-            outFile.write('          Width: {w}\n'.format(w=data['width']))
+            height = 54
             if 'height' in data:
-                outFile.write('          Height: {h}\n'.format(h=data['height']))
-            else:
-                outFile.write('          Height: 54\n')
-    outFile.write('\n')
+                height = data['height']
+            outFile.write('    {k}: {{ x: {x}, y: {y}, w: {w}, h: {h} }}\n'
+                          .format(k=shortKey, x=data['x'], y=data['y'],
+                                  w=data['width'], h=height))
+
+outFile.write('ImageMap:\n')
+for groupName in imageMap:
+    outFile.write('  {g} : {i}\n'.format(g=groupName, i=imageMap[groupName]))
 outFile.write('''...''')
 
 outFile.close()

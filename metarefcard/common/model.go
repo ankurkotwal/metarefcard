@@ -1,7 +1,8 @@
 package common
 
 import (
-	"regexp"
+	"fmt"
+	"log"
 	"sort"
 )
 
@@ -25,34 +26,27 @@ func LoadGameModel(filename string, label string, debugOutput bool) *GameData {
 	return &data
 }
 
-// OrgDeviceModel - Returns only the devices that the caller is asking for
-func OrgDeviceModel(deviceMap DeviceMap, neededDevices MockSet, config *Config) DeviceModel {
-	deviceModel := make(DeviceModel)
+// FilterDevices - Returns only the devices that the caller is asking for
+func FilterDevices(neededDevices MockSet, config *Config) DeviceMap {
+	filteredDevices := make(DeviceMap)
 	// Filter for only the device groups we're interested in
-	for _, groupData := range deviceMap {
-		for shortName, inputData := range groupData.Devices {
-			if _, found := neededDevices[shortName]; found {
-				deviceData := new(DeviceData)
-				deviceModel[shortName] = deviceData
-				deviceData.Image = groupData.Image
-				deviceData.Inputs = inputData.Inputs
-			}
+	for shortName := range neededDevices {
+		if _, found := config.DeviceMap[shortName]; !found {
+			log.Printf("Error: device not found in config %s", shortName)
+			continue
 		}
+		neededDevices[shortName] = ""
 	}
-
-	// Add device additions to the main device index
-	for deviceName, deviceInputData := range config.InputOverrides {
-		if deviceData, found := deviceModel[deviceName]; found {
-			for additionInput, additionData := range deviceInputData.Inputs {
-				deviceData.Inputs[additionInput] = additionData
-			}
+	for shortName, inputs := range config.DeviceMap {
+		if _, found := neededDevices[shortName]; found {
+			filteredDevices[shortName] = inputs
 		}
 	}
 
 	if config.DebugOutput {
-		PrintYamlObject(&deviceModel, "Targeted Device Map")
+		PrintYamlObject(filteredDevices, "Targeted Device Map")
 	}
-	return deviceModel
+	return filteredDevices
 }
 
 // GenerateContextColours - basic utility function to generate colours
@@ -71,77 +65,42 @@ func GenerateContextColours(contexts MockSet, config *Config) {
 	}
 }
 
-// RegexByName - map of named regex strings
-type RegexByName map[string]*regexp.Regexp
+func GenerateImageOverlays(overlaysByImage OverlaysByImage, input string, inputData *InputData,
+	gameData *GameData, actionName string, context string, shortName string,
+	image string) {
+	var overlayData OverlayData
+	overlayData.ContextToTexts = make(map[string][]string)
+	overlayData.PosAndSize = inputData
+	var text string
+	// Game data might have a better label for this text
+	if label, found := (*gameData).InputLabels[actionName]; found {
+		text = label
+	} else {
+		text = actionName
+		log.Printf("Error: FS2020 Unknown action %s context %s device %s\n",
+			actionName, context, shortName)
+	}
+	texts := make([]string, 1)
+	texts[0] = text
+	overlayData.ContextToTexts[context] = texts
 
-// DeviceNameToImage - contains device short name -> image name
-type DeviceNameToImage map[string]string
-
-// DeviceMap - structure of devices (by group name)
-type DeviceMap map[string]struct {
-	Image   string                     `yaml:"Image"`
-	Devices map[string]DeviceInputData `yaml:"Devices"`
+	// Find by Image first
+	deviceAndInput := fmt.Sprintf("%s:%s", shortName, input)
+	if overlay, found := overlaysByImage[image]; !found {
+		// First time adding this image
+		overlay := make(map[string]*OverlayData)
+		overlaysByImage[image] = overlay
+		overlay[deviceAndInput] = &overlayData
+	} else {
+		// Now find by input
+		if previousOverlayData, found := overlay[deviceAndInput]; !found {
+			// Not new image but new overlayData
+			overlay[deviceAndInput] = &overlayData
+		} else {
+			// Concatenate input
+			texts = append(previousOverlayData.ContextToTexts[context], text)
+			sort.Strings(texts)
+			previousOverlayData.ContextToTexts[context] = texts
+		}
+	}
 }
-
-// DeviceInputData - data about a given device
-type DeviceInputData struct {
-	DisplayName string    `yaml:"DisplayName"`
-	Inputs      InputsMap `yaml:"Inputs"`
-}
-
-// InputData - data relating to a given input
-type InputData struct {
-	IsDigital bool `yaml:"IsDigital"`
-	ImageX    int  `yaml:"OffsetX"`
-	ImageY    int  `yaml:"OffsetY"`
-	Width     int  `yaml:"Width"`
-	Height    int  `yaml:"Height"`
-}
-
-// DeviceModel - structure to store image and inputs, keyed by device shortname
-type DeviceModel map[string]*DeviceData
-
-// DeviceData - information about a device
-type DeviceData struct {
-	Image  string
-	Inputs InputsMap
-}
-
-// InputsMap - Map of input data by name
-type InputsMap map[string]InputData
-
-// OverlaysByImage - image overlay data indexed by image name
-// Image -> Device:Input -> OverlayData
-type OverlaysByImage map[string]map[string]*OverlayData
-
-// OverlayData - data about what to put in overlay, grouping and location
-type OverlayData struct {
-	ContextToTexts map[string][]string
-	PosAndSize     *InputData
-}
-
-// GameData holds the game's parsed data
-type GameData struct {
-	DeviceNameMap DeviceNameFullToShort  `yaml:"DeviceNameMap"`
-	InputMap      DeviceInputTypeMapping `yaml:"InputMapping"`
-	InputLabels   map[string]string      `yaml:"InputLabels"`
-	Regexes       map[string]string      `yaml:"Regexes"`
-}
-
-// DeviceNameFullToShort maps game device full names to MetaRefCard short names
-type DeviceNameFullToShort map[string]string
-
-// DeviceInputTypeMapping contains a map of device short names to
-// types of input maps (e.g. Slider, Axis, Rotaion)
-type DeviceInputTypeMapping map[string]InputTypeMapping
-
-// InputTypeMapping maps the type of input (e.g Slider, Axis, Rotation) to
-// a map of game input to MetaRefCard input (e.g. X-Axis -> U-Axis)
-type InputTypeMapping map[string]map[string]string // Device -> Type (Axis/Slider) -> axisInputMap/sliderInputMap
-
-const (
-	// DeviceUnknown - unfamiliar with this device
-	DeviceUnknown = "DeviceUnknown"
-	// DeviceMissingInfo - only know the name of device
-	DeviceMissingInfo = "DeviceMissingInfo"
-)

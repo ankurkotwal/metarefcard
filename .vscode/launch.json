@@ -26,7 +26,7 @@
             "env": {},
             "args": [
                 "-g", // Expose GET Handlers
-                "${workspaceFolder}/testdata/debug.xml",
+                // "${workspaceFolder}/testdata/debug.xml",
             ]
         },
         {

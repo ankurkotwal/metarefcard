@@ -16,16 +16,18 @@
 13. ~~Publish on Cloud Run~~
 14. ~~Add Google Analytics~~
 15. ~~Add early testing info text, Github repo, how to report an issue~~
-16. Performance improvement - go functions for font size / measuring
-17. Performance improvement - parallelise image processing
-18. Add a message for unsupported devices. Maybe capture those configs to process later?
-19. Add a message for unknown input
-20. Add a message for unknown action
-21. Steam path
-22. Watermark
-23. Generate game name + device name
-24. Keyboard & mouse
-25. Extend to Elite Dangerous
+16. ~~Thrustmaster HotasOne~~
+17. GeneratedBindings Comments
+18. Performance improvement - go functions for font size / measuring
+19. Performance improvement - parallelise image processing
+20. Add a message for unsupported devices. Maybe capture those configs to process later?
+21. Add a message for unknown input
+22. Add a message for unknown action
+23. Steam path
+24. Watermark
+25. Generate game name + device name
+26. Keyboard & mouse
+27. Extend to Elite Dangerous
 
 
 # Setup

@@ -2,11 +2,13 @@
 
 import asyncio
 import os
+import shutil
 import subprocess
 import sys
 import yaml
 
 DEBUG_OUTPUT = False
+
 
 def initialise():
     # Load configuration
@@ -48,7 +50,9 @@ def initialise():
         print("Found destination dir {d}".format(d=dir_out))
     return dir_hotas_images, dir_out, inkscape, config
 
-def convertfile(inkscape, svg, defaultwidth, defaultheight, multiplier, overrides, dir_out):
+
+def convertfile(inkscape, svg, defaultwidth, defaultheight, multiplier,
+                overrides, dir_out):
     name = os.path.splitext(os.path.basename(svg))[0]
     out = "{dir}/{out}.png".format(dir=dir_out, out=name)
 
@@ -56,8 +60,8 @@ def convertfile(inkscape, svg, defaultwidth, defaultheight, multiplier, override
     width = defaultwidth * multiplier
     height = defaultheight * multiplier
     if name in overrides:
-        width = int(overrides[name]["Width"]) * multiplier
-        height = int(overrides[name]["Height"]) * multiplier
+        width = int(overrides[name]["W"]) * multiplier
+        height = int(overrides[name]["H"]) * multiplier
 
     # Convert svg to png with Inkscape
     cmd_export = [inkscape,
@@ -73,12 +77,13 @@ def convertfile(inkscape, svg, defaultwidth, defaultheight, multiplier, override
     else:
         print("Converted {f}".format(f=name))
 
+
 def main():
     dir_hotas_images, dir_out, inkscape, config = initialise()
     overrides = config["ImageSizeOverride"]
     multiplier = float(config["PixelMultiplier"])
-    defaultwidth = int(config["DefaultImageWidth"])
-    defaultheight = int(config["DefaultImageHeight"])
+    defaultwidth = int(config["DefaultImage"]["W"])
+    defaultheight = int(config["DefaultImage"]["H"])
 
     svgs = []
     for file in os.listdir(dir_hotas_images):
@@ -87,10 +92,12 @@ def main():
             svgs.append("{p}/{f}".format(p=dir_hotas_images, f=file))
     svgs.sort()
     for svg in svgs:
-        convertfile(inkscape, svg, defaultwidth, defaultheight, multiplier, overrides, dir_out)
+        convertfile(inkscape, svg, defaultwidth, defaultheight,
+                    multiplier, overrides, dir_out)
 
     print("Done")
     exit(0)
+
 
 if __name__ == '__main__':
     main()

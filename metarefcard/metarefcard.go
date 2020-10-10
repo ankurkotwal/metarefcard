@@ -23,13 +23,10 @@ import (
 	"golang.org/x/image/font"
 )
 
-type requestHandler func(files [][]byte, deviceMap common.DeviceMap,
-	deviceNameToImage common.DeviceNameToImage,
+type requestHandler func(files [][]byte,
 	config *common.Config) (common.OverlaysByImage, map[string]string)
 
 var config common.Config
-var deviceMap common.DeviceMap
-var deviceNameToImage common.DeviceNameToImage
 var exposeGetHandler = false
 
 // Initialise the package
@@ -39,16 +36,43 @@ func initialise() {
 	// Load the configuration
 	common.LoadYaml("config/config.yaml", &config, "Config")
 
-	// Load the device model (i.e. non-game specific) based on the devices in our game files
-	common.LoadYaml(config.DevicesModel, &deviceMap, "Full Device Map")
+	// Load the device model (i.e. non-game specific)
+	var generatedConfig common.GeneratedConfig
+	common.LoadYaml(config.DevicesFile, &generatedConfig, "Full Device Map")
 
-	// Generate mapping of device short names to image names
-	deviceNameToImage = make(common.DeviceNameToImage)
-	for _, deviceGroup := range deviceMap {
-		for deviceName := range deviceGroup.Devices {
-			deviceNameToImage[deviceName] = deviceGroup.Image
+	// Add device additions to the main device index
+	for shortName, inputs := range config.DeviceMap {
+		generatedInputs, found := generatedConfig.DeviceMap[shortName]
+		if !found {
+			generatedInputs = make(common.DeviceInputs)
+			generatedConfig.DeviceMap[shortName] = generatedInputs
+		}
+
+		// Already have some inputs. Need to override one at a time
+		for input, additionalInput := range inputs {
+			generatedInputs[input] = additionalInput
 		}
 	}
+	config.DeviceMap = generatedConfig.DeviceMap
+
+	// Add input overrides
+	for shortName, inputOverrides := range config.InputOverrides {
+		deviceInputs, found := config.DeviceMap[shortName]
+		if !found {
+			log.Printf("Error: Override device not found %s\n", shortName)
+			continue // Next device
+		}
+		for input, override := range inputOverrides {
+			deviceInputs[input] = override
+		}
+	}
+
+	// Add image map additions
+	for shortName, image := range config.ImageMap {
+		generatedConfig.ImageMap[shortName] = image
+	}
+	config.ImageMap = generatedConfig.ImageMap
+
 }
 
 // RunLocal will run local files
@@ -156,7 +180,7 @@ func loadFormFiles(c *gin.Context) [][]byte {
 
 func sendResponse(loadedFiles [][]byte, handler requestHandler, c *gin.Context) {
 	// Call game handler to generate image overlayes
-	overlaysByImage, categories := handler(loadedFiles, deviceMap, deviceNameToImage, &config)
+	overlaysByImage, categories := handler(loadedFiles, &config)
 
 	// Now generate images from the overlays
 	generatedFiles := generateImages(overlaysByImage, categories)
@@ -196,7 +220,7 @@ func sendResponse(loadedFiles [][]byte, handler requestHandler, c *gin.Context) 
 func getPixelMultiplier(name string, dc *gg.Context) float64 {
 	multiplier := config.PixelMultiplier
 	if dimensions, found := config.ImageSizeOverride[name]; found {
-		multiplier = float64(dimensions.Width) / float64(config.DefaultImageWidth)
+		multiplier = float64(dimensions.W) / float64(config.DefaultImage.W)
 	}
 	return multiplier
 }
@@ -239,7 +263,7 @@ func generateImages(overlaysByImage common.OverlaysByImage, categories map[strin
 	imageNames := prepareGeneratorData(overlaysByImage)
 
 	for _, imageFilename := range imageNames {
-		image, err := gg.LoadImage(fmt.Sprintf("%s/%s", config.ImagesDir, imageFilename))
+		image, err := gg.LoadImage(fmt.Sprintf("%s/%s.png", config.ImagesDir, imageFilename))
 		if err != nil {
 			log.Printf("Error: loadImage %s failed. %v\n", imageFilename, err)
 			continue
@@ -260,8 +284,8 @@ func generateImages(overlaysByImage common.OverlaysByImage, categories map[strin
 			fontSize := float64(config.InputFontSize) * pixelMultiplier
 			dc.SetFontFace(getFontBySize(fontSize))
 
-			targetWidth := float64(overlayData.PosAndSize.Width-config.InputPixelInset) * pixelMultiplier
-			targetHeight := float64(overlayData.PosAndSize.Height) * pixelMultiplier
+			targetWidth := float64(overlayData.PosAndSize.W-config.InputPixelInset) * pixelMultiplier
+			targetHeight := float64(overlayData.PosAndSize.H) * pixelMultiplier
 
 			// Iterate through contexts (in order) and texts (already sorted)
 			// to generate text to be displayed
@@ -291,8 +315,8 @@ func generateImages(overlaysByImage common.OverlaysByImage, categories map[strin
 					offset, _ := dc.MeasureString(incrementalTexts[idx])
 					idx++
 
-					x := offset + float64(overlayData.PosAndSize.ImageX+config.InputPixelInset)*pixelMultiplier
-					y := float64(overlayData.PosAndSize.ImageY) * pixelMultiplier
+					x := offset + float64(overlayData.PosAndSize.X+config.InputPixelInset)*pixelMultiplier
+					y := float64(overlayData.PosAndSize.Y) * pixelMultiplier
 					w, h := dc.MeasureString(text)
 					// Vertically center
 					y = y + (targetHeight-h)/2
