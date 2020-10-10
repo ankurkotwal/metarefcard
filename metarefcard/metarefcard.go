@@ -32,8 +32,8 @@ var config common.Config
 var exposeGetHandler = false
 
 // Initialise the package
-func initialise() {
-	parseCliArgs(&exposeGetHandler)
+func initialise() gameFiles {
+	gameFiles := parseCliArgs(&exposeGetHandler)
 
 	// Load the configuration
 	common.LoadYaml("config/config.yaml", &config, "Config")
@@ -75,18 +75,19 @@ func initialise() {
 	}
 	config.ImageMap = generatedConfig.ImageMap
 
+	return gameFiles
 }
 
 // RunLocal will run local files
-func RunLocal(files []string) {
-	initialise()
-	sendResponse(loadLocalFiles(files), fs2020.HandleRequest,
+func RunLocal() {
+	gameFiles := initialise()
+	sendResponse(loadLocalFiles(gameFiles.fs2020), fs2020.HandleRequest,
 		fs2020.MatchGameInputToModel, nil)
 }
 
 // RunServer will run the server
 func RunServer() {
-	initialise()
+	gameFiles := initialise()
 
 	router := gin.Default()
 	router.LoadHTMLGlob("resources/web_templates/*")
@@ -109,7 +110,7 @@ func RunServer() {
 	if exposeGetHandler {
 		router.GET("/fs2020", func(c *gin.Context) {
 			// Use local files (specified on the command line)
-			sendResponse(loadLocalFiles(flag.Args()), fs2020.HandleRequest,
+			sendResponse(loadLocalFiles(gameFiles.fs2020), fs2020.HandleRequest,
 				fs2020.MatchGameInputToModel, c)
 		})
 	}
@@ -123,7 +124,7 @@ func RunServer() {
 	if exposeGetHandler {
 		router.GET("/sws", func(c *gin.Context) {
 			// Use local files (specified on the command line)
-			sendResponse(loadLocalFiles(flag.Args()), sws.HandleRequest,
+			sendResponse(loadLocalFiles(gameFiles.sws), sws.HandleRequest,
 				sws.MatchGameInputToModel, c)
 		})
 	}
@@ -137,15 +138,35 @@ func RunServer() {
 
 }
 
-func parseCliArgs(exposeGetHandler *bool) {
+type arrayFlags []string
+
+func (i *arrayFlags) String() string {
+	return ""
+}
+
+func (i *arrayFlags) Set(value string) error {
+	*i = append(*i, value)
+	return nil
+}
+
+type gameFiles struct {
+	fs2020 arrayFlags
+	sws    arrayFlags
+}
+
+func parseCliArgs(exposeGetHandler *bool) gameFiles {
+	var gameFiles gameFiles
 	flag.Usage = func() {
 		fmt.Printf("Usage: %s file...\n\n", filepath.Base(os.Args[0]))
 		fmt.Printf("file\tSupported game input configration.\n")
 		flag.PrintDefaults()
 	}
 	flag.BoolVar(exposeGetHandler, "g", false, "Deploy GET handlers.")
-	// TODO add files list for --fs2020 and --sws
+	flag.Var(&gameFiles.fs2020, "fs2020", "Flight Simulator 2020 input configs")
+	flag.Var(&gameFiles.sws, "sws", "Star Wars Squadrons input configs")
 	flag.Parse()
+
+	return gameFiles
 }
 
 func loadLocalFiles(files []string) [][]byte {
