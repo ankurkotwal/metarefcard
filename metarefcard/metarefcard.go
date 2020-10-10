@@ -23,8 +23,8 @@ import (
 	"golang.org/x/image/font"
 )
 
-type requestHandler func(files [][]byte,
-	config *common.Config) (common.OverlaysByImage, map[string]string)
+type requestHandler func(files [][]byte, config *common.Config) (*common.GameData,
+	common.GameBindsByDevice, common.MockSet, common.MockSet)
 
 var config common.Config
 var exposeGetHandler = false
@@ -78,7 +78,8 @@ func initialise() {
 // RunLocal will run local files
 func RunLocal(files []string) {
 	initialise()
-	sendResponse(loadLocalFiles(files), fs2020.HandleRequest, nil)
+	sendResponse(loadLocalFiles(files), fs2020.HandleRequest,
+		fs2020.MatchGameInputToModel, nil)
 }
 
 // RunServer will run the server
@@ -100,24 +101,28 @@ func RunServer() {
 	// Flight simulator endpoint
 	router.POST("/fs2020", func(c *gin.Context) {
 		// Use the posted form data
-		sendResponse(loadFormFiles(c), fs2020.HandleRequest, c)
+		sendResponse(loadFormFiles(c), fs2020.HandleRequest,
+			fs2020.MatchGameInputToModel, c)
 	})
 	if exposeGetHandler {
 		router.GET("/fs2020", func(c *gin.Context) {
 			// Use local files (specified on the command line)
-			sendResponse(loadLocalFiles(flag.Args()), fs2020.HandleRequest, c)
+			sendResponse(loadLocalFiles(flag.Args()), fs2020.HandleRequest,
+				fs2020.MatchGameInputToModel, c)
 		})
 	}
 
 	// Flight simulator endpoint
 	router.POST("/sws", func(c *gin.Context) {
 		// Use the posted form data
-		sendResponse(loadFormFiles(c), sws.HandleRequest, c)
+		sendResponse(loadFormFiles(c), sws.HandleRequest,
+			sws.MatchGameInputToModel, c)
 	})
 	if exposeGetHandler {
 		router.GET("/sws", func(c *gin.Context) {
 			// Use local files (specified on the command line)
-			sendResponse(loadLocalFiles(flag.Args()), sws.HandleRequest, c)
+			sendResponse(loadLocalFiles(flag.Args()), sws.HandleRequest,
+				sws.MatchGameInputToModel, c)
 		})
 	}
 
@@ -179,12 +184,15 @@ func loadFormFiles(c *gin.Context) [][]byte {
 	return files
 }
 
-func sendResponse(loadedFiles [][]byte, handler requestHandler, c *gin.Context) {
+func sendResponse(loadedFiles [][]byte, handler requestHandler,
+	matchFunc common.MatchGameInputToModel, c *gin.Context) {
 	// Call game handler to generate image overlayes
-	overlaysByImage, categories := handler(loadedFiles, &config)
+	gameData, gameBinds, gameDevices, gameContexts := handler(loadedFiles, &config)
+	overlaysByImage := common.PopulateImageOverlays(gameDevices, &config,
+		gameBinds, gameData, matchFunc)
 
 	// Now generate images from the overlays
-	generatedFiles := generateImages(overlaysByImage, categories)
+	generatedFiles := generateImages(overlaysByImage, gameContexts)
 
 	// Generate HTML
 	tmplFilename := "resources/web_templates/refcard.tmpl"

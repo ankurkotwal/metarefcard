@@ -98,3 +98,24 @@ type OverlayData struct {
 
 // DeviceNameFullToShort maps game device full names to MetaRefCard short names
 type DeviceNameFullToShort map[string]string
+
+// GameBindsByDevice - Short name -> Context -> Action -> Primary/Secondary -> Key
+type GameBindsByDevice map[string]GameContextActions
+
+// GameContextActions - Context -> Action
+type GameContextActions map[string]GameActions
+
+// GameActions - Action -> Input
+type GameActions map[string]GameInput
+
+// GameInput - Array of inputs. Index of InputPrimary and InputSecondary
+type GameInput []string
+
+const (
+	// InputPrimary - primary input
+	InputPrimary = 0
+	// InputSecondary - secondary input
+	InputSecondary = 1
+	// NumInputs - number of inputs.
+	NumInputs = 2
+)

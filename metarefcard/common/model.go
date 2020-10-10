@@ -65,9 +65,60 @@ func GenerateContextColours(contexts MockSet, config *Config) {
 	}
 }
 
+// MatchGameInputToModel takes the game provided bindings with the device map to
+// build a list of image overlays.
+type MatchGameInputToModel func(deviceName string, actionData GameInput,
+	deviceInputs DeviceInputs, gameInputMap InputTypeMapping) (GameInput, string)
+
+// PopulateImageOverlays returns a list of image overlays to put on device images
+func PopulateImageOverlays(neededDevices MockSet, config *Config,
+	gameBinds GameBindsByDevice, gameData *GameData, matchFunc MatchGameInputToModel) OverlaysByImage {
+
+	deviceMap := FilterDevices(neededDevices, config)
+	imageMap := config.ImageMap
+
+	// Iterate through our game binds
+	overlaysByImage := make(OverlaysByImage)
+	for shortName, gameDevice := range gameBinds {
+		inputs := deviceMap[shortName]
+		image := imageMap[shortName]
+		for context, actions := range gameDevice {
+			for actionName, gameInput := range actions {
+
+				inputLookups, label := matchFunc(shortName, gameInput, inputs,
+					(*gameData).InputMap[shortName])
+
+				for idx, input := range inputLookups {
+					if idx != 0 && len(input) == 0 {
+						// Ok to have no input if its not the primary input
+						// i.e. Might not have a secondary input
+						continue
+					}
+
+					inputData, found := inputs[input]
+					if !found {
+						log.Printf("Error: %s unknown input to lookup %s for device %s\n",
+							label, input, shortName)
+					}
+					if inputData.X == 0 && inputData.Y == 0 {
+						log.Printf("Error: %s location 0,0 for %s device %s %v\n",
+							label, actionName, shortName, inputData)
+						continue
+					}
+					GenerateImageOverlays(overlaysByImage, input, &inputData,
+						gameData, actionName, context, shortName, image, label)
+				}
+			}
+		}
+	}
+
+	return overlaysByImage
+}
+
+// GenerateImageOverlays - creates the image overlays into overlaysByImage
 func GenerateImageOverlays(overlaysByImage OverlaysByImage, input string, inputData *InputData,
 	gameData *GameData, actionName string, context string, shortName string,
-	image string) {
+	image string, gameLabel string) {
 	var overlayData OverlayData
 	overlayData.ContextToTexts = make(map[string][]string)
 	overlayData.PosAndSize = inputData
@@ -77,8 +128,8 @@ func GenerateImageOverlays(overlaysByImage OverlaysByImage, input string, inputD
 		text = label
 	} else {
 		text = actionName
-		log.Printf("Error: FS2020 Unknown action %s context %s device %s\n",
-			actionName, context, shortName)
+		log.Printf("Error: %s label not found. %s context %s device %s\n",
+			gameLabel, actionName, context, shortName)
 	}
 	texts := make([]string, 1)
 	texts[0] = text

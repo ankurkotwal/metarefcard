@@ -16,8 +16,8 @@ var regexes swsRegexes
 var gameData *common.GameData
 
 // HandleRequest services the request to load files
-func HandleRequest(files [][]byte,
-	config *common.Config) (common.OverlaysByImage, map[string]string) {
+func HandleRequest(files [][]byte, config *common.Config) (*common.GameData,
+	common.GameBindsByDevice, common.MockSet, common.MockSet) {
 	if !initiliased {
 		gameData = common.LoadGameModel("config/sws.yaml",
 			"StarWarsSquadrons Data", config.DebugOutput)
@@ -26,17 +26,16 @@ func HandleRequest(files [][]byte,
 		initiliased = true
 	}
 
-	gameBinds, devices, contexts := loadInputFiles(files, gameData.DeviceNameMap,
+	gameBinds, gameDevices, gameContexts := loadInputFiles(files, gameData.DeviceNameMap,
 		config.DebugOutput, config.VerboseOutput)
-	common.GenerateContextColours(contexts, config)
-	deviceMap := common.FilterDevices(devices, config)
-	return populateImageOverlays(deviceMap, config.ImageMap, gameBinds, gameData), contexts
+	common.GenerateContextColours(gameContexts, config)
+	return gameData, gameBinds, gameDevices, gameContexts
 }
 
 // Load the game config files (provided by user)
 func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
-	debugOutput bool, verboseOutput bool) (swsBindsByDevice, common.MockSet, common.MockSet) {
-	gameBinds := make(swsBindsByDevice)
+	debugOutput bool, verboseOutput bool) (common.GameBindsByDevice, common.MockSet, common.MockSet) {
+	gameBinds := make(common.GameBindsByDevice)
 	deviceNames := make(common.MockSet)
 	contexts := make(common.MockSet)
 
@@ -98,12 +97,12 @@ func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
 			// Add this button to index
 			contextActions, found := gameBinds[shortName]
 			if !found {
-				contextActions = make(swsContextActions)
+				contextActions = make(common.GameContextActions)
 				gameBinds[shortName] = contextActions
 			}
 			actions, found := contextActions[context]
 			if !found {
-				actions = make(swsActions)
+				actions = make(common.GameActions)
 				contextActions[context] = actions
 			}
 
@@ -120,9 +119,14 @@ func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
 			}
 
 			// Assign action details accordingly
-			input := interpretInput(&actionDetails)
+			input := interpretInput(&actionDetails, context, action)
 			if len(input) > 0 {
-				actions[action] = input
+				gameAction, found := actions[action]
+				if !found {
+					gameAction = make(common.GameInput, common.NumInputs)
+					actions[action] = gameAction
+				}
+				gameAction[common.InputPrimary] = input
 			} else {
 				delete(actions, action)
 			}
@@ -176,7 +180,7 @@ func getInputTypeAsField(actionSub string, currAction *swsActionDetails) *string
 	return nil
 }
 
-func interpretInput(details *swsActionDetails) string {
+func interpretInput(details *swsActionDetails, context string, action string) string {
 	switch details.Axis {
 	case "8":
 		return "XAxis" // Throttle
@@ -202,10 +206,12 @@ func interpretInput(details *swsActionDetails) string {
 			return "28" // Throttle Pinky Rocker Up
 		case "74":
 			return "29" // Throttle Pinky Rocker Down
-		case "80":
-			fallthrough // Stick TODO
 		case "86":
 			return ""
+		case "80":
+			fallthrough // Stick TODO
+		default:
+			log.Printf("Error: SWS Unknown button %v context %s action %s\n", details, context, action)
 		}
 		button, err := strconv.Atoi(details.Button)
 		if err == nil {
@@ -213,36 +219,16 @@ func interpretInput(details *swsActionDetails) string {
 		}
 		return strconv.Itoa(button)
 	}
-	log.Printf("Error SWS unknown input %v\n", details)
+	log.Printf("Error: SWS Unknown input %v context %s action %s\n", details, context, action)
 	return ""
 }
 
-func populateImageOverlays(deviceMap common.DeviceMap, imageMap common.ImageMap,
-	gameBinds swsBindsByDevice, data *common.GameData) common.OverlaysByImage {
-	// Iterate through our game binds
-	overlaysByImage := make(common.OverlaysByImage)
-	for shortName, gameDevice := range gameBinds {
-		inputs := deviceMap[shortName]
-		image := imageMap[shortName]
-		for context, actions := range gameDevice {
-			for actionName, input := range actions {
-				inputData, found := inputs[input]
-				if !found {
-					log.Printf("Error: SWS unknown input to lookup %s for device %s\n",
-						input, shortName)
-				}
-				if inputData.X == 0 && inputData.Y == 0 {
-					log.Printf("Error: SWS location 0,0 for %s device %s %v\n",
-						actionName, shortName, inputData)
-					continue
-				}
-				common.GenerateImageOverlays(overlaysByImage, input, &inputData,
-					gameData, actionName, context, shortName, image)
-			}
-		}
-	}
-
-	return overlaysByImage
+// MatchGameInputToModel - returns a common.GameInput of the inputs that can be displayed.
+// Also returns the label to use for error text
+func MatchGameInputToModel(deviceName string, gameInput common.GameInput,
+	deviceInputs common.DeviceInputs, gameInputMap common.InputTypeMapping) (common.GameInput, string) {
+	// For SWS, we've already got the structure right
+	return gameInput, "SWS"
 }
 
 // swsContextActionIndex: context -> action name -> action sub -> value
@@ -252,15 +238,6 @@ type swsRegexes struct {
 	Bind     *regexp.Regexp
 	Joystick *regexp.Regexp
 }
-
-// Device short name -> ContextAction
-type swsBindsByDevice map[string]swsContextActions
-
-// Context -> Actions
-type swsContextActions map[string]swsActions
-
-// Action -> Input
-type swsActions map[string]string
 
 // Parsed fields from sws config
 type swsActionDetails struct {
