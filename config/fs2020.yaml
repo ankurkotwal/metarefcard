@@ -68,6 +68,7 @@ InputMap: # Devices with known game inputs and which model input they map to
     Rotation: { X: X, Y: Y }
     Slider: { Y: Z }
 InputLabels:
+  CHECKLIST : "Display Checklist"
   KEY_ACTIVE_PAUSE_TOGGLE : "Active Pause"
   KEY_AILERON_TRIM_LEFT : "Aileron Trim Left"
   KEY_AILERON_TRIM_RIGHT : "Aileron Trim "
