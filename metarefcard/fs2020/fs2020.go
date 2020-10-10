@@ -40,16 +40,16 @@ func HandleRequest(files [][]byte,
 
 // Load the game config files (provided by user)
 func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToShort,
-	debugOutput bool, verboseOutput bool) (fs2020BindsByDevice, common.MockSet, common.MockSet) {
+	debugOutput bool, verboseOutput bool) (gameBindsByDevice, common.MockSet, common.MockSet) {
 
-	gameBinds := make(fs2020BindsByDevice)
+	gameBinds := make(gameBindsByDevice)
 	neededDevices := make(common.MockSet)
 	contexts := make(common.MockSet)
 
 	// XML state variables
-	var currentDevice *fs2020Device
-	var currentContext map[string]*fs2020Input
-	var currentAction *fs2020Input
+	var currentContext map[string]*gameInput
+	var contextActions gameContextActions
+	var currentAction *gameInput
 	currentKeyType := keyUnknown
 	var currentKey *int
 
@@ -70,22 +70,22 @@ func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToSh
 				switch ty.Name.Local {
 				case "Device":
 					// Found new device
-					var aDevice fs2020Device
+					var aDevice string
 					for _, attr := range ty.Attr {
 						switch attr.Name.Local {
 						case "DeviceName":
-							aDevice.DeviceFullName = attr.Value
+							aDevice = attr.Value
 							break
 						}
 					}
 					var found bool
 					var shortName string
-					if shortName, found = deviceShortNameMap[aDevice.DeviceFullName]; !found {
+					if shortName, found = deviceShortNameMap[aDevice]; !found {
 						log.Printf("Error FS2020 could not find short name for %s\n",
-							aDevice.DeviceFullName)
+							aDevice)
 						break // Move on to next device
 					}
-					currentDevice, found = gameBinds[shortName]
+					_, found = gameBinds[shortName]
 					if found {
 						out, _ := json.Marshal(aDevice)
 						log.Printf("Error: FS2020 duplicate device: %s\n", out)
@@ -95,13 +95,12 @@ func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToSh
 							out, _ := json.Marshal(aDevice)
 							log.Printf("Info: FS2020 new device: %s\n", out)
 						}
-						currentDevice = &aDevice
-						currentDevice.ContextActions = make(fs2020ContextActions)
+						contextActions = make(gameContextActions)
 						neededDevices[shortName] = "" // Add to set
-						gameBinds[shortName] = currentDevice
+						gameBinds[shortName] = contextActions
 						if shortName == common.DeviceMissingInfo {
 							log.Printf("Error: FS2020 missing info for device '%s'\n",
-								aDevice.DeviceFullName)
+								shortName)
 						}
 					}
 				case "Context":
@@ -115,21 +114,21 @@ func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToSh
 						}
 					}
 					var found bool
-					currentContext, found = currentDevice.ContextActions[contextName]
+					currentContext, found = contextActions[contextName]
 					if found {
 						log.Printf("Error: FS2020 duplicate context: %s\n", contextName)
 					} else {
 						if debugOutput {
 							log.Printf("FS2020 new context: %s\n", contextName)
 						}
-						currentContext = make(map[string]*fs2020Input)
-						currentDevice.ContextActions[contextName] = currentContext
+						currentContext = make(map[string]*gameInput)
+						contextActions[contextName] = currentContext
 					}
 				case "Action":
 					// Found new action
 					currentKeyType = keyUnknown
 					var actionName string
-					var action fs2020Input
+					var action gameInput
 					for _, attr := range ty.Attr {
 						if attr.Name.Local == "ActionName" {
 							actionName = attr.Value
@@ -155,9 +154,9 @@ func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToSh
 						if attr.Name.Local == "Information" {
 							switch currentKeyType {
 							case keyPrimary:
-								currentAction.PrimaryInput = attr.Value
+								currentAction.Primary = attr.Value
 							case keySecondary:
-								currentAction.SecondaryInput = attr.Value
+								currentAction.Secondary = attr.Value
 							}
 						}
 						break
@@ -174,7 +173,6 @@ func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToSh
 			case xml.EndElement:
 				switch ty.Name.Local {
 				case "Device":
-					currentDevice = nil
 				case "Context":
 					currentContext = nil
 				case "Action":
@@ -192,18 +190,18 @@ func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToSh
 
 	if verboseOutput {
 		log.Printf("=== Loaded FS2020 Config ===\n")
-		for _, gameDevice := range gameBinds {
-			log.Printf("DeviceName=\"%s\"", gameDevice.DeviceFullName)
-			for contextName, actions := range gameDevice.ContextActions {
+		for shortName, gameDevice := range gameBinds {
+			log.Printf("DeviceName=\"%s\"", shortName)
+			for contextName, actions := range gameDevice {
 				log.Printf("  ContextName=\"%s\"\n", contextName)
 				for actionName, action := range actions {
 					secondaryText := ""
-					if len(action.SecondaryInput) != 0 {
+					if len(action.Secondary) != 0 {
 						secondaryText = fmt.Sprintf(" SecondaryInfo=\"%s\"",
-							action.SecondaryInput)
+							action.Secondary)
 					}
 					log.Printf("    ActionName=\"%s\" PrimaryInfo=\"%s\" %s\n",
-						actionName, action.PrimaryInput, secondaryText)
+						actionName, action.Primary, secondaryText)
 				}
 			}
 		}
@@ -213,13 +211,13 @@ func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToSh
 }
 
 func populateImageOverlays(deviceMap common.DeviceMap, imageMap common.ImageMap,
-	gameBinds fs2020BindsByDevice, data *common.GameData) common.OverlaysByImage {
+	gameBinds gameBindsByDevice, data *common.GameData) common.OverlaysByImage {
 	// Iterate through our game binds
 	overlaysByImage := make(common.OverlaysByImage)
 	for shortName, gameDevice := range gameBinds {
 		inputs := deviceMap[shortName]
 		image := imageMap[shortName]
-		for context, actions := range gameDevice.ContextActions {
+		for context, actions := range gameDevice {
 			for actionName, input := range actions {
 				inputLookups := matchGameInputToModel(shortName, input, inputs,
 					(*data).InputMap[shortName])
@@ -247,27 +245,27 @@ func populateImageOverlays(deviceMap common.DeviceMap, imageMap common.ImageMap,
 
 // matchGameInputToModel takes the game provided bindings with the device map to
 // build a list of image overlays.
-func matchGameInputToModel(deviceName string, actionData *fs2020Input,
+func matchGameInputToModel(deviceName string, actionData *gameInput,
 	inputs common.DeviceInputs, gameInputMap common.InputTypeMapping) []string {
 	inputLookups := make([]string, 0, 2)
 
 	// First the primary input for this action
 	input := matchGameInputToModelByRegex(deviceName,
-		(*actionData).PrimaryInput, inputs, gameInputMap)
+		(*actionData).Primary, inputs, gameInputMap)
 	if input != "" {
 		inputLookups = append(inputLookups, input)
 	} else {
-		log.Printf("Error: FS2020 did not find primary input for %s\n", (*actionData).PrimaryInput)
+		log.Printf("Error: FS2020 did not find primary input for %s\n", (*actionData).Primary)
 	}
 	// Now the secondary input
-	if len((*actionData).SecondaryInput) > 0 {
-		input := matchGameInputToModelByRegex(deviceName, (*actionData).SecondaryInput,
+	if len((*actionData).Secondary) > 0 {
+		input := matchGameInputToModelByRegex(deviceName, (*actionData).Secondary,
 			inputs, gameInputMap)
 		if input != "" {
 			inputLookups = append(inputLookups, input)
 		} else {
 			log.Printf("Error: FS2020 did not find secondary input for %s\n",
-				(*actionData).SecondaryInput)
+				(*actionData).Secondary)
 		}
 	}
 	return inputLookups
@@ -344,20 +342,15 @@ const (
 
 // FS2020 Input model
 // Short name -> Context -> Action -> Primary/Secondary -> Key
-type fs2020BindsByDevice map[string]*fs2020Device
-
-type fs2020Device struct {
-	DeviceFullName string
-	ContextActions fs2020ContextActions
-}
+type gameBindsByDevice map[string]gameContextActions
 
 // Context -> Action
-type fs2020ContextActions map[string]fs2020Actions
+type gameContextActions map[string]gameActions
 
 // Action -> Input
-type fs2020Actions map[string]*fs2020Input
+type gameActions map[string]*gameInput
 
-type fs2020Input struct {
-	PrimaryInput   string
-	SecondaryInput string
+type gameInput struct {
+	Primary   string
+	Secondary string
 }

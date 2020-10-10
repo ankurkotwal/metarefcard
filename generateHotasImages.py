@@ -60,8 +60,8 @@ def convertfile(inkscape, svg, defaultwidth, defaultheight, multiplier,
     width = defaultwidth * multiplier
     height = defaultheight * multiplier
     if name in overrides:
-        width = int(overrides[name]["W"]) * multiplier
-        height = int(overrides[name]["H"]) * multiplier
+        width = int(overrides[name]["h"]) * multiplier
+        height = int(overrides[name]["h"]) * multiplier
 
     # Convert svg to png with Inkscape
     cmd_export = [inkscape,
@@ -82,8 +82,8 @@ def main():
     dir_hotas_images, dir_out, inkscape, config = initialise()
     overrides = config["ImageSizeOverride"]
     multiplier = float(config["PixelMultiplier"])
-    defaultwidth = int(config["DefaultImage"]["W"])
-    defaultheight = int(config["DefaultImage"]["H"])
+    defaultwidth = int(config["DefaultImage"]["w"])
+    defaultheight = int(config["DefaultImage"]["h"])
 
     svgs = []
     for file in os.listdir(dir_hotas_images):

@@ -7,8 +7,8 @@ VerboseOutput: false
 DevicesModel: config/generatedDevices.yaml
 DeviceMap:
   ThrustMasterHOTAS4:
-    14: { x: 9999, y: 9999, w: 592, h: 54 } # Does not exist
-    15: { x: 9999, y: 9999, w: 592, h: 108 } # Does not exist
+    14: { x: -1, y: -1, w: 592, h: 54 } # Does not exist
+    15: { x: -1, y: -1, w: 592, h: 108 } # Does not exist
   ThrustMasterHOTASOne:
     1: { x: 1394, y: 614, w: 1082, h: 54 }
     2: { x: 2114, y: 264, w: 1192, h: 54 }
@@ -35,8 +35,8 @@ DeviceMap:
     ZAxis: { x: 96, y: 736, w: 692, h: 54 }
     UAxis: { x: 1114, y: 1504, w: 932, h: 108 }
   ThrustMasterTFlightHOTASX:
-    14: { x: 9999, y: 9999, w: 592, h: 54 } # Does not exist
-    15: { x: 9999, y: 9999, w: 592, h: 108 } # Does not exist
+    14: { x: -1, y: -1, w: 592, h: 54 } # Does not exist
+    15: { x: -1, y: -1, w: 592, h: 108 } # Does not exist
 InputOverrides:
   SaitekX55Throttle:
     1:     { x: 45,  y: 496, w: 852, h: 54 }
@@ -46,12 +46,12 @@ InputOverrides:
 
 ImageMap:
   ThrustMasterHOTASOne : hotasone
-DefaultImage: { W: 3840, H: 2160 }
+DefaultImage: { w: 3840, h: 2160 }
 PixelMultiplier: 0.4
 ImagesDir: resources/hotas_images
 ImageSizeOverride:
-  vkb-kosmosima-scg-left: { W: 3879, H: 2182 }
-  x45: { W: 5120, H: 2880 }
+  vkb-kosmosima-scg-left: { w: 3879, h: 2182 }
+  x45: { w: 5120, h: 2880 }
 
 FontsDir: resources/fonts
 InputFont: YanoneKaffeesatz-Regular.ttf

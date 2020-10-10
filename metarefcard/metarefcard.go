@@ -137,6 +137,7 @@ func parseCliArgs(exposeGetHandler *bool) {
 		flag.PrintDefaults()
 	}
 	flag.BoolVar(exposeGetHandler, "g", false, "Deploy GET handlers.")
+	// TODO add files list for --fs2020 and --sws
 	flag.Parse()
 }
 
@@ -281,6 +282,19 @@ func generateImages(overlaysByImage common.OverlaysByImage, categories map[strin
 
 		overlayDataRange := overlaysByImage[imageFilename]
 		for _, overlayData := range overlayDataRange {
+			// Skip known bad locations
+			if overlayData.PosAndSize.X == -1 || overlayData.PosAndSize.Y == -1 {
+				continue
+			}
+			xLoc := float64(overlayData.PosAndSize.X) * pixelMultiplier
+			yLoc := float64(overlayData.PosAndSize.Y) * pixelMultiplier
+
+			if xLoc >= float64(dc.Width()) || yLoc >= float64(dc.Height()) {
+				log.Printf("Error: Overlay outside bounds. File %s overlayData %v defaults %v\n",
+					imageFilename, overlayData.PosAndSize, config.DefaultImage)
+				continue
+			}
+
 			fontSize := float64(config.InputFontSize) * pixelMultiplier
 			dc.SetFontFace(getFontBySize(fontSize))
 
