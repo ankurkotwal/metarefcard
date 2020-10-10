@@ -5,8 +5,6 @@ Regexes:
   Pov: (?i)Pov(\d?)[\s_]([[:alpha:]]+)
   Rotation: Rotation\s*([XYZ])
   Slider: Slider\s*([XYZ])
-  TrimKey: ^KEY_([^\s]+)
-  TrimAxis: (.*)AXIS_([^\s]+)
 DeviceNameMap:
   # Airbus T-A320 Quadrant throttle:
   # Alpha Flight Controls:

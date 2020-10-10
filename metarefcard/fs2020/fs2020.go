@@ -15,8 +15,8 @@ import (
 )
 
 var initiliased bool = false
+var regexes fs2020Regexes
 var gameData *common.GameData
-var regexes common.RegexByName
 
 // HandleRequest services the request to load files
 func HandleRequest(files [][]byte,
@@ -24,11 +24,11 @@ func HandleRequest(files [][]byte,
 	if !initiliased {
 		gameData = common.LoadGameModel("config/fs2020.yaml",
 			"FS2020 Data", config.DebugOutput)
-		regexes = make(common.RegexByName)
-		// TODO perf - make regexes a struct instead of a map
-		for name, pattern := range gameData.Regexes {
-			regexes[name] = regexp.MustCompile(pattern)
-		}
+		regexes.Button = regexp.MustCompile(gameData.Regexes["Button"])
+		regexes.Axis = regexp.MustCompile(gameData.Regexes["Axis"])
+		regexes.Pov = regexp.MustCompile(gameData.Regexes["Pov"])
+		regexes.Rotation = regexp.MustCompile(gameData.Regexes["Rotation"])
+		regexes.Slider = regexp.MustCompile(gameData.Regexes["Slider"])
 		initiliased = true
 	}
 	gameBinds, neededDevices, contexts := loadInputFiles(files, gameData.DeviceNameMap,
@@ -276,12 +276,12 @@ func matchGameInputToModelByRegex(deviceName string, action string,
 	inputs common.DeviceInputs, gameInputMap common.InputTypeMapping) string {
 	var matches [][]string
 
-	matches = regexes["Button"].FindAllStringSubmatch(action, -1)
+	matches = regexes.Button.FindAllStringSubmatch(action, -1)
 	if matches != nil {
 		return matches[0][1]
 	}
 
-	matches = regexes["Axis"].FindAllStringSubmatch(action, -1)
+	matches = regexes.Axis.FindAllStringSubmatch(action, -1)
 	if matches != nil {
 		axis := fmt.Sprintf("%s%s", matches[0][1], matches[0][2])
 		if gameInputMap != nil {
@@ -294,7 +294,7 @@ func matchGameInputToModelByRegex(deviceName string, action string,
 		axis = fmt.Sprintf("%sAxis", axis)
 		return axis
 	}
-	matches = regexes["Pov"].FindAllStringSubmatch(action, -1)
+	matches = regexes.Pov.FindAllStringSubmatch(action, -1)
 	if matches != nil {
 		direction := strings.Title(strings.ToLower(matches[0][2]))
 		pov := fmt.Sprintf("POV%s%s", "1", direction)
@@ -304,7 +304,7 @@ func matchGameInputToModelByRegex(deviceName string, action string,
 		return pov
 	}
 
-	matches = regexes["Rotation"].FindAllStringSubmatch(action, -1)
+	matches = regexes.Rotation.FindAllStringSubmatch(action, -1)
 	if matches != nil {
 		rotation := fmt.Sprintf("R%sAxis", matches[0][1])
 		if input, ok := gameInputMap["Rotation"]; ok {
@@ -314,7 +314,7 @@ func matchGameInputToModelByRegex(deviceName string, action string,
 		return rotation
 	}
 
-	matches = regexes["Slider"].FindAllStringSubmatch(action, -1)
+	matches = regexes.Slider.FindAllStringSubmatch(action, -1)
 	if matches != nil {
 		var slider string
 		if input, ok := gameInputMap["Slider"]; ok {
@@ -339,6 +339,14 @@ const (
 	keyPrimary   = iota
 	keySecondary = iota
 )
+
+type fs2020Regexes struct {
+	Button   *regexp.Regexp
+	Axis     *regexp.Regexp
+	Pov      *regexp.Regexp
+	Rotation *regexp.Regexp
+	Slider   *regexp.Regexp
+}
 
 // FS2020 Input model
 // Short name -> Context -> Action -> Primary/Secondary -> Key
