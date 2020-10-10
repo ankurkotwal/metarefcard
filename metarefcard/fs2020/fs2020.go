@@ -15,26 +15,26 @@ import (
 )
 
 var initiliased bool = false
-var regexes fs2020Regexes
-var gameData *common.GameData
+var sharedRegexes fs2020Regexes
+var sharedGameData *common.GameData
 
 // HandleRequest services the request to load files
 func HandleRequest(files [][]byte, config *common.Config) (*common.GameData,
 	common.GameBindsByDevice, common.MockSet, common.MockSet) {
 	if !initiliased {
-		gameData = common.LoadGameModel("config/fs2020.yaml",
+		sharedGameData = common.LoadGameModel("config/fs2020.yaml",
 			"FS2020 Data", config.DebugOutput)
-		regexes.Button = regexp.MustCompile(gameData.Regexes["Button"])
-		regexes.Axis = regexp.MustCompile(gameData.Regexes["Axis"])
-		regexes.Pov = regexp.MustCompile(gameData.Regexes["Pov"])
-		regexes.Rotation = regexp.MustCompile(gameData.Regexes["Rotation"])
-		regexes.Slider = regexp.MustCompile(gameData.Regexes["Slider"])
+		sharedRegexes.Button = regexp.MustCompile(sharedGameData.Regexes["Button"])
+		sharedRegexes.Axis = regexp.MustCompile(sharedGameData.Regexes["Axis"])
+		sharedRegexes.Pov = regexp.MustCompile(sharedGameData.Regexes["Pov"])
+		sharedRegexes.Rotation = regexp.MustCompile(sharedGameData.Regexes["Rotation"])
+		sharedRegexes.Slider = regexp.MustCompile(sharedGameData.Regexes["Slider"])
 		initiliased = true
 	}
-	gameBinds, gameDevices, gameContexts := loadInputFiles(files, gameData.DeviceNameMap,
+	gameBinds, gameDevices, gameContexts := loadInputFiles(files, sharedGameData.DeviceNameMap,
 		config.DebugOutput, config.VerboseOutput)
 	common.GenerateContextColours(gameContexts, config)
-	return gameData, gameBinds, gameDevices, gameContexts
+	return sharedGameData, gameBinds, gameDevices, gameContexts
 }
 
 // Load the game config files (provided by user)
@@ -242,12 +242,12 @@ func matchGameInputToModelByRegex(deviceName string, action string,
 	inputs common.DeviceInputs, gameInputMap common.InputTypeMapping) string {
 	var matches [][]string
 
-	matches = regexes.Button.FindAllStringSubmatch(action, -1)
+	matches = sharedRegexes.Button.FindAllStringSubmatch(action, -1)
 	if matches != nil {
 		return matches[0][1]
 	}
 
-	matches = regexes.Axis.FindAllStringSubmatch(action, -1)
+	matches = sharedRegexes.Axis.FindAllStringSubmatch(action, -1)
 	if matches != nil {
 		axis := fmt.Sprintf("%s%s", matches[0][1], matches[0][2])
 		if gameInputMap != nil {
@@ -260,7 +260,7 @@ func matchGameInputToModelByRegex(deviceName string, action string,
 		axis = fmt.Sprintf("%sAxis", axis)
 		return axis
 	}
-	matches = regexes.Pov.FindAllStringSubmatch(action, -1)
+	matches = sharedRegexes.Pov.FindAllStringSubmatch(action, -1)
 	if matches != nil {
 		direction := strings.Title(strings.ToLower(matches[0][2]))
 		pov := fmt.Sprintf("POV%s%s", "1", direction)
@@ -270,7 +270,7 @@ func matchGameInputToModelByRegex(deviceName string, action string,
 		return pov
 	}
 
-	matches = regexes.Rotation.FindAllStringSubmatch(action, -1)
+	matches = sharedRegexes.Rotation.FindAllStringSubmatch(action, -1)
 	if matches != nil {
 		rotation := fmt.Sprintf("R%sAxis", matches[0][1])
 		if input, ok := gameInputMap["Rotation"]; ok {
@@ -280,7 +280,7 @@ func matchGameInputToModelByRegex(deviceName string, action string,
 		return rotation
 	}
 
-	matches = regexes.Slider.FindAllStringSubmatch(action, -1)
+	matches = sharedRegexes.Slider.FindAllStringSubmatch(action, -1)
 	if matches != nil {
 		var slider string
 		if input, ok := gameInputMap["Slider"]; ok {

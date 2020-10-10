@@ -23,6 +23,8 @@ import (
 	"golang.org/x/image/font"
 )
 
+// requestHandler - handles incoming requests and returns game data, game binds,
+// neededDevices and a context to colour mapping
 type requestHandler func(files [][]byte, config *common.Config) (*common.GameData,
 	common.GameBindsByDevice, common.MockSet, common.MockSet)
 

@@ -12,24 +12,24 @@ import (
 )
 
 var initiliased bool = false
-var regexes swsRegexes
-var gameData *common.GameData
+var sharedRegexes swsRegexes
+var sharedGameData *common.GameData
 
 // HandleRequest services the request to load files
 func HandleRequest(files [][]byte, config *common.Config) (*common.GameData,
 	common.GameBindsByDevice, common.MockSet, common.MockSet) {
 	if !initiliased {
-		gameData = common.LoadGameModel("config/sws.yaml",
+		sharedGameData = common.LoadGameModel("config/sws.yaml",
 			"StarWarsSquadrons Data", config.DebugOutput)
-		regexes.Bind = regexp.MustCompile(gameData.Regexes["Bind"])
-		regexes.Joystick = regexp.MustCompile(gameData.Regexes["Joystick"])
+		sharedRegexes.Bind = regexp.MustCompile(sharedGameData.Regexes["Bind"])
+		sharedRegexes.Joystick = regexp.MustCompile(sharedGameData.Regexes["Joystick"])
 		initiliased = true
 	}
 
-	gameBinds, gameDevices, gameContexts := loadInputFiles(files, gameData.DeviceNameMap,
+	gameBinds, gameDevices, gameContexts := loadInputFiles(files, sharedGameData.DeviceNameMap,
 		config.DebugOutput, config.VerboseOutput)
 	common.GenerateContextColours(gameContexts, config)
-	return gameData, gameBinds, gameDevices, gameContexts
+	return sharedGameData, gameBinds, gameDevices, gameContexts
 }
 
 // Load the game config files (provided by user)
@@ -50,12 +50,12 @@ func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
 		for scanner.Scan() {
 			line := scanner.Text()
 
-			matches = regexes.Bind.FindAllStringSubmatch(line, -1)
+			matches = sharedRegexes.Bind.FindAllStringSubmatch(line, -1)
 			if matches != nil {
 				addAction(contextActionIndex, matches[0][1], contexts, matches[0][2],
 					matches[0][3], matches[0][4], matches[0][5])
 			}
-			matches = regexes.Joystick.FindAllStringSubmatch(line, -1)
+			matches = sharedRegexes.Joystick.FindAllStringSubmatch(line, -1)
 			if matches != nil && len(matches[0][2]) > 0 {
 				if shortName, found := deviceNameMap[matches[0][2]]; !found {
 					log.Printf("Error: SWS Unknown device found %s\n", matches[0][2])
