@@ -9,6 +9,7 @@ import (
 	"image/jpeg"
 	"io/ioutil"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"path"
@@ -20,6 +21,7 @@ import (
 	"github.com/ankurkotwal/MetaRefCard/metarefcard/sws"
 	"github.com/fogleman/gg"
 	"github.com/gin-gonic/gin"
+	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
 )
 
@@ -257,16 +259,90 @@ func getPixelMultiplier(name string, dc *gg.Context) float64 {
 	return multiplier
 }
 
-var fontBySize map[float64]font.Face = make(map[float64]font.Face)
+var fontBySize map[int]font.Face = make(map[int]font.Face)
 
-func getFontBySize(size float64) font.Face {
-	font, found := fontBySize[size]
+func getFontBySize(size int) font.Face {
+	face, found := fontBySize[size]
 	if !found {
 		name := fmt.Sprintf("%s/%s", config.FontsDir, config.InputFont)
-		font = common.LoadFont(name, size)
-		fontBySize[size] = font
+
+		fontBytes, err := ioutil.ReadFile(name)
+		if err != nil {
+			panic(err)
+		}
+		f, err := truetype.Parse(fontBytes)
+		if err != nil {
+			panic(err)
+		}
+		face = truetype.NewFace(f, &truetype.Options{
+			Size: float64(size),
+		})
+		fontBySize[size] = face
 	}
-	return font
+	return face
+}
+
+func measureString(fontFace font.Face, text string) (int, int) {
+	calcX := font.MeasureString(fontFace, text).Round()
+	calcY := fontFace.Metrics().Height.Round()
+	return calcX, calcY
+}
+
+func calcFontSizeAlt(text string, fontSize int, targetWidth int, targetHeight int) int {
+	calcX, calcY := measureString(getFontBySize(fontSize), text)
+	if calcX > targetWidth || calcY > targetHeight {
+		// Text is too big, shrink till it fits
+		for calcX > targetWidth || calcY > targetHeight {
+			fontSize--
+			calcX, calcY = measureString(getFontBySize(fontSize), text)
+		}
+	} else if calcX < targetWidth && calcY < targetHeight {
+		// Text can grow to fit
+		for calcX < targetWidth && calcY < targetHeight {
+			fontSize++
+			calcX, calcY = measureString(getFontBySize(fontSize), text)
+		}
+		fontSize-- // Go down one size
+	}
+	return fontSize
+}
+
+// Resize font till it fits
+func calcFontSize(text string, fontSize int, targetWidth int, targetHeight int) int {
+	// Max height in pixels is targetHeight (fontSize = height)
+	maxFontSize := targetHeight
+	minFontSize := 13
+	newFontSize := maxFontSize
+	for {
+		x, y := measureString(getFontBySize(newFontSize), text)
+		if y > targetHeight {
+			panic("Text is taller than max height")
+		}
+		if x > targetWidth {
+			// Need to reduce fontSize and try again
+			maxFontSize = newFontSize - 1
+			delta := ((newFontSize - minFontSize) / 2)
+			if delta == 0 {
+				// Found optimal size
+				break
+			}
+			newFontSize -= delta
+		} else {
+			if newFontSize == maxFontSize || newFontSize == maxFontSize-1 {
+				// We optimally fit in the space, we're done.
+				break
+			}
+			// Can grow more, do so.
+			minFontSize = newFontSize + 1
+			delta := ((maxFontSize - newFontSize) / 2)
+			if delta == 0 {
+				// Found optimal size
+				break
+			}
+			newFontSize += delta
+		}
+	}
+	return newFontSize
 }
 
 func prepareGeneratorData(overlaysByImage common.OverlaysByImage) []string {
@@ -326,11 +402,9 @@ func generateImages(overlaysByImage common.OverlaysByImage, categories map[strin
 				continue
 			}
 
-			fontSize := float64(config.InputFontSize) * pixelMultiplier
-			dc.SetFontFace(getFontBySize(fontSize))
-
-			targetWidth := float64(overlayData.PosAndSize.W-config.InputPixelInset) * pixelMultiplier
-			targetHeight := float64(overlayData.PosAndSize.H) * pixelMultiplier
+			fontSize := int(math.Round(float64(config.InputFontSize) * pixelMultiplier))
+			targetWidth := int(math.Round(float64(overlayData.PosAndSize.W-config.InputPixelInset) * pixelMultiplier))
+			targetHeight := int(math.Round(float64(overlayData.PosAndSize.H) * pixelMultiplier))
 
 			// Iterate through contexts (in order) and texts (already sorted)
 			// to generate text to be displayed
@@ -356,23 +430,23 @@ func generateImages(overlaysByImage common.OverlaysByImage, categories map[strin
 			for _, context := range prepareContexts(overlayData.ContextToTexts) {
 				texts := overlayData.ContextToTexts[context]
 				for _, text := range texts {
-					dc.SetFontFace(getFontBySize(fontSize))
-					offset, _ := dc.MeasureString(incrementalTexts[idx])
+					offset, _ := measureString(getFontBySize(fontSize), incrementalTexts[idx])
 					idx++
 
-					x := offset + float64(overlayData.PosAndSize.X+config.InputPixelInset)*pixelMultiplier
-					y := float64(overlayData.PosAndSize.Y) * pixelMultiplier
-					w, h := dc.MeasureString(text)
+					x := offset + int(math.Round(float64(overlayData.PosAndSize.X+config.InputPixelInset)*pixelMultiplier))
+					y := int(math.Round(float64(overlayData.PosAndSize.Y) * pixelMultiplier))
+					w, h := measureString(getFontBySize(fontSize), text)
 					// Vertically center
 					y = y + (targetHeight-h)/2
 
 					dc.SetHexColor(categories[context])
-					dc.DrawRoundedRectangle(x, y, w, h, 6)
+					dc.DrawRoundedRectangle(float64(x), float64(y), float64(w), float64(h), 6)
 					dc.Fill()
 					dc.SetHexColor(config.LightColour)
-					dc.SetFontFace(getFontBySize(fontSize - 1)) // Render one font size smaller to fit in rect
-					w2, _ := dc.MeasureString(text)
-					dc.DrawStringAnchored(text, x+(w-w2)/2, y, 0, 0.85)
+					face := getFontBySize(fontSize)
+					dc.SetFontFace(face) // Render one font size smaller to fit in rect
+					w2, _ := measureString(face, text)
+					dc.DrawStringAnchored(text, float64(x+(w-w2)/2), float64(y), 0, 0.85)
 				}
 			}
 		}
@@ -381,32 +455,4 @@ func generateImages(overlaysByImage common.OverlaysByImage, categories map[strin
 		files = append(files, &jpgBytes)
 	}
 	return files
-}
-
-var fontCtx *gg.Context = nil
-
-// Resize font till it fits
-func calcFontSize(text string, fontSize float64, targetWidth float64, targetHeight float64) float64 {
-	if fontCtx == nil {
-		fontCtx = gg.NewContext(1, 1) // Only needed for fonts, small size
-	}
-	fontCtx.SetFontFace(getFontBySize(fontSize))
-	calcX, calcY := fontCtx.MeasureString(text)
-	if calcX > targetWidth || calcY > targetHeight {
-		// Text is too big, shrink till it fits
-		for calcX > targetWidth || calcY > targetHeight {
-			fontSize--
-			fontCtx.SetFontFace(getFontBySize(fontSize))
-			calcX, calcY = fontCtx.MeasureString(text)
-		}
-	} else if calcX < targetWidth && calcY < targetHeight {
-		// Text can grow to fit
-		for calcX < targetWidth && calcY < targetHeight {
-			fontSize++
-			fontCtx.SetFontFace(getFontBySize(fontSize))
-			calcX, calcY = fontCtx.MeasureString(text)
-		}
-		fontSize-- // Go down one size
-	}
-	return fontSize
 }
