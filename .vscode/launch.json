@@ -12,7 +12,7 @@
             "program": "${workspaceFolder}/main.go",
             "env": {},
             "args": [
-                "-g", // Expose GET Handlers
+                "-d", // Expose GET Handlers
                 "--sws",
                 "${workspaceFolder}/testdata/sws/Saitek_Pro_Flight_X-55_Rhino.profile",
                 "--fs2020",
@@ -29,7 +29,7 @@
             "program": "${workspaceFolder}/main.go",
             "env": {},
             "args": [
-                "-g", // Expose GET Handlers
+                "-d", // Expose GET Handlers
                 "--sws",
                 "${workspaceFolder}/testdata/sws/Saitek_Pro_Flight_X-55_Rhino.profile",
                 "--fs2020",
@@ -112,7 +112,7 @@
             "program": "${workspaceFolder}/main.go",
             "env": {},
             "args": [
-                "-g", // Expose GET Handlers
+                "-d", // Expose GET Handlers
                 // "--fs2020",
                 // "${workspaceFolder}/testdata/debug.xml",
             ]
@@ -125,7 +125,7 @@
             "program": "${workspaceFolder}/main.go",
             "env": {},
             "args": [
-                "-g", // Expose GET Handlers
+                "-d", // Expose GET Handlers
                 "--sws",
                 "${workspaceFolder}/testdata/sws/debug.profile",
             ]

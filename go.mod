@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	github.com/fogleman/gg v1.3.1-0.20200515011029-ad4d1eafac46
+	github.com/gin-contrib/pprof v1.3.0
 	github.com/gin-gonic/gin v1.6.3
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/kr/pretty v0.1.0 // indirect

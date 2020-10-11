@@ -6,10 +6,9 @@ import (
 	"flag"
 	"fmt"
 	"html/template"
-	"image/jpeg"
+	"image"
 	"io/ioutil"
 	"log"
-	"math"
 	"net/http"
 	"os"
 	"path"
@@ -20,9 +19,8 @@ import (
 	"github.com/ankurkotwal/MetaRefCard/metarefcard/fs2020"
 	"github.com/ankurkotwal/MetaRefCard/metarefcard/sws"
 	"github.com/fogleman/gg"
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
-	"github.com/golang/freetype/truetype"
-	"golang.org/x/image/font"
 )
 
 // requestHandler - handles incoming requests and returns game data, game binds,
@@ -31,11 +29,11 @@ type requestHandler func(files [][]byte, config *common.Config) (*common.GameDat
 	common.GameBindsByDevice, common.MockSet, common.MockSet)
 
 var config common.Config
-var exposeGetHandler = false
+var debugMode = false
 
 // Initialise the package
 func initialise() gameFiles {
-	gameFiles := parseCliArgs(&exposeGetHandler)
+	gameFiles := parseCliArgs(&debugMode)
 
 	// Load the configuration
 	common.LoadYaml("config/config.yaml", &config, "Config")
@@ -92,6 +90,11 @@ func RunServer() {
 	gameFiles := initialise()
 
 	router := gin.Default()
+
+	if debugMode {
+		pprof.Register(router)
+	}
+
 	router.LoadHTMLGlob("resources/web_templates/*")
 	router.StaticFile("/script.js", "resources/www/script.js")
 
@@ -109,7 +112,7 @@ func RunServer() {
 		sendResponse(loadFormFiles(c), fs2020.HandleRequest,
 			fs2020.MatchGameInputToModel, c)
 	})
-	if exposeGetHandler {
+	if debugMode {
 		router.GET("/fs2020", func(c *gin.Context) {
 			// Use local files (specified on the command line)
 			sendResponse(loadLocalFiles(gameFiles.fs2020), fs2020.HandleRequest,
@@ -123,7 +126,7 @@ func RunServer() {
 		sendResponse(loadFormFiles(c), sws.HandleRequest,
 			sws.MatchGameInputToModel, c)
 	})
-	if exposeGetHandler {
+	if debugMode {
 		router.GET("/sws", func(c *gin.Context) {
 			// Use local files (specified on the command line)
 			sendResponse(loadLocalFiles(gameFiles.sws), sws.HandleRequest,
@@ -156,14 +159,14 @@ type gameFiles struct {
 	sws    arrayFlags
 }
 
-func parseCliArgs(exposeGetHandler *bool) gameFiles {
+func parseCliArgs(debugMode *bool) gameFiles {
 	var gameFiles gameFiles
 	flag.Usage = func() {
 		fmt.Printf("Usage: %s file...\n\n", filepath.Base(os.Args[0]))
 		fmt.Printf("file\tSupported game input configration.\n")
 		flag.PrintDefaults()
 	}
-	flag.BoolVar(exposeGetHandler, "g", false, "Deploy GET handlers.")
+	flag.BoolVar(debugMode, "d", false, "Debug mode & deploy GET handlers.")
 	flag.Var(&gameFiles.fs2020, "fs2020", "Flight Simulator 2020 input configs")
 	flag.Var(&gameFiles.sws, "sws", "Star Wars Squadrons input configs")
 	flag.Parse()
@@ -250,101 +253,6 @@ func sendResponse(loadedFiles [][]byte, handler requestHandler,
 	}
 }
 
-// Return the multiplier/scale of image based on actual width vs default width
-func getPixelMultiplier(name string, dc *gg.Context) float64 {
-	multiplier := config.PixelMultiplier
-	if dimensions, found := config.ImageSizeOverride[name]; found {
-		multiplier = float64(dimensions.W) / float64(config.DefaultImage.W)
-	}
-	return multiplier
-}
-
-var fontBySize map[int]font.Face = make(map[int]font.Face)
-
-func getFontBySize(size int) font.Face {
-	face, found := fontBySize[size]
-	if !found {
-		name := fmt.Sprintf("%s/%s", config.FontsDir, config.InputFont)
-
-		fontBytes, err := ioutil.ReadFile(name)
-		if err != nil {
-			panic(err)
-		}
-		f, err := truetype.Parse(fontBytes)
-		if err != nil {
-			panic(err)
-		}
-		face = truetype.NewFace(f, &truetype.Options{
-			Size: float64(size),
-		})
-		fontBySize[size] = face
-	}
-	return face
-}
-
-func measureString(fontFace font.Face, text string) (int, int) {
-	calcX := font.MeasureString(fontFace, text).Round()
-	calcY := fontFace.Metrics().Height.Round()
-	return calcX, calcY
-}
-
-func calcFontSizeAlt(text string, fontSize int, targetWidth int, targetHeight int) int {
-	calcX, calcY := measureString(getFontBySize(fontSize), text)
-	if calcX > targetWidth || calcY > targetHeight {
-		// Text is too big, shrink till it fits
-		for calcX > targetWidth || calcY > targetHeight {
-			fontSize--
-			calcX, calcY = measureString(getFontBySize(fontSize), text)
-		}
-	} else if calcX < targetWidth && calcY < targetHeight {
-		// Text can grow to fit
-		for calcX < targetWidth && calcY < targetHeight {
-			fontSize++
-			calcX, calcY = measureString(getFontBySize(fontSize), text)
-		}
-		fontSize-- // Go down one size
-	}
-	return fontSize
-}
-
-// Resize font till it fits
-func calcFontSize(text string, fontSize int, targetWidth int, targetHeight int) int {
-	// Max height in pixels is targetHeight (fontSize = height)
-	maxFontSize := targetHeight
-	minFontSize := 13
-	newFontSize := maxFontSize
-	for {
-		x, y := measureString(getFontBySize(newFontSize), text)
-		if y > targetHeight {
-			panic("Text is taller than max height")
-		}
-		if x > targetWidth {
-			// Need to reduce fontSize and try again
-			maxFontSize = newFontSize - 1
-			delta := ((newFontSize - minFontSize) / 2)
-			if delta == 0 {
-				// Found optimal size
-				break
-			}
-			newFontSize -= delta
-		} else {
-			if newFontSize == maxFontSize || newFontSize == maxFontSize-1 {
-				// We optimally fit in the space, we're done.
-				break
-			}
-			// Can grow more, do so.
-			minFontSize = newFontSize + 1
-			delta := ((maxFontSize - newFontSize) / 2)
-			if delta == 0 {
-				// Found optimal size
-				break
-			}
-			newFontSize += delta
-		}
-	}
-	return newFontSize
-}
-
 func prepareGeneratorData(overlaysByImage common.OverlaysByImage) []string {
 	// Generate sorted list of image names
 	imageNames := make([]string, 0)
@@ -355,104 +263,41 @@ func prepareGeneratorData(overlaysByImage common.OverlaysByImage) []string {
 	return imageNames
 }
 
-func prepareContexts(contextToTexts map[string][]string) []string {
-	// Get a list of contexts and sort them
-	contexts := make([]string, 0, len(contextToTexts))
-	for context := range contextToTexts {
-		contexts = append(contexts, context)
-	}
-	sort.Strings(contexts)
-	return contexts
+type chanData struct {
+	Dc            *gg.Context
+	Image         *image.Image
+	ImageFilename string
 }
 
 func generateImages(overlaysByImage common.OverlaysByImage, categories map[string]string) []*bytes.Buffer {
-	var files []*bytes.Buffer = nil
 
 	imageNames := prepareGeneratorData(overlaysByImage)
 
-	for _, imageFilename := range imageNames {
-		image, err := gg.LoadImage(fmt.Sprintf("%s/%s.png", config.ImagesDir, imageFilename))
-		if err != nil {
-			log.Printf("Error: loadImage %s failed. %v\n", imageFilename, err)
-			continue
+	files := make([]*bytes.Buffer, 0, len(imageNames))
+	channel := make(chan chanData, len(imageNames))
+	for _, imageName := range imageNames {
+		go func(imageFilename string) {
+			image, err := gg.LoadImage(fmt.Sprintf("%s/%s.png", config.ImagesDir, imageFilename))
+			if err != nil {
+				log.Printf("Error: loadImage %s failed. %v\n", imageFilename, err)
+				channel <- chanData{nil, nil, ""}
+			}
+
+			// Load the image
+			dc := gg.NewContext(image.Bounds().Size().X, image.Bounds().Size().Y)
+
+			channel <- chanData{dc, &image, imageFilename}
+		}(imageName)
+
+	}
+
+	for range imageNames {
+		data := <-channel
+		imgBytes := common.GenerateImage(data.Dc, data.Image, data.ImageFilename,
+			overlaysByImage, categories, &config)
+		if imgBytes != nil {
+			files = append(files, imgBytes)
 		}
-
-		// Load the image
-		dc := gg.NewContext(image.Bounds().Size().X, image.Bounds().Size().Y)
-		// Set the background colour
-		dc.SetHexColor(config.BackgroundColour)
-		dc.Clear()
-		// Apply the image on top
-		dc.DrawImage(image, 0, 0)
-		dc.SetRGB(0, 0, 0)
-		pixelMultiplier := getPixelMultiplier(imageFilename, dc)
-
-		overlayDataRange := overlaysByImage[imageFilename]
-		for _, overlayData := range overlayDataRange {
-			// Skip known bad locations
-			if overlayData.PosAndSize.X == -1 || overlayData.PosAndSize.Y == -1 {
-				continue
-			}
-			xLoc := float64(overlayData.PosAndSize.X) * pixelMultiplier
-			yLoc := float64(overlayData.PosAndSize.Y) * pixelMultiplier
-
-			if xLoc >= float64(dc.Width()) || yLoc >= float64(dc.Height()) {
-				log.Printf("Error: Overlay outside bounds. File %s overlayData %v defaults %v\n",
-					imageFilename, overlayData.PosAndSize, config.DefaultImage)
-				continue
-			}
-
-			fontSize := int(math.Round(float64(config.InputFontSize) * pixelMultiplier))
-			targetWidth := int(math.Round(float64(overlayData.PosAndSize.W-config.InputPixelInset) * pixelMultiplier))
-			targetHeight := int(math.Round(float64(overlayData.PosAndSize.H) * pixelMultiplier))
-
-			// Iterate through contexts (in order) and texts (already sorted)
-			// to generate text to be displayed
-			fullText := ""
-			incrementalTexts := []string{""}
-			for _, context := range prepareContexts(overlayData.ContextToTexts) {
-				texts := overlayData.ContextToTexts[context]
-				// First get the full text to workout font size
-				for _, text := range texts {
-					padding := " "
-					if len(fullText) != 0 {
-						fullText = fmt.Sprintf("%s%s%s", fullText, padding, text)
-					} else {
-						fullText = text
-					}
-					incrementalTexts = append(incrementalTexts, fullText+padding)
-				}
-			}
-			fontSize = calcFontSize(fullText, fontSize, targetWidth, targetHeight)
-			// Now create overlays for each text
-			// Ugh, second loop through texts
-			idx := 0
-			for _, context := range prepareContexts(overlayData.ContextToTexts) {
-				texts := overlayData.ContextToTexts[context]
-				for _, text := range texts {
-					offset, _ := measureString(getFontBySize(fontSize), incrementalTexts[idx])
-					idx++
-
-					x := offset + int(math.Round(float64(overlayData.PosAndSize.X+config.InputPixelInset)*pixelMultiplier))
-					y := int(math.Round(float64(overlayData.PosAndSize.Y) * pixelMultiplier))
-					w, h := measureString(getFontBySize(fontSize), text)
-					// Vertically center
-					y = y + (targetHeight-h)/2
-
-					dc.SetHexColor(categories[context])
-					dc.DrawRoundedRectangle(float64(x), float64(y), float64(w), float64(h), 6)
-					dc.Fill()
-					dc.SetHexColor(config.LightColour)
-					face := getFontBySize(fontSize)
-					dc.SetFontFace(face) // Render one font size smaller to fit in rect
-					w2, _ := measureString(face, text)
-					dc.DrawStringAnchored(text, float64(x+(w-w2)/2), float64(y), 0, 0.85)
-				}
-			}
-		}
-		var jpgBytes bytes.Buffer
-		dc.EncodeJPG(&jpgBytes, &jpeg.Options{Quality: 90})
-		files = append(files, &jpgBytes)
 	}
 	return files
 }
