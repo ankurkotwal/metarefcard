@@ -59,6 +59,14 @@ InputFontSize: 40
 DefaultLineHeight: 54
 InputPixelInset: 10
 
+Watermark:
+  Text: MetaRefCard.com
+  Font: SourceSansPro-Regular.ttf
+  FontSize: 60
+  Location:
+    x: 25
+    y: 230
+
 BackgroundColour: "#e9ecefff"
 LightColour: "#ffffffff"
 DarkColour: "#373a3cff"

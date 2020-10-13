@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"log"
 
+	"github.com/golang/freetype/truetype"
+	"golang.org/x/image/font"
 	"gopkg.in/yaml.v3"
 )
 
@@ -22,10 +24,6 @@ func (m MockSet) Keys() []string {
 
 // LoadYaml loads Yaml file and prints any errors
 func LoadYaml(filename string, out interface{}, label string) {
-	loadYaml(filename, out, label)
-}
-
-func loadYaml(filename string, out interface{}, label string) {
 	yamlData, err := ioutil.ReadFile(filename)
 	if err != nil {
 		log.Fatalf("error: yaml ioutil.ReadFile %v ", err)
@@ -48,4 +46,22 @@ func PrintYamlObject(in interface{}, label string) {
 	}
 	fmt.Printf("=== %s ===\n%s\n\n", label, string(d))
 
+}
+
+// LoadFont loads a font into memory and returns it.
+func LoadFont(dir string, name string, size int) *font.Face {
+	fontPath := fmt.Sprintf("%s/%s", dir, name)
+
+	fontBytes, err := ioutil.ReadFile(fontPath)
+	if err != nil {
+		panic(err)
+	}
+	f, err := truetype.Parse(fontBytes)
+	if err != nil {
+		panic(err)
+	}
+	face := truetype.NewFace(f, &truetype.Options{
+		Size: float64(size),
+	})
+	return &face
 }

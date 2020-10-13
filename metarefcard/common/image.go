@@ -5,16 +5,16 @@ import (
 	"fmt"
 	"image"
 	"image/jpeg"
-	"io/ioutil"
 	"log"
 	"math"
 	"sort"
 	"sync"
 
 	"github.com/fogleman/gg"
-	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
 )
+
+var waterMarkFont *font.Face = nil
 
 // GenerateImage - generates an image with the provided overlays
 func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
@@ -44,7 +44,7 @@ func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
 			continue
 		}
 
-		fontSize := int(math.Round(float64(config.InputFontSize) * pixelMultiplier))
+		fontSize := int(math.Round(config.InputFontSize * pixelMultiplier))
 		targetWidth := int(math.Round(float64(overlayData.PosAndSize.W-config.InputPixelInset) * pixelMultiplier))
 		targetHeight := int(math.Round(float64(overlayData.PosAndSize.H) * pixelMultiplier))
 
@@ -92,6 +92,18 @@ func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
 			}
 		}
 	}
+
+	// Generate watermark
+	if waterMarkFont == nil {
+		waterMarkFont = LoadFont(config.FontsDir, config.Watermark.Font,
+			int(math.Round(config.Watermark.FontSize*pixelMultiplier)))
+	}
+	dc.SetHexColor(config.DarkColour)
+	dc.SetFontFace(*waterMarkFont)
+	dc.DrawString(fmt.Sprintf("%s (%s)", config.Watermark.Text, config.Version),
+		config.Watermark.Location.X*pixelMultiplier,
+		config.Watermark.Location.Y*pixelMultiplier)
+
 	var imgBytes bytes.Buffer
 	dc.EncodeJPG(&imgBytes, &jpeg.Options{Quality: 90})
 	return &imgBytes
@@ -104,19 +116,7 @@ func getFontBySize(size int, config *Config) font.Face {
 	fontsMux.Lock()
 	face, found := fontBySize[size]
 	if !found {
-		name := fmt.Sprintf("%s/%s", config.FontsDir, config.InputFont)
-
-		fontBytes, err := ioutil.ReadFile(name)
-		if err != nil {
-			panic(err)
-		}
-		f, err := truetype.Parse(fontBytes)
-		if err != nil {
-			panic(err)
-		}
-		face = truetype.NewFace(f, &truetype.Options{
-			Size: float64(size),
-		})
+		face = *LoadFont(config.FontsDir, config.InputFont, size)
 		fontBySize[size] = face
 	}
 	fontsMux.Unlock()

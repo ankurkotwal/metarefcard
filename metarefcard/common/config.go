@@ -25,6 +25,13 @@ type Config struct {
 	DefaultLineHeight int     `yaml:"DefaultLineHeight"`
 	InputPixelInset   int     `yaml:"InputPixelInset"`
 
+	Watermark struct {
+		Text     string  `yaml:"Text"`
+		Font     string  `yaml:"Font"`
+		FontSize float64 `yaml:"FontSize"`
+		Location Point2d `yaml:"Location"`
+	} `yaml:"Watermark"`
+
 	BackgroundColour string   `yaml:"BackgroundColour"`
 	LightColour      string   `yaml:"LightColour"`
 	DarkColour       string   `yaml:"DarkColour"`
@@ -35,6 +42,12 @@ type Config struct {
 type GeneratedConfig struct {
 	DeviceMap DeviceMap `yaml:"DeviceMap"`
 	ImageMap  ImageMap  `yaml:"ImageMap"`
+}
+
+// Point2d contains x and y
+type Point2d struct {
+	X float64 `yaml:"x"`
+	Y float64 `yaml:"y"`
 }
 
 // Dimensions2d contains width and height
