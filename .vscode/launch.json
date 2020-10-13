@@ -113,8 +113,8 @@
             "env": {},
             "args": [
                 "-d", // Expose GET Handlers
-                // "--fs2020",
-                // "${workspaceFolder}/testdata/debug.xml",
+                "--fs2020",
+                "${workspaceFolder}/testdata/fs2020/debug.xml",
             ]
         },
         {

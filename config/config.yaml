@@ -56,8 +56,10 @@ ImageSizeOverride:
 FontsDir: resources/fonts
 InputFont: YanoneKaffeesatz-Regular.ttf
 InputFontSize: 40
+InputMinFontSize: 13
 DefaultLineHeight: 54
-InputPixelInset: 10
+InputPixelXInset: 5
+InputPixelYInset: 5
 
 Watermark:
   Text: MetaRefCard.com

@@ -22,8 +22,10 @@ type Config struct {
 	FontsDir          string  `yaml:"FontsDir"`
 	InputFont         string  `yaml:"InputFont"`
 	InputFontSize     float64 `yaml:"InputFontSize"`
+	InputMinFontSize  int     `yaml:"InputMinFontSize"`
 	DefaultLineHeight int     `yaml:"DefaultLineHeight"`
-	InputPixelInset   int     `yaml:"InputPixelInset"`
+	InputPixelXInset  int     `yaml:"InputPixelXInset"`
+	InputPixelYInset  int     `yaml:"InputPixelYInset"`
 
 	Watermark struct {
 		Text     string  `yaml:"Text"`

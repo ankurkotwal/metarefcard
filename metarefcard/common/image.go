@@ -45,8 +45,8 @@ func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
 		}
 
 		fontSize := int(math.Round(config.InputFontSize * pixelMultiplier))
-		targetWidth := int(math.Round(float64(overlayData.PosAndSize.W-config.InputPixelInset) * pixelMultiplier))
-		targetHeight := int(math.Round(float64(overlayData.PosAndSize.H) * pixelMultiplier))
+		targetWidth := int(math.Round(float64(overlayData.PosAndSize.W-2*config.InputPixelXInset) * pixelMultiplier))
+		targetHeight := int(math.Round(float64(overlayData.PosAndSize.H-2*config.InputPixelYInset) * pixelMultiplier))
 
 		// Iterate through contexts (in order) and texts (already sorted)
 		// to generate text to be displayed
@@ -75,20 +75,21 @@ func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
 				offset, _ := measureString(getFontBySize(fontSize, config), incrementalTexts[idx])
 				idx++
 
-				x := offset + int(math.Round(float64(overlayData.PosAndSize.X+config.InputPixelInset)*pixelMultiplier))
-				y := int(math.Round(float64(overlayData.PosAndSize.Y) * pixelMultiplier))
+				x := offset + int(math.Round(float64(overlayData.PosAndSize.X+config.InputPixelXInset)*pixelMultiplier))
+				y := int(math.Round(float64(overlayData.PosAndSize.Y+config.InputPixelYInset) * pixelMultiplier))
 				w, h := measureString(getFontBySize(fontSize, config), text)
 				// Vertically center
-				y = y + (targetHeight-h)/2
+				y += (targetHeight - h) / 2
 
 				dc.SetHexColor(categories[context])
 				dc.DrawRoundedRectangle(float64(x), float64(y), float64(w), float64(h), 6)
 				dc.Fill()
 				dc.SetHexColor(config.LightColour)
-				face := getFontBySize(fontSize, config)
+				// Decrease font size to fit nicely in the rectangle
+				face := getFontBySize(fontSize-1, config)
 				dc.SetFontFace(face) // Render one font size smaller to fit in rect
-				w2, _ := measureString(face, text)
-				dc.DrawStringAnchored(text, float64(x+(w-w2)/2), float64(y), 0, 0.85)
+				w2, h2 := measureString(face, text)
+				dc.DrawStringAnchored(text, float64(x+(w-w2)/2), float64(y+(h-h2)/2), 0, 0.83)
 			}
 		}
 	}
@@ -138,7 +139,7 @@ func calcFontSize(text string, fontSize int, targetWidth int, targetHeight int,
 	config *Config) int {
 	// Max height in pixels is targetHeight (fontSize = height)
 	maxFontSize := targetHeight
-	minFontSize := 13
+	minFontSize := config.InputMinFontSize
 	newFontSize := maxFontSize
 	for {
 		x, y := measureString(getFontBySize(newFontSize, config), text)
@@ -148,8 +149,13 @@ func calcFontSize(text string, fontSize int, targetWidth int, targetHeight int,
 		if x > targetWidth {
 			// Need to reduce fontSize and try again
 			maxFontSize = newFontSize - 1
-			delta := ((newFontSize - minFontSize) / 2)
+			delta := (newFontSize - minFontSize) / 2
 			if delta == 0 {
+				// We're too big but can't go between min and current font size,
+				// return the min font size
+				if x > targetWidth {
+					newFontSize = minFontSize
+				}
 				// Found optimal size
 				break
 			}
@@ -160,8 +166,8 @@ func calcFontSize(text string, fontSize int, targetWidth int, targetHeight int,
 				break
 			}
 			// Can grow more, do so.
-			minFontSize = newFontSize + 1
-			delta := ((maxFontSize - newFontSize) / 2)
+			minFontSize = newFontSize
+			delta := (maxFontSize - newFontSize) / 2
 			if delta == 0 {
 				// Found optimal size
 				break
