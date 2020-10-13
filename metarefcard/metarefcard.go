@@ -291,8 +291,15 @@ func generateImages(overlaysByImage common.OverlaysByImage, categories map[strin
 
 	}
 
+	imagesByName := make(map[string]*chanData)
 	for range imageNames {
 		data := <-channel
+		imagesByName[data.ImageFilename] = &data
+	}
+
+	for _, imageFilename := range imageNames {
+		data := imagesByName[imageFilename]
+		// Sort by image filename
 		imgBytes := common.GenerateImage(data.Dc, data.Image, data.ImageFilename,
 			overlaysByImage, categories, &config)
 		if imgBytes != nil {
