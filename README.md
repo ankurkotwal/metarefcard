@@ -18,19 +18,19 @@
 15. ~~Add early testing info text, Github repo, how to report an issue~~
 16. ~~Thrustmaster HotasOne~~
 17. ~~GeneratedBindings Comments~~
-18. Confirm if FS2020 can structure inputs appropriately in loadInputFiles.
-20. Move DeviceNameMapping to Config.go
-21. SWS key bindings
-22. Performance improvement - go functions for font size / measuring
-23. Performance improvement - parallelise image processing
+18. ~~Performance improvement - go functions for font size / measuring~~
+19. ~~Performance improvement - parallelise image processing~~
+20. ~~Watermark~~
+21. Confirm if FS2020 can structure inputs appropriately in loadInputFiles.
+22. Move DeviceNameMapping to Config.go
+23. SWS key bindings
 24. Add a message for unsupported devices. Maybe capture those configs to process later?
 25. Add a message for unknown input
 26. Add a message for unknown action
 27. FS2020 Steam path
-28. Watermark
-29. Generate game name + device name
-30. Keyboard & mouse
-31. Extend to Elite Dangerous
+28. Generate game name + device name
+29. Keyboard & mouse
+30. Extend to Elite Dangerous
 
 
 # Setup
