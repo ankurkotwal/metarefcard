@@ -107,7 +107,7 @@ func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
 		config.Watermark.Location.Y*pixelMultiplier)
 
 	var imgBytes bytes.Buffer
-	dc.EncodeJPG(&imgBytes, &jpeg.Options{Quality: 90})
+	dc.EncodeJPG(&imgBytes, &jpeg.Options{Quality: config.JpgQuality})
 	return &imgBytes
 }
 

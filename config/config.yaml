@@ -47,11 +47,12 @@ InputOverrides:
 ImageMap:
   ThrustMasterHOTASOne : hotasone
 DefaultImage: { w: 3840, h: 2160 }
-PixelMultiplier: 0.4
+PixelMultiplier: 0.5
 ImagesDir: resources/hotas_images
 ImageSizeOverride:
   vkb-kosmosima-scg-left: { w: 3879, h: 2182 }
   x45: { w: 5120, h: 2880 }
+JpgQuality: 90
 
 FontsDir: resources/fonts
 InputFont: YanoneKaffeesatz-Regular.ttf

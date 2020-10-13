@@ -18,6 +18,7 @@ type Config struct {
 	PixelMultiplier   float64                 `yaml:"PixelMultiplier"`
 	ImagesDir         string                  `yaml:"ImagesDir"`
 	ImageSizeOverride map[string]Dimensions2d `yaml:"ImageSizeOverride"` // Device Name -> Dimensions2d
+	JpgQuality        int                     `yaml:"JpgQuality"`
 
 	FontsDir          string  `yaml:"FontsDir"`
 	InputFont         string  `yaml:"InputFont"`
