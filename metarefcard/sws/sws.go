@@ -119,7 +119,7 @@ func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
 			}
 
 			// Assign action details accordingly
-			input := interpretInput(&actionDetails, context, action)
+			input := interpretInput(&actionDetails, shortName, context, action)
 			if len(input) > 0 {
 				gameAction, found := actions[action]
 				if !found {
@@ -180,7 +180,8 @@ func getInputTypeAsField(actionSub string, currAction *swsActionDetails) *string
 	return nil
 }
 
-func interpretInput(details *swsActionDetails, context string, action string) string {
+func interpretInput(details *swsActionDetails, device string, context string, action string) string {
+	// TODO - Currently hardcoded for the X-55 based on reverse engineering.
 	switch details.Axis {
 	case "8":
 		return "XAxis" // Throttle
@@ -188,38 +189,60 @@ func interpretInput(details *swsActionDetails, context string, action string) st
 		return "YAxis" // Stick
 	case "10":
 		return "XAxis" // Stick
+	case "11":
+		return "YAxis" // Stick
 	case "26":
-		switch details.Button {
-		case "46":
-			fallthrough
-		case "47":
-			return "RZAxis" // Stick
-		case "48":
-			return "POV1Up" // Stick
-		case "49":
-			return "POV1Down" // Stick
-		case "50":
-			return "POV1Left" // Stick
-		case "51":
-			return "POV1Right" // Stick
-		case "73":
-			return "28" // Throttle Pinky Rocker Up
-		case "74":
-			return "29" // Throttle Pinky Rocker Down
-		case "86":
-			return ""
-		case "80":
-			fallthrough // Stick TODO
-		default:
-			log.Printf("Error: SWS Unknown button %v context %s action %s\n", details, context, action)
-		}
 		button, err := strconv.Atoi(details.Button)
 		if err == nil {
-			button -= 21 // Seems like a hardcoded number?
+			if button > 21 && button < 40 {
+				button -= 21 // Seems like a hardcoded number?
+				return strconv.Itoa(button)
+			} else if button >= 64 && button < 86 {
+				button -= 45 // Another hardcoded number
+				return strconv.Itoa(button)
+			} else if button == 86 {
+				return ""
+			}
+			switch device {
+			case "SaitekX55Joystick":
+				switch button {
+				case 46:
+					return "RZAxis"
+				case 47:
+					return "RZAxis"
+				case 48:
+					return "POV1Up"
+				case 49:
+					return "POV1Down"
+				case 50:
+					return "POV1Left"
+				case 51:
+					return "POV1Right"
+				}
+			case "SaitekX55Throttle":
+				switch button {
+				case 40:
+					return "ZAxis"
+				case 41:
+					return "ZAxis"
+				case 42:
+					return "RXAxis"
+				case 43:
+					return "RXAxis"
+				case 44:
+					return "RYAxis"
+				case 45:
+					return "RYAxis"
+				case 46:
+					return "RZAxis"
+				case 47:
+					return "RZAxis"
+				}
+			}
 		}
-		return strconv.Itoa(button)
 	}
-	log.Printf("Error: SWS Unknown input %v context %s action %s\n", details, context, action)
+	log.Printf("Error: SWS Unknown input - device %s context %s action %s data %v\n",
+		device, context, action, details)
 	return ""
 }
 

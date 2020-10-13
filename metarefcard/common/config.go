@@ -61,10 +61,10 @@ type Dimensions2d struct {
 
 // GameData holds the game's parsed data
 type GameData struct {
+	Regexes       map[string]string      `yaml:"Regexes"`
 	DeviceNameMap DeviceNameFullToShort  `yaml:"DeviceNameMap"`
 	InputMap      DeviceInputTypeMapping `yaml:"InputMap"`
 	InputLabels   map[string]string      `yaml:"InputLabels"`
-	Regexes       map[string]string      `yaml:"Regexes"`
 }
 
 // DeviceInputTypeMapping contains a map of device short names to

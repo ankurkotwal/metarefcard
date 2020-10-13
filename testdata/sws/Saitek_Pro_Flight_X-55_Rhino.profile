@@ -11,7 +11,7 @@ GstInput.GamepadThrottleDeadzone 0.000000
 GstInput.GamepadThrottleSensitivity 0.500000
 GstInput.GamepadYawDeadzone 0.000000
 GstInput.GamepadYawSensitivity 0.500000
-GstInput.JoystickDeadzoneCenter 0.029700
+GstInput.JoystickDeadzoneCenter 0.000000
 GstInput.JoystickDevice1 Saitek Pro Flight X-55 Rhino Stick
 GstInput.JoystickDevice2 Saitek Pro Flight X-55 Rhino Throttle
 GstInput.JoystickDevice3 
@@ -237,7 +237,7 @@ GstKeyBinding.IncomDefaultInputConcepts.ConceptMenuDigitalLeft.1.type 2
 GstKeyBinding.IncomDefaultInputConcepts.ConceptMenuDigitalLeft.2.altbutton 0
 GstKeyBinding.IncomDefaultInputConcepts.ConceptMenuDigitalLeft.2.axis 26
 GstKeyBinding.IncomDefaultInputConcepts.ConceptMenuDigitalLeft.2.button 86
-GstKeyBinding.IncomDefaultInputConcepts.ConceptMenuDigitalLeft.2.deviceid 0
+GstKeyBinding.IncomDefaultInputConcepts.ConceptMenuDigitalLeft.2.deviceid -1
 GstKeyBinding.IncomDefaultInputConcepts.ConceptMenuDigitalLeft.2.identifier -1396011426
 GstKeyBinding.IncomDefaultInputConcepts.ConceptMenuDigitalLeft.2.modifier 0
 GstKeyBinding.IncomDefaultInputConcepts.ConceptMenuDigitalLeft.2.negate 0
@@ -261,7 +261,7 @@ GstKeyBinding.IncomDefaultInputConcepts.ConceptMenuDigitalRight.1.type 2
 GstKeyBinding.IncomDefaultInputConcepts.ConceptMenuDigitalRight.2.altbutton 0
 GstKeyBinding.IncomDefaultInputConcepts.ConceptMenuDigitalRight.2.axis 26
 GstKeyBinding.IncomDefaultInputConcepts.ConceptMenuDigitalRight.2.button 86
-GstKeyBinding.IncomDefaultInputConcepts.ConceptMenuDigitalRight.2.deviceid 0
+GstKeyBinding.IncomDefaultInputConcepts.ConceptMenuDigitalRight.2.deviceid -1
 GstKeyBinding.IncomDefaultInputConcepts.ConceptMenuDigitalRight.2.identifier -1878336071
 GstKeyBinding.IncomDefaultInputConcepts.ConceptMenuDigitalRight.2.modifier 0
 GstKeyBinding.IncomDefaultInputConcepts.ConceptMenuDigitalRight.2.negate 0
@@ -1234,6 +1234,14 @@ GstKeyBinding.IncomDefaultInputConcepts.ConceptTeamChat.1.identifier -1748655597
 GstKeyBinding.IncomDefaultInputConcepts.ConceptTeamChat.1.modifier 0
 GstKeyBinding.IncomDefaultInputConcepts.ConceptTeamChat.1.negate 0
 GstKeyBinding.IncomDefaultInputConcepts.ConceptTeamChat.1.type 1
+GstKeyBinding.IncomDefaultInputConcepts.ConceptTeamChat.2.altbutton 0
+GstKeyBinding.IncomDefaultInputConcepts.ConceptTeamChat.2.axis 26
+GstKeyBinding.IncomDefaultInputConcepts.ConceptTeamChat.2.button 86
+GstKeyBinding.IncomDefaultInputConcepts.ConceptTeamChat.2.deviceid 0
+GstKeyBinding.IncomDefaultInputConcepts.ConceptTeamChat.2.identifier 0
+GstKeyBinding.IncomDefaultInputConcepts.ConceptTeamChat.2.modifier 0
+GstKeyBinding.IncomDefaultInputConcepts.ConceptTeamChat.2.negate 0
+GstKeyBinding.IncomDefaultInputConcepts.ConceptTeamChat.2.type 3
 GstKeyBinding.IncomDefaultInputConcepts.ConceptToggleChat.0.altbutton 0
 GstKeyBinding.IncomDefaultInputConcepts.ConceptToggleChat.0.axis 0
 GstKeyBinding.IncomDefaultInputConcepts.ConceptToggleChat.0.button 23
@@ -1242,6 +1250,14 @@ GstKeyBinding.IncomDefaultInputConcepts.ConceptToggleChat.0.identifier -10540692
 GstKeyBinding.IncomDefaultInputConcepts.ConceptToggleChat.0.modifier 255
 GstKeyBinding.IncomDefaultInputConcepts.ConceptToggleChat.0.negate 0
 GstKeyBinding.IncomDefaultInputConcepts.ConceptToggleChat.0.type 2
+GstKeyBinding.IncomDefaultInputConcepts.ConceptToggleChat.1.altbutton 0
+GstKeyBinding.IncomDefaultInputConcepts.ConceptToggleChat.1.axis 26
+GstKeyBinding.IncomDefaultInputConcepts.ConceptToggleChat.1.button 86
+GstKeyBinding.IncomDefaultInputConcepts.ConceptToggleChat.1.deviceid 0
+GstKeyBinding.IncomDefaultInputConcepts.ConceptToggleChat.1.identifier 0
+GstKeyBinding.IncomDefaultInputConcepts.ConceptToggleChat.1.modifier 0
+GstKeyBinding.IncomDefaultInputConcepts.ConceptToggleChat.1.negate 0
+GstKeyBinding.IncomDefaultInputConcepts.ConceptToggleChat.1.type 3
 GstKeyBinding.IncomDefaultInputConcepts.ConceptVRRecenterCamera.0.altbutton 0
 GstKeyBinding.IncomDefaultInputConcepts.ConceptVRRecenterCamera.0.axis 0
 GstKeyBinding.IncomDefaultInputConcepts.ConceptVRRecenterCamera.0.button 12
@@ -2068,12 +2084,12 @@ GstKeyBinding.IncomStarshipInputConcepts.ConceptDrift.0.negate 0
 GstKeyBinding.IncomStarshipInputConcepts.ConceptDrift.0.type 2
 GstKeyBinding.IncomStarshipInputConcepts.ConceptDrift.1.altbutton 0
 GstKeyBinding.IncomStarshipInputConcepts.ConceptDrift.1.axis 26
-GstKeyBinding.IncomStarshipInputConcepts.ConceptDrift.1.button 80
+GstKeyBinding.IncomStarshipInputConcepts.ConceptDrift.1.button 86
 GstKeyBinding.IncomStarshipInputConcepts.ConceptDrift.1.deviceid 0
 GstKeyBinding.IncomStarshipInputConcepts.ConceptDrift.1.identifier 0
 GstKeyBinding.IncomStarshipInputConcepts.ConceptDrift.1.modifier 0
 GstKeyBinding.IncomStarshipInputConcepts.ConceptDrift.1.negate 0
-GstKeyBinding.IncomStarshipInputConcepts.ConceptDrift.1.type -1
+GstKeyBinding.IncomStarshipInputConcepts.ConceptDrift.1.type 3
 GstKeyBinding.IncomStarshipInputConcepts.ConceptEmergencyPowerTransferBalance.0.altbutton 0
 GstKeyBinding.IncomStarshipInputConcepts.ConceptEmergencyPowerTransferBalance.0.axis 26
 GstKeyBinding.IncomStarshipInputConcepts.ConceptEmergencyPowerTransferBalance.0.button 2
