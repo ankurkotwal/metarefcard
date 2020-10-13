@@ -21,15 +21,14 @@
 18. ~~Performance improvement - go functions for font size / measuring~~
 19. ~~Performance improvement - parallelise image processing~~
 20. ~~Watermark~~
-21. Confirm if FS2020 can structure inputs appropriately in loadInputFiles.
-22. Move DeviceNameMapping to Config.go
-23. SWS key bindings
-24. Add a message for unsupported devices. Maybe capture those configs to process later?
-25. Add a message for unknown input
-26. Add a message for unknown action
-27. FS2020 Steam path
-28. Generate game name + device name
-29. Keyboard & mouse
+21. Generate game name + device name
+22. Add a message for unknown input
+23. Add a message for unsupported devices. Maybe capture those configs to process later?
+24. Add a message for unknown action
+25. FS2020 Steam path
+27. Move DeviceNameMapping to Config.go
+28. Confirm if FS2020 can structure inputs appropriately in loadInputFiles.
+29. SWS key bindings
 30. Extend to Elite Dangerous
 
 
