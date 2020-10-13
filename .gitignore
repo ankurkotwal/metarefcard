@@ -9,6 +9,10 @@ out/
 ##### VIM #####
 *.swp
 
+##### Github Codespaces #####
+python3.8/
+pythonenv3.8/
+
 ##### VSCode #####
 .vscode/*
 !.vscode/settings.json
