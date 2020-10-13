@@ -66,8 +66,8 @@ Watermark:
   Font: SourceSansPro-Regular.ttf
   FontSize: 60
   Location:
-    x: 25
-    y: 230
+    x: 30
+    y: 240
 
 BackgroundColour: "#e9ecefff"
 LightColour: "#ffffffff"
