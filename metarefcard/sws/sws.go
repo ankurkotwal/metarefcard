@@ -17,7 +17,7 @@ var sharedGameData *common.GameData
 
 // HandleRequest services the request to load files
 func HandleRequest(files [][]byte, config *common.Config) (*common.GameData,
-	common.GameBindsByDevice, common.MockSet, common.MockSet) {
+	common.GameBindsByDevice, common.MockSet, common.MockSet, string) {
 	if !initiliased {
 		sharedGameData = common.LoadGameModel("config/sws.yaml",
 			"StarWarsSquadrons Data", config.DebugOutput)
@@ -29,7 +29,7 @@ func HandleRequest(files [][]byte, config *common.Config) (*common.GameData,
 	gameBinds, gameDevices, gameContexts := loadInputFiles(files, sharedGameData.DeviceNameMap,
 		config.DebugOutput, config.VerboseOutput)
 	common.GenerateContextColours(gameContexts, config)
-	return sharedGameData, gameBinds, gameDevices, gameContexts
+	return sharedGameData, gameBinds, gameDevices, gameContexts, "Star Wars: Squadrons"
 }
 
 // Load the game config files (provided by user)

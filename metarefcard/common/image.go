@@ -19,7 +19,7 @@ var waterMarkFont *font.Face = nil
 // GenerateImage - generates an image with the provided overlays
 func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
 	overlaysByImage OverlaysByImage, categories map[string]string,
-	config *Config) *bytes.Buffer {
+	config *Config, gameLabel string) *bytes.Buffer {
 
 	// Set the background colour
 	dc.SetHexColor(config.BackgroundColour)
@@ -101,7 +101,8 @@ func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
 	}
 	dc.SetHexColor(config.DarkColour)
 	dc.SetFontFace(*waterMarkFont)
-	dc.DrawString(fmt.Sprintf("%s (%s)", config.Watermark.Text, config.Version),
+	dc.DrawString(fmt.Sprintf("%s (%s) for %s", config.Watermark.Text,
+		config.Version, gameLabel),
 		config.Watermark.Location.X*pixelMultiplier,
 		config.Watermark.Location.Y*pixelMultiplier)
 

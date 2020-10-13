@@ -26,7 +26,7 @@ import (
 // requestHandler - handles incoming requests and returns game data, game binds,
 // neededDevices and a context to colour mapping
 type requestHandler func(files [][]byte, config *common.Config) (*common.GameData,
-	common.GameBindsByDevice, common.MockSet, common.MockSet)
+	common.GameBindsByDevice, common.MockSet, common.MockSet, string)
 
 var config common.Config
 var debugMode = false
@@ -215,12 +215,12 @@ func loadFormFiles(c *gin.Context) [][]byte {
 func sendResponse(loadedFiles [][]byte, handler requestHandler,
 	matchFunc common.MatchGameInputToModel, c *gin.Context) {
 	// Call game handler to generate image overlayes
-	gameData, gameBinds, gameDevices, gameContexts := handler(loadedFiles, &config)
+	gameData, gameBinds, gameDevices, gameContexts, gameLabel := handler(loadedFiles, &config)
 	overlaysByImage := common.PopulateImageOverlays(gameDevices, &config,
 		gameBinds, gameData, matchFunc)
 
 	// Now generate images from the overlays
-	generatedFiles := generateImages(overlaysByImage, gameContexts)
+	generatedFiles := generateImages(overlaysByImage, gameContexts, gameLabel)
 
 	// Generate HTML
 	tmplFilename := "resources/web_templates/refcard.tmpl"
@@ -269,7 +269,8 @@ type chanData struct {
 	ImageFilename string
 }
 
-func generateImages(overlaysByImage common.OverlaysByImage, categories map[string]string) []*bytes.Buffer {
+func generateImages(overlaysByImage common.OverlaysByImage, categories map[string]string,
+	gameLabel string) []*bytes.Buffer {
 
 	imageNames := prepareGeneratorData(overlaysByImage)
 
@@ -301,7 +302,7 @@ func generateImages(overlaysByImage common.OverlaysByImage, categories map[strin
 		data := imagesByName[imageFilename]
 		// Sort by image filename
 		imgBytes := common.GenerateImage(data.Dc, data.Image, data.ImageFilename,
-			overlaysByImage, categories, &config)
+			overlaysByImage, categories, &config, gameLabel)
 		if imgBytes != nil {
 			files = append(files, imgBytes)
 		}
