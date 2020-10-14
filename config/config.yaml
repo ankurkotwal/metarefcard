@@ -63,7 +63,7 @@ InputPixelXInset: 5
 InputPixelYInset: 5
 
 ImageHeading:
-  Font: Dirga.ttf
+  Font: Orbitron-Regular.ttf
   FontSize:  90
   Inset:
     x: 30
@@ -76,11 +76,11 @@ ImageHeading:
 Watermark:
   Text: MetaRefCard.com
   TextColour: "#ccccccff"
-  Font: Orbitron-Regular.ttf
+  Font: Dirga.ttf
   FontSize: 44
   Location:
     x: 30
-    y: 175
+    y: 170
 
 BackgroundColour: "#e9ecefff"
 LightColour: "#ffffffff"
