@@ -1,6 +1,6 @@
 ---
 AppName: MetaRefCard
-Version: v0.2
+Version: 0.2
 DebugOutput: false
 VerboseOutput: false
 
@@ -62,13 +62,25 @@ DefaultLineHeight: 54
 InputPixelXInset: 5
 InputPixelYInset: 5
 
+ImageHeading:
+  Font: Dirga.ttf
+  FontSize:  90
+  Inset:
+    x: 30
+    y: 100
+  TextHeight: 180
+  TextColour: "#ffffffff"
+  BackgorundHeight: 200
+  BackgroundColour: "#2780e3ff"
+
 Watermark:
   Text: MetaRefCard.com
-  Font: SourceSansPro-Regular.ttf
-  FontSize: 60
+  TextColour: "#ccccccff"
+  Font: Orbitron-Regular.ttf
+  FontSize: 44
   Location:
     x: 30
-    y: 240
+    y: 175
 
 BackgroundColour: "#e9ecefff"
 LightColour: "#ffffffff"
@@ -99,4 +111,84 @@ AlternateColours:
   # White: #fff;
   # Gray: #868e96;
   # Gray-dark: #373a3c;
+
+DeviceToShortNameMap:
+  # Airbus T-A320 Quadrant throttle:
+  # Alpha Flight Controls:
+  # BU0836X Interface:
+  # BU0836X Interface_1:
+  Joystick - HOTAS Warthog: ThrustMasterWarthogJoystick
+  # Keyboard (FSX): # TODO Keyboad
+  Logitech Extreme 3D: LogitechExtreme3DPro
+  # Mouse: # TODO Mouse
+  PS4: DualShock4
+  # Saitek Pro Flight Quadrant:
+  Saitek Pro Flight Rudder Pedals: SaitekProFlightCombatRudderPedals
+  Saitek Pro Flight X-55 Rhino Stick: SaitekX55Joystick
+  Saitek Pro Flight X-55 Rhino Throttle: SaitekX55Throttle
+  Saitek Pro Flight X-56 Rhino Stick: SaitekX56Joystick
+  Saitek Pro Flight X-56 Rhino Throttle: SaitekX56Throttle
+  # Saitek Pro Flight Yoke:
+  Saitek X52 Flight Control System: SaitekX52
+  Saitek X52 Pro Flight Control System: SaitekX52Pro
+  T.16000M: T16000M
+  # T.A320 CoPilot:
+  # T.A320 Pilot:
+  T.Flight Hotas 4: ThrustMasterHOTAS4
+  T.Flight Hotas One: ThrustMasterHOTASOne
+  T.Flight Hotas X: ThrustMasterTFlightHOTASX
+  T.Flight Rudder Pedals: T-Rudder
+  T.Flight Stick X: 044FB106
+  Throttle - HOTAS Warthog: ThrustMasterWarthogThrottle
+  TWCS Throttle: T16000MTHROTTLE
+  # T-Pendular-Rudder:
+  # VF - TPM V3RNIO:
+  # VirtualFly - RUDDO+:
+  # VirtualFly - TQ3+:
+  # VirtualFly - TQ6+:
+  # VirtualFly - YOKO+:
+  XInput Gamepad: GamePad
+DeviceLabels:
+  chcombat: "CH Combatstick & Throttle"
+  chfighter: "CH Fighterstick & Throttle"
+  chproflightquadrant: "CH Pro Flight Throttle Quadrant"
+  chpropedals: "CH Pro Pedals"
+  chquadrant: "CH Throttle Quadrant"
+  cobram5: "Defender Cobra M5 Stick"
+  cougar: "Cougar MFD"
+  crosswind: "MFG Crosswind Pedals"
+  ds4: "DualShock 4 Controller"
+  extreme3dpro: "Extreme 3D Pro"
+  f710: "F710 Controller"
+  fly5: "Cyborg F.L.Y. 5 Stick"
+  g940: "Logitech G940 Pedals"
+  g940pedals: "G940 Stick & Throttle"
+  gladiator: "VKB Gladiator"
+  gtwheel: "Logitech Driving Force GT Wheel"
+  hotas4: "T.Flight HOTAS 4 Stick & Throttle"
+  hotascougar: "Thrustmaster Hotas Cougar"
+  hotasone: "T.Flight HOTAS One Stick & Throttle"
+  hotasx: "T.Flight HOTAS X Stick & Throttle"
+  keyboard: "Keyboard"
+  proflightcombatpedals: "Saitek Pro Flight Combat Pedals"
+  proflightpedals: "Saitek Pro Flight Pedals"
+  sabretooth: "Sabretooth Controller"
+  sidepanelcontroldeck: "Side Panel Control Deck"
+  slawbf109pedals: "Slaw BF-109 Pedals"
+  stickx: "Thrustmaster T.Flight X Stick"
+  t16000m: "T-16000M Stick"
+  t16000mfcs: "T.16000M FCS Stick & Throttle"
+  tfrp: "Thrustmaster T-Flight Pedals"
+  vkb-kosmosima-scg-left: "VKB Kosmosima SCG Left"
+  vkb-kosmosima-scg-right: "VKB Kosmosima SCG Right"
+  vpc-warbrd-delta-left: "VPC WarBRD DELTA Left"
+  vpc-warbrd-delta-right: "VPC WarBRD DELTA Right"
+  warthog: "Warthog Stick & Throttle"
+  x45: "X-45 Stick & Throttle"
+  x52: "X-52 Pro Stick & Throttle"
+  x52pro: "X-52 Stick & Throttle"
+  x55: "X-55 Stick & Throttle"
+  x56: "X-56 Stick & Throttle"
+  xbox: "XBox Controller"
+  xboxelite: "XBox Elite Controller"
 ...

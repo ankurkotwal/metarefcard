@@ -15,6 +15,7 @@ import (
 )
 
 var waterMarkFont *font.Face = nil
+var headingFont *font.Face = nil
 
 // GenerateImage - generates an image with the provided overlays
 func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
@@ -94,15 +95,28 @@ func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
 		}
 	}
 
+	// Generate Heading
+	dc.SetHexColor(config.ImageHeading.BackgroundColour)
+	dc.DrawRectangle(0, 0, float64((*image).Bounds().Max.X),
+		config.ImageHeading.BackgroundHeight*pixelMultiplier)
+	dc.Fill()
+	if headingFont == nil {
+		headingFont = LoadFont(config.FontsDir, config.ImageHeading.Font,
+			int(math.Round(config.ImageHeading.FontSize*pixelMultiplier)))
+	}
+	dc.SetHexColor(config.ImageHeading.TextColour)
+	dc.SetFontFace(*headingFont)
+	dc.DrawString(fmt.Sprintf("%s", config.DeviceLabels[imageFilename]),
+		config.ImageHeading.Inset.X*pixelMultiplier,
+		config.ImageHeading.Inset.Y*pixelMultiplier)
 	// Generate watermark
 	if waterMarkFont == nil {
 		waterMarkFont = LoadFont(config.FontsDir, config.Watermark.Font,
 			int(math.Round(config.Watermark.FontSize*pixelMultiplier)))
 	}
-	dc.SetHexColor(config.DarkColour)
+	dc.SetHexColor(config.Watermark.TextColour)
 	dc.SetFontFace(*waterMarkFont)
-	dc.DrawString(fmt.Sprintf("%s (%s) for %s", config.Watermark.Text,
-		config.Version, gameLabel),
+	dc.DrawString(fmt.Sprintf("%s (%s)", config.Watermark.Text, config.Version),
 		config.Watermark.Location.X*pixelMultiplier,
 		config.Watermark.Location.Y*pixelMultiplier)
 
@@ -125,13 +139,18 @@ func getFontBySize(size int, config *Config) font.Face {
 	return face
 }
 
-var measureMux sync.Mutex
+var fontMuxes map[*font.Face]*sync.Mutex = make(map[*font.Face]*sync.Mutex)
 
 func measureString(fontFace font.Face, text string) (int, int) {
-	measureMux.Lock()
+	mux, found := fontMuxes[&fontFace]
+	if !found {
+		mux = &sync.Mutex{}
+		fontMuxes[&fontFace] = mux
+	}
+	mux.Lock()
 	calcX := font.MeasureString(fontFace, text).Round()
 	calcY := fontFace.Metrics().Height.Round()
-	measureMux.Unlock()
+	mux.Unlock()
 	return calcX, calcY
 }
 

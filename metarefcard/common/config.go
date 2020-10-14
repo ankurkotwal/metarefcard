@@ -28,17 +28,31 @@ type Config struct {
 	InputPixelXInset  int     `yaml:"InputPixelXInset"`
 	InputPixelYInset  int     `yaml:"InputPixelYInset"`
 
+	ImageHeading struct {
+		Font             string  `yaml:"Font"`
+		FontSize         float64 `yaml:"FontSize"`
+		Inset            Point2d `yaml:"Inset"`
+		TextHeight       float64 `yaml:"TextHeight"`
+		TextColour       string  `yaml:"TextColour"`
+		BackgroundHeight float64 `yaml:"BackgorundHeight"`
+		BackgroundColour string  `yaml:"BackgroundColour"`
+	} `yaml:"ImageHeading"`
+
 	Watermark struct {
-		Text     string  `yaml:"Text"`
-		Font     string  `yaml:"Font"`
-		FontSize float64 `yaml:"FontSize"`
-		Location Point2d `yaml:"Location"`
+		Text       string  `yaml:"Text"`
+		TextColour string  `yaml:"TextColour"`
+		Font       string  `yaml:"Font"`
+		FontSize   float64 `yaml:"FontSize"`
+		Location   Point2d `yaml:"Location"`
 	} `yaml:"Watermark"`
 
 	BackgroundColour string   `yaml:"BackgroundColour"`
 	LightColour      string   `yaml:"LightColour"`
 	DarkColour       string   `yaml:"DarkColour"`
 	AlternateColours []string `yaml:"AlternateColours"`
+
+	DeviceToShortNameMap map[string]string `yaml:"DeviceShortNamMap"`
+	DeviceLabels         map[string]string `yaml:"DeviceLabels"`
 }
 
 // GeneratedConfig holds structure from the generated config
