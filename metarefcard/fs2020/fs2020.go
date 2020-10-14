@@ -34,7 +34,7 @@ func HandleRequest(files [][]byte, config *common.Config) (*common.GameData,
 	gameBinds, gameDevices, gameContexts := loadInputFiles(files, sharedGameData.DeviceNameMap,
 		config.DebugOutput, config.VerboseOutput)
 	common.GenerateContextColours(gameContexts, config)
-	return sharedGameData, gameBinds, gameDevices, gameContexts, "Flight Simulator 2020"
+	return sharedGameData, gameBinds, gameDevices, gameContexts, sharedGameData.Logo
 }
 
 // Load the game config files (provided by user)

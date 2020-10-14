@@ -16,6 +16,7 @@ import (
 
 var waterMarkFont *font.Face = nil
 var headingFont *font.Face = nil
+var gameLogos map[string]image.Image = make(map[string]image.Image)
 
 // GenerateImage - generates an image with the provided overlays
 func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
@@ -95,9 +96,22 @@ func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
 		}
 	}
 
+	// Add game logo
+	logo, found := gameLogos[gameLogo]
+	if !found {
+		var err error
+		logo, err = gg.LoadImage(fmt.Sprintf("%s/%s.png", config.LogoImagesDir, gameLogo))
+		if err != nil {
+			log.Printf("Error: loadImage %s failed. %v\n", imageFilename, err)
+		}
+		gameLogos[gameLogo] = logo
+	}
+	dc.DrawImage(logo, 0, 0)
+	xOffset := float64(logo.Bounds().Max.X)
+
 	// Generate Heading
 	dc.SetHexColor(config.ImageHeading.BackgroundColour)
-	dc.DrawRectangle(0, 0, float64((*image).Bounds().Max.X),
+	dc.DrawRectangle(xOffset, 0, float64(dc.Width())-xOffset,
 		config.ImageHeading.BackgroundHeight*pixelMultiplier)
 	dc.Fill()
 	if headingFont == nil {
@@ -107,7 +121,7 @@ func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
 	dc.SetHexColor(config.ImageHeading.TextColour)
 	dc.SetFontFace(*headingFont)
 	dc.DrawString(fmt.Sprintf("%s", config.DeviceLabels[imageFilename]),
-		config.ImageHeading.Inset.X*pixelMultiplier,
+		xOffset+config.ImageHeading.Inset.X*pixelMultiplier,
 		config.ImageHeading.Inset.Y*pixelMultiplier)
 	// Generate watermark
 	if waterMarkFont == nil {
@@ -117,7 +131,7 @@ func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
 	dc.SetHexColor(config.Watermark.TextColour)
 	dc.SetFontFace(*waterMarkFont)
 	dc.DrawString(fmt.Sprintf("%s (%s)", config.Watermark.Text, config.Version),
-		config.Watermark.Location.X*pixelMultiplier,
+		xOffset+config.Watermark.Location.X*pixelMultiplier,
 		config.Watermark.Location.Y*pixelMultiplier)
 
 	var imgBytes bytes.Buffer

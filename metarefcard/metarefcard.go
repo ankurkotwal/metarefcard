@@ -215,12 +215,12 @@ func loadFormFiles(c *gin.Context) [][]byte {
 func sendResponse(loadedFiles [][]byte, handler requestHandler,
 	matchFunc common.MatchGameInputToModel, c *gin.Context) {
 	// Call game handler to generate image overlayes
-	gameData, gameBinds, gameDevices, gameContexts, gameLabel := handler(loadedFiles, &config)
+	gameData, gameBinds, gameDevices, gameContexts, gameLogo := handler(loadedFiles, &config)
 	overlaysByImage := common.PopulateImageOverlays(gameDevices, &config,
 		gameBinds, gameData, matchFunc)
 
 	// Now generate images from the overlays
-	generatedFiles := generateImages(overlaysByImage, gameContexts, gameLabel)
+	generatedFiles := generateImages(overlaysByImage, gameContexts, gameLogo)
 
 	// Generate HTML
 	tmplFilename := "resources/web_templates/refcard.tmpl"
