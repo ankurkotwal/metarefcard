@@ -16,7 +16,8 @@ type Config struct {
 	ImageMap          ImageMap                `yaml:"ImageMap"`
 	DefaultImage      Dimensions2d            `yaml:"DefaultImage"`
 	PixelMultiplier   float64                 `yaml:"PixelMultiplier"`
-	ImagesDir         string                  `yaml:"ImagesDir"`
+	HotasImagesDir    string                  `yaml:"HotasImagesDir"`
+	LogoImagesDir     string                  `yaml:"LogoImagesDir"`
 	ImageSizeOverride map[string]Dimensions2d `yaml:"ImageSizeOverride"` // Device Name -> Dimensions2d
 	JpgQuality        int                     `yaml:"JpgQuality"`
 
@@ -75,6 +76,7 @@ type Dimensions2d struct {
 
 // GameData holds the game's parsed data
 type GameData struct {
+	Logo          string                 `yaml:"Logo"`
 	Regexes       map[string]string      `yaml:"Regexes"`
 	DeviceNameMap DeviceNameFullToShort  `yaml:"DeviceNameMap"`
 	InputMap      DeviceInputTypeMapping `yaml:"InputMap"`

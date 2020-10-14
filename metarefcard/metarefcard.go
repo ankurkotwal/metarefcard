@@ -278,7 +278,8 @@ func generateImages(overlaysByImage common.OverlaysByImage, categories map[strin
 	channel := make(chan chanData, len(imageNames))
 	for _, imageName := range imageNames {
 		go func(imageFilename string) {
-			image, err := gg.LoadImage(fmt.Sprintf("%s/%s.png", config.ImagesDir, imageFilename))
+			image, err := gg.LoadImage(fmt.Sprintf("%s/%s.png",
+				config.HotasImagesDir, imageFilename))
 			if err != nil {
 				log.Printf("Error: loadImage %s failed. %v\n", imageFilename, err)
 				channel <- chanData{nil, nil, ""}

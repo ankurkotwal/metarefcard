@@ -20,7 +20,7 @@ var headingFont *font.Face = nil
 // GenerateImage - generates an image with the provided overlays
 func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
 	overlaysByImage OverlaysByImage, categories map[string]string,
-	config *Config, gameLabel string) *bytes.Buffer {
+	config *Config, gameLogo string) *bytes.Buffer {
 
 	// Set the background colour
 	dc.SetHexColor(config.BackgroundColour)

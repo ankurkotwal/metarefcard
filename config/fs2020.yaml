@@ -1,4 +1,5 @@
 ---
+Logo: fs2020
 Regexes:
   Button: Button\s*(\d+)
   Axis: (?:([R])-)?Axis\s*([XYZ])

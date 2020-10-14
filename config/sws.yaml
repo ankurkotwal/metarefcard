@@ -1,4 +1,5 @@
 ---
+Logo: sws
 Regexes:
   Joystick: ^GstInput.JoystickDevice(\d+)(?:\s+(.*))$
   Bind: ^GstKeyBinding\.Incom(Default|Soldier|Starship)InputConcepts\.Concept(.+)\.(\d+)\.(.+)\s+(.+)$

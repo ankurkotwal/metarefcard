@@ -234,7 +234,7 @@ func MatchGameInputToModel(deviceName string, actionData common.GameInput,
 				actionData[common.InputSecondary])
 		}
 	}
-	return inputLookups, "FS2020"
+	return inputLookups, sharedGameData.Logo
 }
 
 // Matches an action to a device's inputs using regexes. Returns string to lookup input

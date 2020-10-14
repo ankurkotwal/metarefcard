@@ -18,14 +18,6 @@ def initialise():
     if DEBUG_OUTPUT:
         print("Config loaded: {c}\n".format(c=config))
 
-    dir_hotas_images = "assets/hotas_images"
-    # Confirm source images exist
-    if False == os.path.isdir(dir_hotas_images):
-        print("Error could not find dir {d}".format(d=dir_hotas_images))
-        exit(1)
-    if DEBUG_OUTPUT:
-        print("Found hotas images at {d}".format(d=dir_hotas_images))
-
     # Find inkscape binary
     inkscape = subprocess.run(
         ["which", "inkscape"], capture_output=True).stdout.decode("utf-8").rstrip("\n")
@@ -35,17 +27,27 @@ def initialise():
     if DEBUG_OUTPUT:
         print("Found Inkscape at {i}".format(i=inkscape))
 
+    dirs_images = ["assets/game_logos", "assets/hotas_images"]
+    for dir in dirs_images:
+        # Confirm source images exist
+        if False == os.path.isdir(dir):
+            print("Error could not find dir {d}".format(d=dir))
+            exit(1)
+        if DEBUG_OUTPUT:
+            print("Found hotas images at {d}".format(d=dir))
+
     # Confirm destination directory
-    dir_out = config["ImagesDir"]
-    if False == os.path.isdir(dir_out):
-        os.mkdir(dir_out)
-        # Check that mkdir succeeded
+    dirs_out = [config["LogoImagesDir"], config["HotasImagesDir"]]
+    for dir_out in dirs_images:
         if False == os.path.isdir(dir_out):
-            print("mkdir {d} failed".format(d=dir_out))
-            exit(3)
-    if DEBUG_OUTPUT:
-        print("Found destination dir {d}".format(d=dir_out))
-    return dir_hotas_images, dir_out, inkscape, config
+            os.mkdir(dir_out)
+            # Check that mkdir succeeded
+            if False == os.path.isdir(dir_out):
+                print("mkdir {d} failed".format(d=dir_out))
+                exit(3)
+        if DEBUG_OUTPUT:
+            print("Found destination dir {d}".format(d=dir_out))
+    return dirs_images, dirs_out, inkscape, config
 
 
 def convertfile(inkscape, svg, defaultwidth, defaultheight, multiplier,
@@ -76,21 +78,24 @@ def convertfile(inkscape, svg, defaultwidth, defaultheight, multiplier,
 
 
 def main():
-    dir_hotas_images, dir_out, inkscape, config = initialise()
+    dirs_images, dirs_out, inkscape, config = initialise()
     overrides = config["ImageSizeOverride"]
     multiplier = float(config["PixelMultiplier"])
     defaultwidth = int(config["DefaultImage"]["w"])
     defaultheight = int(config["DefaultImage"]["h"])
 
-    svgs = []
-    for file in os.listdir(dir_hotas_images):
-        # Filter out non-svg files
-        if file.endswith(".svg"):
-            svgs.append("{p}/{f}".format(p=dir_hotas_images, f=file))
-    svgs.sort()
-    for svg in svgs:
-        convertfile(inkscape, svg, defaultwidth, defaultheight,
-                    multiplier, overrides, dir_out)
+    i = 0
+    for dir in dirs_images:
+        svgs = []
+        for file in os.listdir(dir):
+            # Filter out non-svg files
+            if file.endswith(".svg"):
+                svgs.append("{p}/{f}".format(p=dir, f=file))
+        svgs.sort()
+        for svg in svgs:
+            convertfile(inkscape, svg, defaultwidth, defaultheight,
+                        multiplier, overrides, dirs_out[i])
+        i += 1
 
     print("Done")
     exit(0)
