@@ -67,7 +67,7 @@ ImageHeading:
   Font: Orbitron-Regular.ttf
   FontSize:  90
   Inset:
-    x: 30
+    x: 50
     y: 100
   TextHeight: 180
   TextColour: "#ffffffff"
@@ -80,7 +80,7 @@ Watermark:
   Font: Dirga.ttf
   FontSize: 44
   Location:
-    x: 30
+    x: 50
     y: 170
 
 BackgroundColour: "#e9ecefff"
