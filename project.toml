@@ -5,18 +5,19 @@ version = "1.0.0"
 
 [build]
 exclude = [
-    ".git",
-    "generateControllerInputs.py",
-    "generateImages.py",
+    ".dockerignore",
     ".git",
     ".gitattributes",
     ".github",
     ".gitignore",
+    ".vscode",
+    "Dockerfile",
+    "generateControllerInputs.py",
+    "generateImages.py",
     "LICENSE",
     "project.toml",
     "README.md",
     "resources-source",
     "testdata",
     "TODO.md",
-    ".vscode"
 ]

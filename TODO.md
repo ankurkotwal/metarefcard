@@ -24,7 +24,8 @@ A list of the tasks to be done.
 22. Add a message for unknown input
 23. Add a message for unsupported devices. Maybe capture those configs to process later?
 24. Add a message for unknown action
-25. FS2020 Steam path
+25. FS2020 Warthog inputs not showing
+26. FS2020 Steam path
 27. Move DeviceNameMapping to Config.go
 28. Confirm if FS2020 can structure inputs appropriately in loadInputFiles.
 29. SWS key bindings
