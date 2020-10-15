@@ -275,7 +275,7 @@ func generateImages(overlaysByImage common.OverlaysByImage, categories map[strin
 	imageNames := prepareGeneratorData(overlaysByImage)
 
 	files := make([]*bytes.Buffer, 0, len(imageNames))
-	channel := make(chan chanData, len(imageNames))
+	channel := make(chan chanData)
 	for _, imageName := range imageNames {
 		go func(imageFilename string) {
 			image, err := gg.LoadImage(fmt.Sprintf("%s/%s.png",
@@ -294,7 +294,7 @@ func generateImages(overlaysByImage common.OverlaysByImage, categories map[strin
 	}
 
 	imagesByName := make(map[string]*chanData)
-	for range imageNames {
+	for i := 0; i < len(imageNames); i++ {
 		data := <-channel
 		imagesByName[data.ImageFilename] = &data
 	}
