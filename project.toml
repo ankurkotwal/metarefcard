@@ -1,0 +1,22 @@
+[project]
+id = "metarefcard"
+name = "MetaRefCard"
+version = "1.0.0"
+
+[build]
+exclude = [
+    ".git",
+    "generateControllerInputs.py",
+    "generateImages.py",
+    ".git",
+    ".gitattributes",
+    ".github",
+    ".gitignore",
+    "LICENSE",
+    "project.toml",
+    "README.md",
+    "resources-source",
+    "testdata",
+    "TODO.md",
+    ".vscode"
+]
