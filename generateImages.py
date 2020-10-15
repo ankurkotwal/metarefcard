@@ -36,12 +36,12 @@ def initialise():
     if DEBUG_OUTPUT:
         print("Found convert at {i}".format(i=inkscape))
 
-    dir_hotas_images = "assets/hotas_images"
+    dir_hotas_images = "resources-source/hotas-images"
     checkDirExists(dir_hotas_images)
     # Confirm destination directory
     dir_hotas_out = config["HotasImagesDir"]
     ensureDirExists(dir_hotas_out)
-    dir_logos = "assets/game_logos"
+    dir_logos = "resources-source/game-logos"
     checkDirExists(dir_logos)
     # Confirm destination directory
     dir_logos_out = config["LogoImagesDir"]

@@ -95,8 +95,8 @@ func RunServer() {
 		pprof.Register(router)
 	}
 
-	router.LoadHTMLGlob("resources/web_templates/*")
-	router.StaticFile("/script.js", "resources/www/script.js")
+	router.LoadHTMLGlob("resources/www/templates/*")
+	router.StaticFile("/script.js", "resources/www/static/script.js")
 
 	// Index page
 	router.GET("/", func(c *gin.Context) {
@@ -223,7 +223,7 @@ func sendResponse(loadedFiles [][]byte, handler requestHandler,
 	generatedFiles := generateImages(overlaysByImage, gameContexts, gameLogo)
 
 	// Generate HTML
-	tmplFilename := "resources/web_templates/refcard.tmpl"
+	tmplFilename := "resources/www/templates/refcard.html"
 	t, err := template.New(path.Base(tmplFilename)).ParseFiles(tmplFilename)
 	if err != nil {
 		s := fmt.Sprintf("Error parsing image template - %s\n", err)

@@ -4,7 +4,7 @@ from collections import OrderedDict
 import sys
 import re
 
-sys.path.append('3rdparty/edrefcard')
+sys.path.append('resources-source/edrefcard')
 from bindingsData import *
 
 
@@ -18,7 +18,7 @@ def delTodo(line):
 # Read comments from python data structure and return as two maps
 def loadComments():
     # Read hotasDetails comments (as they contain comments about buttons to inputs)
-    inFile = open('3rdparty/edrefcard/bindingsData.py', 'r')
+    inFile = open('resources-source/edrefcard/bindingsData.py', 'r')
     hotasDetails = False
     devName = ""
     devCmnt = {}

@@ -1,9 +1,9 @@
 {
     "python.autoComplete.extraPaths": [
-        "3rdparty/edrefcard"
+        "resources-source/edrefcard"
     ],
     "python.analysis.extraPaths": [
-        "3rdparty/edrefcard"
+        "resources-source/edrefcard"
     ],
     "[yaml]": {
         "editor.tabSize": 2,
