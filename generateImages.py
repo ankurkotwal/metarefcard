@@ -97,14 +97,14 @@ def convertfile(inkscape, svg, defaultwidth, defaultheight, multiplier,
         print("Converted {f}".format(f=name))
 
 
-def resizefile(convert, img, multiplier, dir_out):
+def resizefile(convert, img, height, multiplier, dir_out):
     name = os.path.splitext(os.path.basename(img))[0]
     out = "{dir}/{out}.png".format(dir=dir_out, out=name)
 
     # Convert svg to png with Inkscape
     cmd_export = [convert,
-                  "-resize",
-                  "{m}%".format(m=multiplier * 100),
+                  "-geometry",
+                  "x{m}".format(m=multiplier * height),
                   img,
                   out]
     convert = subprocess.run(cmd_export,
@@ -122,6 +122,7 @@ def main():
     multiplier = float(config["PixelMultiplier"])
     defaultwidth = int(config["DefaultImage"]["w"])
     defaultheight = int(config["DefaultImage"]["h"])
+    backgroundHeight = int(config["ImageHeading"]["BackgroundHeight"])
 
     logos = []
     for file in os.listdir(dir_logos):
@@ -130,7 +131,7 @@ def main():
             logos.append("{p}/{f}".format(p=dir_logos, f=file))
     logos.sort()
     for logo in logos:
-        resizefile(convert, logo, multiplier, dir_logos_out)
+        resizefile(convert, logo, backgroundHeight, multiplier, dir_logos_out)
 
     hotases = []
     for file in os.listdir(dir_hotas_images):

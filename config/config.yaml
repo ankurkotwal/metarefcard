@@ -71,7 +71,7 @@ ImageHeading:
     y: 100
   TextHeight: 180
   TextColour: "#ffffffff"
-  BackgorundHeight: 200
+  BackgroundHeight: 200
   BackgroundColour: "#2780e3ff"
 
 Watermark:

@@ -35,7 +35,7 @@ type Config struct {
 		Inset            Point2d `yaml:"Inset"`
 		TextHeight       float64 `yaml:"TextHeight"`
 		TextColour       string  `yaml:"TextColour"`
-		BackgroundHeight float64 `yaml:"BackgorundHeight"`
+		BackgroundHeight float64 `yaml:"BackgroundHeight"`
 		BackgroundColour string  `yaml:"BackgroundColour"`
 	} `yaml:"ImageHeading"`
 
