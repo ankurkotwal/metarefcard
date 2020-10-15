@@ -105,7 +105,7 @@
             ]
         },
         {
-            "name": "fs2020_debug",
+            "name": "debugging",
             "type": "go",
             "request": "launch",
             "mode": "auto",
@@ -114,20 +114,7 @@
             "args": [
                 "-d", // Expose GET Handlers
                 "--fs2020",
-                "${workspaceFolder}/testdata/fs2020/debug.xml",
-            ]
-        },
-        {
-            "name": "sws_debug",
-            "type": "go",
-            "request": "launch",
-            "mode": "auto",
-            "program": "${workspaceFolder}/main.go",
-            "env": {},
-            "args": [
-                "-d", // Expose GET Handlers
-                "--sws",
-                "${workspaceFolder}/testdata/sws/debug.profile",
+                "${workspaceFolder}/testdata/fs2020/unsupported/PS4.xml",
             ]
         },
         {

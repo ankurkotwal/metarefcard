@@ -30,9 +30,14 @@ type requestHandler func(files [][]byte, config *common.Config) (*common.GameDat
 
 var config common.Config
 var debugMode = false
+var logs []*common.LogEntry = make([]*common.LogEntry, 0)
 
 // Initialise the package
 func initialise() gameFiles {
+	// Capture logs
+	common.RegisterHandler(func(newLog *common.LogEntry) {
+		logs = append(logs, newLog)
+	})
 	gameFiles := parseCliArgs(&debugMode)
 
 	// Load the configuration
@@ -223,8 +228,8 @@ func sendResponse(loadedFiles [][]byte, handler requestHandler,
 	generatedFiles := generateImages(overlaysByImage, gameContexts, gameLogo)
 
 	// Generate HTML
-	tmplFilename := "resources/www/templates/refcard.html"
-	t, err := template.New(path.Base(tmplFilename)).ParseFiles(tmplFilename)
+	cardTempl := "resources/www/templates/refcard.html"
+	t, err := template.New(path.Base(cardTempl)).ParseFiles(cardTempl)
 	if err != nil {
 		s := fmt.Sprintf("Error parsing image template - %s\n", err)
 		log.Print(s)
@@ -245,6 +250,24 @@ func sendResponse(loadedFiles [][]byte, handler requestHandler,
 			s := fmt.Sprintf("Error executing image template - %s\n", err)
 			log.Print(s)
 			continue
+		}
+		imagesAsHTML = append(imagesAsHTML, tpl.Bytes()...)
+	}
+	// Generate HTML
+	logTempl := "resources/www/templates/log.html"
+	l, err := template.New(path.Base(logTempl)).ParseFiles(logTempl)
+	if err != nil {
+		s := fmt.Sprintf("Error parsing image template - %s\n", err)
+		log.Print(s)
+		if c != nil {
+			c.Data(http.StatusInternalServerError, "text/html; charset=utf-8", []byte(s))
+		}
+	} else {
+		var tpl bytes.Buffer
+		err = l.Execute(&tpl, struct{ Logs []*common.LogEntry }{Logs: logs})
+		if err != nil {
+			s := fmt.Sprintf("Error executing logging template - %s\n", err)
+			log.Print(s)
 		}
 		imagesAsHTML = append(imagesAsHTML, tpl.Bytes()...)
 	}
