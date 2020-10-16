@@ -1,10 +1,12 @@
-<hr class="my-4 solid">
-<ul>
-    {{range .Logs}}
-        {{if .IsError}}
-            <li class="msg-info">{{.Msg}}</li>
-        {{else}}
-            <li class="msg-error">{{.Msg}}</li>
+{{if .Logs}}
+    <hr class="my-4 solid">
+    <ul>
+        {{range .Logs}}
+            {{if .IsError}}
+                <li class="msg-info">{{.Msg}}</li>
+            {{else}}
+                <li class="msg-error">{{.Msg}}</li>
+            {{end}}
         {{end}}
-    {{end}}
-</ul>
+    </ul>
+{{end}}

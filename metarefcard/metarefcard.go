@@ -101,6 +101,7 @@ func RunServer() {
 	}
 
 	router.LoadHTMLGlob("resources/www/templates/*")
+	router.StaticFile("/main.css", "resources/www/static/main.css")
 	router.StaticFile("/script.js", "resources/www/static/script.js")
 
 	// Index page

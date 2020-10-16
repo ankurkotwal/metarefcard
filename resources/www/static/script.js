@@ -31,23 +31,26 @@ function copyTextFromElement(element) {
 
 $(function () {
   let files = [];
+  registerHandlers("fs2020", files)
+  registerHandlers("sws", files)
+});
 
-  // ##### Flight Simulator 2020 #####
-  let fs2020InputFile = $('#fs2020FilesInput');
-  let fs2020AddButton = $('#fs2020AddButton');
-  let fs2020GenerateButton = $('#fs2020GenerateButton');
-  let fs2020FilesContainer = $('#fs2020Files');
-  fs2020InputFile.change(function () {
-    inputFileChange(fs2020GenerateButton, fs2020InputFile, files, fs2020FilesContainer);
+function registerHandlers(game, files) {
+  let inputFile = $('#${game}FilesInput');
+  let addButton = $('#${game}AddButton');
+  let generateButton = $('#${game}GenerateButton');
+  let filesContainer = $('#${game}Files');
+  inputFile.change(function () {
+    inputFileChange(generateButton, inputFile, files, filesContainer);
     $(this).val('') // Makes it possible to add, remove, add same file
   });
-  fs2020AddButton.click(function () {
-    fs2020InputFile.click();
+  addButton.click(function () {
+    inputFile.click();
   });
-  fs2020GenerateButton.click(function () {
-    callBackend('/fs2020', files, $('#fs2020Progressbar'), $('#fs2020Images'))
+  generateButton.click(function () {
+    callBackend('/${game}', files, $('#${game}Progressbar'), $('#${game}Images'))
   });
-});
+}
 
 function inputFileChange(generateButton, inputFile, files, filesContainer) {
   generateButton.attr("disabled", true);
