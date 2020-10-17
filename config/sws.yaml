@@ -38,6 +38,9 @@ InputLabels:
   Deactivate: Deactivate
   Drift: Drift
   Edit: Edit Control
+  EmergencyPowerTransferBalance: Transfer Power->Balance
+  EmergencyPowerTransferEngine: Transfer Power->Engine
+  EmergencyPowerTransferWeapon: Transfer Power->Weapon
   EmoteWheel: Emote Wheel
   Fire: Fire
   FreeLookCameraDown: Quick Look Down
