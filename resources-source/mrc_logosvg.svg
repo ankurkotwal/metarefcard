@@ -17,8 +17,8 @@
    inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
    sodipodi:docname="mrc_logosvg.svg"
    inkscape:export-filename="/home/ankur/devel/MetaRefCard/resources/www/static/favicon.ico.png"
-   inkscape:export-xdpi="25.79875"
-   inkscape:export-ydpi="25.79875">
+   inkscape:export-xdpi="24"
+   inkscape:export-ydpi="24">
   <defs
      id="defs2" />
   <sodipodi:namedview
@@ -29,10 +29,10 @@
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.49497475"
-     inkscape:cx="135.47042"
-     inkscape:cy="551.39096"
+     inkscape:cx="127.3892"
+     inkscape:cy="596.32981"
      inkscape:document-units="mm"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="g4688"
      showgrid="false"
      units="px"
      inkscape:window-width="1920"
@@ -58,12 +58,16 @@
      id="layer1"
      transform="translate(0,-26.06663)">
     <rect
-       style="fill:#373a3c;fill-opacity:1;stroke:none;stroke-width:0.26458332;stroke-opacity:1"
+       style="fill:#373a3c;fill-opacity:1;stroke:none;stroke-width:0.1887157;stroke-opacity:1"
        id="rect849"
        width="270.93332"
-       height="270.93332"
+       height="137.8331"
        x="0"
-       y="26.066645" />
+       y="92.616745"
+       inkscape:export-filename="/home/ankur/devel/MetaRefCard/resources/www/static/favicon.ico.png"
+       inkscape:export-xdpi="24.000002"
+       inkscape:export-ydpi="24.000002"
+       ry="18.174326" />
     <flowRoot
        xml:space="preserve"
        id="flowRoot828"
@@ -111,9 +115,10 @@
            x="-880"
            y="344" /></flowRegion><flowPara
          id="flowPara890" /></flowRoot>    <g
-       id="g4688">
+       id="g4688"
+       transform="translate(9.3615739,0.53453905)">
       <flowRoot
-         transform="matrix(0.26458333,0,0,0.26458333,47.330829,-51.378996)"
+         transform="matrix(0.26458333,0,0,0.26458333,-46.372855,34.442681)"
          style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ff0039;fill-opacity:1;stroke:none"
          id="flowRoot852"
          xml:space="preserve"><flowRegion
@@ -125,9 +130,9 @@
              width="757.14288"
              id="rect856"
              style="fill:#ff0039;fill-opacity:1" /></flowRegion><flowPara
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:426.66668701px;font-family:Orbitron;-inkscape-font-specification:Orbitron;fill:#ff0039;fill-opacity:1"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:426.66668701px;font-family:Dirga;-inkscape-font-specification:Dirga;fill:#ffffff;fill-opacity:1"
            id="flowPara858">M</flowPara></flowRoot>      <flowRoot
-         transform="matrix(0.26458333,0,0,0.26458333,53.088162,34.631102)"
+         transform="matrix(0.26458333,0,0,0.26458333,55.407181,33.144459)"
          style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#3fb618;fill-opacity:1;stroke:none"
          id="flowRoot852-9"
          xml:space="preserve"><flowRegion
@@ -139,9 +144,9 @@
              width="757.14288"
              id="rect856-5"
              style="fill:#3fb618;fill-opacity:1" /></flowRegion><flowPara
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:426.66668701px;font-family:Orbitron;-inkscape-font-specification:Orbitron;fill:#3fb618;fill-opacity:1"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:426.66668701px;font-family:Dirga;-inkscape-font-specification:Dirga;fill:#ffffff;fill-opacity:1"
            id="flowPara858-4">R</flowPara></flowRoot>      <flowRoot
-         transform="matrix(0.26458333,0,0,0.25501802,52.21764,123.58124)"
+         transform="matrix(0.26458333,0,0,0.25501802,133.46758,36.550584)"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:1.25;font-family:Dirga;-inkscape-font-specification:Dirga;letter-spacing:0px;word-spacing:0px;fill:#2780e3;fill-opacity:1;stroke:none"
          id="flowRoot852-0"
          xml:space="preserve"><flowRegion
@@ -153,7 +158,7 @@
              height="628.57141"
              width="757.14288"
              id="rect856-9" /></flowRegion><flowPara
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:434.5947876px;font-family:Orbitron;-inkscape-font-specification:Orbitron;fill:#2780e3;fill-opacity:1"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:434.5947876px;font-family:Dirga;-inkscape-font-specification:Dirga;fill:#ffffff;fill-opacity:1"
            id="flowPara858-46">C</flowPara></flowRoot>    </g>
   </g>
 </svg>
