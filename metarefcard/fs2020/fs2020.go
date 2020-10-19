@@ -6,7 +6,6 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
-	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -30,7 +29,7 @@ func GetGameInfo() (string, string, common.FuncRequestHandler, common.FuncMatchG
 	return label, desc, handleRequest, matchGameInputToModel
 }
 
-// h"Flight Simulator 2020 input configs"andleRequest services the request to load files
+// handleRequest services the request to load files
 func handleRequest(files [][]byte, config *common.Config) (*common.GameData,
 	common.GameBindsByDevice, common.MockSet, common.MockSet, string) {
 	if !initiliased {
@@ -73,7 +72,8 @@ func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToSh
 				// EOF means we're done.
 				break
 			} else if err != nil {
-				log.Fatalf("Error: FS2020 decoding token: %s", err)
+				common.LogErr("FS2020 decoding token %s in file %s", err, file)
+				return gameBinds, neededDevices, contexts
 			}
 
 			switch ty := token.(type) {
