@@ -7,9 +7,9 @@ import (
 
 // LoadGameModel - load game specific data from our model. Update the device names
 // (map game device name to our model names)
-func LoadGameModel(filename string, label string, debugOutput bool) *GameData {
+func LoadGameModel(filename string, label string, debugOutput bool, log *Logger) *GameData {
 	data := GameData{}
-	LoadYaml(filename, &data, label)
+	LoadYaml(filename, &data, label, log)
 
 	fullToShort := DeviceNameFullToShort{}
 	// Update map of game device names to our model device names
@@ -26,12 +26,12 @@ func LoadGameModel(filename string, label string, debugOutput bool) *GameData {
 }
 
 // FilterDevices - Returns only the devices that the caller is asking for
-func FilterDevices(neededDevices MockSet, config *Config) DeviceMap {
+func FilterDevices(neededDevices MockSet, config *Config, log *Logger) DeviceMap {
 	filteredDevices := make(DeviceMap)
 	// Filter for only the device groups we're interested in
 	for shortName := range neededDevices {
 		if _, found := config.DeviceMap[shortName]; !found {
-			LogErr("device not found in config %s", shortName)
+			log.Err("device not found in config %s", shortName)
 			continue
 		}
 		neededDevices[shortName] = ""
@@ -43,7 +43,7 @@ func FilterDevices(neededDevices MockSet, config *Config) DeviceMap {
 	}
 
 	if config.DebugOutput {
-		DbgMsg(YamlObjectAsString(filteredDevices, "Targeted Device Map"))
+		log.Dbg(YamlObjectAsString(filteredDevices, "Targeted Device Map"))
 	}
 	return filteredDevices
 }
@@ -66,19 +66,19 @@ func GenerateContextColours(contexts MockSet, config *Config) {
 
 // FuncRequestHandler - handles incoming requests and returns game data, game binds,
 // neededDevices and a context to colour mapping
-type FuncRequestHandler func(files [][]byte, config *Config) (*GameData,
+type FuncRequestHandler func(files [][]byte, config *Config, log *Logger) (*GameData,
 	GameBindsByDevice, MockSet, MockSet, string)
 
 // FuncMatchGameInputToModel takes the game provided bindings with the device map to
 // build a list of image overlays.
 type FuncMatchGameInputToModel func(deviceName string, actionData GameInput,
-	deviceInputs DeviceInputs, gameInputMap InputTypeMapping) (GameInput, string)
+	deviceInputs DeviceInputs, gameInputMap InputTypeMapping, log *Logger) (GameInput, string)
 
 // PopulateImageOverlays returns a list of image overlays to put on device images
-func PopulateImageOverlays(neededDevices MockSet, config *Config,
+func PopulateImageOverlays(neededDevices MockSet, config *Config, log *Logger,
 	gameBinds GameBindsByDevice, gameData *GameData, matchFunc FuncMatchGameInputToModel) OverlaysByImage {
 
-	deviceMap := FilterDevices(neededDevices, config)
+	deviceMap := FilterDevices(neededDevices, config, log)
 	imageMap := config.ImageMap
 
 	// Iterate through our game binds
@@ -90,7 +90,7 @@ func PopulateImageOverlays(neededDevices MockSet, config *Config,
 			for actionName, gameInput := range actions {
 
 				inputLookups, label := matchFunc(shortName, gameInput, inputs,
-					(*gameData).InputMap[shortName])
+					(*gameData).InputMap[shortName], log)
 
 				for idx, input := range inputLookups {
 					if idx != 0 && len(input) == 0 {
@@ -101,16 +101,16 @@ func PopulateImageOverlays(neededDevices MockSet, config *Config,
 
 					inputData, found := inputs[input]
 					if !found {
-						LogErr("%s unknown input to lookup %s for device %s",
+						log.Err("%s unknown input to lookup %s for device %s",
 							label, input, shortName)
 					}
 					if inputData.X == 0 && inputData.Y == 0 {
-						LogErr("%s location 0,0 for %s device %s %v",
+						log.Err("%s location 0,0 for %s device %s %v",
 							label, actionName, shortName, inputData)
 						continue
 					}
 					GenerateImageOverlays(overlaysByImage, input, &inputData,
-						gameData, actionName, context, shortName, image, label)
+						gameData, actionName, context, shortName, image, label, log)
 				}
 			}
 		}
@@ -122,7 +122,7 @@ func PopulateImageOverlays(neededDevices MockSet, config *Config,
 // GenerateImageOverlays - creates the image overlays into overlaysByImage
 func GenerateImageOverlays(overlaysByImage OverlaysByImage, input string, inputData *InputData,
 	gameData *GameData, actionName string, context string, shortName string,
-	image string, gameLabel string) {
+	image string, gameLabel string, log *Logger) {
 	var overlayData OverlayData
 	overlayData.ContextToTexts = make(map[string][]string)
 	overlayData.PosAndSize = inputData
@@ -132,7 +132,7 @@ func GenerateImageOverlays(overlaysByImage OverlaysByImage, input string, inputD
 		text = label
 	} else {
 		text = actionName
-		LogErr("%s label not found. %s context %s device %s",
+		log.Err("%s label not found. %s context %s device %s",
 			gameLabel, actionName, context, shortName)
 	}
 	texts := make([]string, 1)

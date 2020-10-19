@@ -20,7 +20,7 @@ var gameLogos map[string]image.Image = make(map[string]image.Image)
 // GenerateImage - generates an image with the provided overlays
 func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
 	overlaysByImage OverlaysByImage, categories map[string]string,
-	config *Config, gameLogo string) *bytes.Buffer {
+	config *Config, log *Logger, gameLogo string) *bytes.Buffer {
 
 	// Set the background colour
 	dc.SetHexColor(config.BackgroundColour)
@@ -40,7 +40,7 @@ func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
 		yLoc := float64(overlayData.PosAndSize.Y) * pixelMultiplier
 
 		if xLoc >= float64(dc.Width()) || yLoc >= float64(dc.Height()) {
-			LogErr("Overlay outside bounds. File %s overlayData %v defaults %v",
+			log.Err("Overlay outside bounds. File %s overlayData %v defaults %v",
 				imageFilename, overlayData.PosAndSize, config.DefaultImage)
 			continue
 		}
@@ -101,7 +101,7 @@ func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
 		var err error
 		logo, err = gg.LoadImage(fmt.Sprintf("%s/%s.png", config.LogoImagesDir, gameLogo))
 		if err != nil {
-			LogErr("loadImage %s failed. %v", imageFilename, err)
+			log.Err("loadImage %s failed. %v", imageFilename, err)
 		}
 		gameLogos[gameLogo] = logo
 	}

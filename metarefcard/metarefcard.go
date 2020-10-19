@@ -24,27 +24,21 @@ import (
 
 var config *common.Config
 var debugMode = false
-var logs []*common.LogEntry = make([]*common.LogEntry, 0)
 
 type gameInfo func() (string, string, common.FuncRequestHandler,
 	common.FuncMatchGameInputToModel)
 
 // Initialise the package
-func initialise() (cliGameArgs, []gameInfo) {
+func initialise(log *common.Logger) (cliGameArgs, []gameInfo) {
 	gamesInfo := []gameInfo{fs2020.GetGameInfo, sws.GetGameInfo}
-
-	// Capture logs
-	common.RegisterHandler(func(newLog *common.LogEntry) {
-		logs = append(logs, newLog)
-	})
 	gameArgs := parseCliArgs(&debugMode, gamesInfo)
 
 	// Load the configuration
-	common.LoadYaml("config/config.yaml", &config, "Config")
+	common.LoadYaml("config/config.yaml", &config, "Config", log)
 
 	// Load the device model (i.e. non-game specific)
 	var generatedConfig common.GeneratedConfig
-	common.LoadYaml(config.DevicesFile, &generatedConfig, "Full Device Map")
+	common.LoadYaml(config.DevicesFile, &generatedConfig, "Full Device Map", log)
 
 	// Add device additions to the main device index
 	for shortName, inputs := range config.DeviceMap {
@@ -65,7 +59,7 @@ func initialise() (cliGameArgs, []gameInfo) {
 	for shortName, inputOverrides := range config.InputOverrides {
 		deviceInputs, found := config.DeviceMap[shortName]
 		if !found {
-			common.LogErr("Override device not found %s", shortName)
+			log.Err("Override device not found %s", shortName)
 			continue // Next device
 		}
 		for input, override := range inputOverrides {
@@ -84,7 +78,8 @@ func initialise() (cliGameArgs, []gameInfo) {
 
 // RunServer will run the server
 func RunServer() {
-	gameArgs, gamesInfo := initialise()
+	log := common.NewLog()
+	gameArgs, gamesInfo := initialise(log)
 
 	router := gin.Default()
 	if debugMode {
@@ -114,12 +109,12 @@ func RunServer() {
 		// Flight simulator endpoint
 		router.POST(fmt.Sprintf("/api/%s", label), func(c *gin.Context) {
 			// Use the posted form data
-			sendResponse(loadFormFiles(c), handleRequest, matchGameInputToModel, c)
+			sendResponse(loadFormFiles(c, log), handleRequest, matchGameInputToModel, c)
 		})
 		if debugMode {
 			router.GET(fmt.Sprintf("/test/%s", label), func(c *gin.Context) {
 				// Use local files (specified on the command line)
-				sendResponse(loadLocalFiles(*gameArgs[label]), handleRequest,
+				sendResponse(loadLocalFiles(*gameArgs[label], log), handleRequest,
 					matchGameInputToModel, c)
 			})
 		}
@@ -173,23 +168,22 @@ func parseCliArgs(debugMode *bool, games []gameInfo) cliGameArgs {
 	return gameFiles
 }
 
-func loadLocalFiles(files []string) [][]byte {
-	// On the GET route, we'll load our own files (for testing purposes)
+func loadLocalFiles(files []string, log *common.Logger) [][]byte {
 	var inputFiles [][]byte
 	for _, filename := range files {
 		file, err := ioutil.ReadFile(filename)
 		if err != nil {
-			common.LogErr("Error reading file. %s", err)
+			log.Err("Error reading file. %s", err)
 		}
 		inputFiles = append(inputFiles, file)
 	}
 	return inputFiles
 }
 
-func loadFormFiles(c *gin.Context) [][]byte {
+func loadFormFiles(c *gin.Context, log *common.Logger) [][]byte {
 	form, err := c.MultipartForm()
 	if err != nil {
-		common.LogErr("Error getting MultipartForm - %s", err)
+		log.Err("Error getting MultipartForm - %s", err)
 		return make([][]byte, 0)
 	}
 
@@ -198,12 +192,12 @@ func loadFormFiles(c *gin.Context) [][]byte {
 	for idx, file := range inputFiles {
 		multipart, err := file.Open()
 		if err != nil {
-			common.LogErr("Error opening multipart file %s - %s", file.Filename, err)
+			log.Err("Error opening multipart file %s - %s", file.Filename, err)
 			continue
 		}
 		contents, err := ioutil.ReadAll(multipart)
 		if err != nil {
-			common.LogErr("Error reading multipart file %s - %s", file.Filename, err)
+			log.Err("Error reading multipart file %s - %s", file.Filename, err)
 			continue
 		}
 		files[idx] = contents
@@ -213,21 +207,23 @@ func loadFormFiles(c *gin.Context) [][]byte {
 
 func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 	matchFunc common.FuncMatchGameInputToModel, c *gin.Context) {
+	log := common.NewLog()
+
 	// Call game handler to generate image overlayes
 	gameData, gameBinds, gameDevices, gameContexts, gameLogo :=
-		handler(loadedFiles, config)
-	overlaysByImage := common.PopulateImageOverlays(gameDevices, config,
+		handler(loadedFiles, config, log)
+	overlaysByImage := common.PopulateImageOverlays(gameDevices, config, log,
 		gameBinds, gameData, matchFunc)
 
 	// Now generate images from the overlays
-	generatedFiles := generateImages(overlaysByImage, gameContexts, gameLogo)
+	generatedFiles := generateImages(overlaysByImage, gameContexts, gameLogo, log)
 
 	// Generate HTML
 	cardTempl := "resources/www/templates/refcard.html"
 	t, err := template.New(path.Base(cardTempl)).ParseFiles(cardTempl)
 	if err != nil {
 		s := fmt.Sprintf("Error parsing card template - %s", err)
-		common.LogErr(s)
+		log.Err(s)
 		if c != nil {
 			c.Data(http.StatusInternalServerError, "text/html; charset=utf-8", []byte(s))
 		}
@@ -242,7 +238,7 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 		}
 		var tpl bytes.Buffer
 		if err := t.Execute(&tpl, image); err != nil {
-			common.LogErr(fmt.Sprintf("Error executing image template - %s", err))
+			log.Err(fmt.Sprintf("Error executing image template - %s", err))
 			continue
 		}
 		imagesAsHTML = append(imagesAsHTML, tpl.Bytes()...)
@@ -252,15 +248,15 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 	l, err := template.New(path.Base(logTempl)).ParseFiles(logTempl)
 	if err != nil {
 		s := fmt.Sprintf("Error parsing logging template - %s", err)
-		common.LogErr(s)
+		log.Err(s)
 		if c != nil {
 			c.Data(http.StatusInternalServerError, "text/html; charset=utf-8", []byte(s))
 		}
 	} else {
 		var tpl bytes.Buffer
-		err = l.Execute(&tpl, struct{ Logs []*common.LogEntry }{Logs: logs})
+		err = l.Execute(&tpl, struct{ Logs []*common.LogEntry }{Logs: *log})
 		if err != nil {
-			common.LogErr("Error executing logging template - %s", err)
+			log.Err("Error executing logging template - %s", err)
 		}
 		imagesAsHTML = append(imagesAsHTML, tpl.Bytes()...)
 	}
@@ -286,7 +282,7 @@ type chanData struct {
 }
 
 func generateImages(overlaysByImage common.OverlaysByImage, categories map[string]string,
-	gameLabel string) []*bytes.Buffer {
+	gameLabel string, log *common.Logger) []*bytes.Buffer {
 
 	imageNames := prepareGeneratorData(overlaysByImage)
 
@@ -297,7 +293,7 @@ func generateImages(overlaysByImage common.OverlaysByImage, categories map[strin
 			image, err := gg.LoadImage(fmt.Sprintf("%s/%s.png",
 				config.HotasImagesDir, imageFilename))
 			if err != nil {
-				common.LogErr("loadImage %s failed. %v", imageFilename, err)
+				log.Err("loadImage %s failed. %v", imageFilename, err)
 				channel <- chanData{nil, nil, ""}
 			}
 
@@ -319,7 +315,7 @@ func generateImages(overlaysByImage common.OverlaysByImage, categories map[strin
 		data := imagesByName[imageFilename]
 		// Sort by image filename
 		imgBytes := common.GenerateImage(data.Dc, data.Image, data.ImageFilename,
-			overlaysByImage, categories, config, gameLabel)
+			overlaysByImage, categories, config, log, gameLabel)
 		if imgBytes != nil {
 			files = append(files, imgBytes)
 		}

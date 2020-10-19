@@ -23,18 +23,18 @@ func (m MockSet) Keys() []string {
 }
 
 // LoadYaml loads Yaml file and prints any errors
-func LoadYaml(filename string, out interface{}, label string) {
+func LoadYaml(filename string, out interface{}, label string, log *Logger) {
 	yamlData, err := ioutil.ReadFile(filename)
 	if err != nil {
-		log.Fatalf("error: yaml ioutil.ReadFile %v ", err)
+		log.Fatal("yaml ioutil.ReadFile %v ", err)
 	}
 	err = yaml.Unmarshal([]byte(yamlData), out)
 	if err != nil {
-		log.Fatalf("error: yaml.Unmarshal %v", err)
+		log.Fatal("yaml.Unmarshal %v", err)
 	}
 	debugOutput := false
 	if debugOutput {
-		DbgMsg(YamlObjectAsString(out, label))
+		log.Dbg(YamlObjectAsString(out, label))
 	}
 }
 
