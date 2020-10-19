@@ -1,4 +1,10 @@
-<div id="fs2020" class="tab-pane fade in active show">
+{{template "header.html" .}}
+<script>
+function mrcPageReady() {
+  registerHandlers("fs2020")
+}
+</script>
+<div id="fs2020">
   <div class="image-box-crop">
     <img src="https://assets-prd.ignimgs.com/2020/07/13/microsoft-flight-simulator-button-01b-1594670655053.jpg" />
   </div>
@@ -26,3 +32,4 @@
     Card</button>
   <div id="fs2020Images" />
 </div>
+{{template "footer.html" .}}

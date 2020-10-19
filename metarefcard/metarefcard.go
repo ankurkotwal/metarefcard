@@ -23,22 +23,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// requestHandler - handles incoming requests and returns game data, game binds,
-// neededDevices and a context to colour mapping
-type requestHandler func(files [][]byte, config *common.Config) (*common.GameData,
-	common.GameBindsByDevice, common.MockSet, common.MockSet, string)
-
-var config common.Config
+var config *common.Config
 var debugMode = false
 var logs []*common.LogEntry = make([]*common.LogEntry, 0)
 
+type gameInfo func() (string, string, common.FuncRequestHandler,
+	common.FuncMatchGameInputToModel)
+
 // Initialise the package
-func initialise() gameFiles {
+func initialise() (cliGameArgs, []gameInfo) {
+	gamesInfo := []gameInfo{fs2020.GetGameInfo, sws.GetGameInfo}
+
 	// Capture logs
 	common.RegisterHandler(func(newLog *common.LogEntry) {
 		logs = append(logs, newLog)
 	})
-	gameFiles := parseCliArgs(&debugMode)
+	gameArgs := parseCliArgs(&debugMode, gamesInfo)
 
 	// Load the configuration
 	common.LoadYaml("config/config.yaml", &config, "Config")
@@ -80,64 +80,51 @@ func initialise() gameFiles {
 	}
 	config.ImageMap = generatedConfig.ImageMap
 
-	return gameFiles
-}
-
-// RunLocal will run local files
-func RunLocal() {
-	gameFiles := initialise()
-	sendResponse(loadLocalFiles(gameFiles.fs2020), fs2020.HandleRequest,
-		fs2020.MatchGameInputToModel, nil)
+	return gameArgs, gamesInfo
 }
 
 // RunServer will run the server
 func RunServer() {
-	gameFiles := initialise()
+	gameArgs, gamesInfo := initialise()
 
 	router := gin.Default()
-
 	if debugMode {
 		pprof.Register(router)
+	} else {
+		gin.SetMode(gin.ReleaseMode)
 	}
 
-	router.LoadHTMLGlob("resources/www/templates/*")
+	router.LoadHTMLGlob("resources/www/templates/*.html")
+	router.StaticFile("/favicon.ico", "resources/www/static/favicon.ico")
 	router.StaticFile("/main.css", "resources/www/static/main.css")
 	router.StaticFile("/script.js", "resources/www/static/script.js")
 
 	// Index page
 	router.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", gin.H{
-			"title":   config.AppName,
-			"version": config.Version,
-		})
+		c.Redirect(http.StatusFound, "/fs2020")
 	})
 
-	// Flight simulator endpoint
-	router.POST("/fs2020", func(c *gin.Context) {
-		// Use the posted form data
-		sendResponse(loadFormFiles(c), fs2020.HandleRequest,
-			fs2020.MatchGameInputToModel, c)
-	})
-	if debugMode {
-		router.GET("/fs2020", func(c *gin.Context) {
-			// Use local files (specified on the command line)
-			sendResponse(loadLocalFiles(gameFiles.fs2020), fs2020.HandleRequest,
-				fs2020.MatchGameInputToModel, c)
+	for _, game := range gamesInfo {
+		label, _, handleRequest, matchGameInputToModel := game()
+		router.GET(fmt.Sprintf("/%s", label), func(c *gin.Context) {
+			c.HTML(http.StatusOK, fmt.Sprintf("%s.html", label), gin.H{
+				"Title":   config.AppName,
+				"Version": config.Version,
+			})
 		})
-	}
+		// Flight simulator endpoint
+		router.POST(fmt.Sprintf("/api/%s", label), func(c *gin.Context) {
+			// Use the posted form data
+			sendResponse(loadFormFiles(c), handleRequest, matchGameInputToModel, c)
+		})
+		if debugMode {
+			router.GET(fmt.Sprintf("/test/%s", label), func(c *gin.Context) {
+				// Use local files (specified on the command line)
+				sendResponse(loadLocalFiles(*gameArgs[label]), handleRequest,
+					matchGameInputToModel, c)
+			})
+		}
 
-	// Flight simulator endpoint
-	router.POST("/sws", func(c *gin.Context) {
-		// Use the posted form data
-		sendResponse(loadFormFiles(c), sws.HandleRequest,
-			sws.MatchGameInputToModel, c)
-	})
-	if debugMode {
-		router.GET("/sws", func(c *gin.Context) {
-			// Use local files (specified on the command line)
-			sendResponse(loadLocalFiles(gameFiles.sws), sws.HandleRequest,
-				sws.MatchGameInputToModel, c)
-		})
 	}
 
 	// Run on port 8080 unless PORT varilable specified
@@ -149,32 +136,39 @@ func RunServer() {
 
 }
 
+type cliGameArgs map[string]*arrayFlags
+
+// arrayFlags are used for storing a list of CLI values
 type arrayFlags []string
 
 func (i *arrayFlags) String() string {
 	return ""
 }
 
+// Set adds to the ArrayFlag
 func (i *arrayFlags) Set(value string) error {
 	*i = append(*i, value)
 	return nil
 }
 
-type gameFiles struct {
-	fs2020 arrayFlags
-	sws    arrayFlags
-}
-
-func parseCliArgs(debugMode *bool) gameFiles {
-	var gameFiles gameFiles
+func parseCliArgs(debugMode *bool, games []gameInfo) cliGameArgs {
+	gameFiles := make(cliGameArgs)
 	flag.Usage = func() {
 		fmt.Printf("Usage: %s file...\n\n", filepath.Base(os.Args[0]))
 		fmt.Printf("file\tSupported game input configration.\n")
 		flag.PrintDefaults()
 	}
 	flag.BoolVar(debugMode, "d", false, "Debug mode & deploy GET handlers.")
-	flag.Var(&gameFiles.fs2020, "fs2020", "Flight Simulator 2020 input configs")
-	flag.Var(&gameFiles.sws, "sws", "Star Wars Squadrons input configs")
+	for _, getGameInfo := range games {
+		label, desc, _, _ := getGameInfo()
+		args, found := gameFiles[label]
+		if !found {
+			arrayFlags := make(arrayFlags, 0)
+			args = &arrayFlags
+			gameFiles[label] = args
+		}
+		flag.Var(args, label, desc)
+	}
 	flag.Parse()
 
 	return gameFiles
@@ -218,11 +212,12 @@ func loadFormFiles(c *gin.Context) [][]byte {
 	return files
 }
 
-func sendResponse(loadedFiles [][]byte, handler requestHandler,
-	matchFunc common.MatchGameInputToModel, c *gin.Context) {
+func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
+	matchFunc common.FuncMatchGameInputToModel, c *gin.Context) {
 	// Call game handler to generate image overlayes
-	gameData, gameBinds, gameDevices, gameContexts, gameLogo := handler(loadedFiles, &config)
-	overlaysByImage := common.PopulateImageOverlays(gameDevices, &config,
+	gameData, gameBinds, gameDevices, gameContexts, gameLogo :=
+		handler(loadedFiles, config)
+	overlaysByImage := common.PopulateImageOverlays(gameDevices, config,
 		gameBinds, gameData, matchFunc)
 
 	// Now generate images from the overlays
@@ -327,7 +322,7 @@ func generateImages(overlaysByImage common.OverlaysByImage, categories map[strin
 		data := imagesByName[imageFilename]
 		// Sort by image filename
 		imgBytes := common.GenerateImage(data.Dc, data.Image, data.ImageFilename,
-			overlaysByImage, categories, &config, gameLabel)
+			overlaysByImage, categories, config, gameLabel)
 		if imgBytes != nil {
 			files = append(files, imgBytes)
 		}

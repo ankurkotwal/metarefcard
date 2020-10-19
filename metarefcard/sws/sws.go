@@ -14,9 +14,21 @@ import (
 var initiliased bool = false
 var sharedRegexes swsRegexes
 var sharedGameData *common.GameData
+var label = "sws"
+var desc = "Star Wars Squadrons input configs"
 
-// HandleRequest services the request to load files
-func HandleRequest(files [][]byte, config *common.Config) (*common.GameData,
+// GetGameInfo returns the info needed to fit into MetaRefCard
+// Returns:
+//   * Game label / name
+//   * User friendly command line description
+//   * Func handler for incoming request
+//   * Func that matches the game input format to MRC's model
+func GetGameInfo() (string, string, common.FuncRequestHandler, common.FuncMatchGameInputToModel) {
+	return label, desc, handleRequest, matchGameInputToModel
+}
+
+// handleRequest services the request to load files
+func handleRequest(files [][]byte, config *common.Config) (*common.GameData,
 	common.GameBindsByDevice, common.MockSet, common.MockSet, string) {
 	if !initiliased {
 		sharedGameData = common.LoadGameModel("config/sws.yaml",
@@ -246,12 +258,12 @@ func interpretInput(details *swsActionDetails, device string, context string, ac
 	return ""
 }
 
-// MatchGameInputToModel - returns a common.GameInput of the inputs that can be displayed.
+// matchGameInputToModel - returns a common.GameInput of the inputs that can be displayed.
 // Also returns the label to use for error text
-func MatchGameInputToModel(deviceName string, gameInput common.GameInput,
+func matchGameInputToModel(deviceName string, gameInput common.GameInput,
 	deviceInputs common.DeviceInputs, gameInputMap common.InputTypeMapping) (common.GameInput, string) {
 	// For SWS, we've already got the structure right
-	return gameInput, "SWS"
+	return gameInput, sharedGameData.Logo
 }
 
 // swsContextActionIndex: context -> action name -> action sub -> value

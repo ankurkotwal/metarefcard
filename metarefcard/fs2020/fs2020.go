@@ -17,9 +17,21 @@ import (
 var initiliased bool = false
 var sharedRegexes fs2020Regexes
 var sharedGameData *common.GameData
+var label = "fs2020"
+var desc = "Flight Simulator 2020 input configs"
 
-// HandleRequest services the request to load files
-func HandleRequest(files [][]byte, config *common.Config) (*common.GameData,
+// GetGameInfo returns the info needed to fit into MetaRefCard
+// Returns:
+//   * Game label / name
+//   * User friendly command line description
+//   * Func handler for incoming request
+//   * Func that matches the game input format to MRC's model
+func GetGameInfo() (string, string, common.FuncRequestHandler, common.FuncMatchGameInputToModel) {
+	return label, desc, handleRequest, matchGameInputToModel
+}
+
+// h"Flight Simulator 2020 input configs"andleRequest services the request to load files
+func handleRequest(files [][]byte, config *common.Config) (*common.GameData,
 	common.GameBindsByDevice, common.MockSet, common.MockSet, string) {
 	if !initiliased {
 		sharedGameData = common.LoadGameModel("config/fs2020.yaml",
@@ -209,9 +221,9 @@ func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToSh
 	return gameBinds, neededDevices, contexts
 }
 
-// MatchGameInputToModel takes the game provided bindings with the device map to
+// matchGameInputToModel takes the game provided bindings with the device map to
 // build a list of image overlays.
-func MatchGameInputToModel(deviceName string, actionData common.GameInput,
+func matchGameInputToModel(deviceName string, actionData common.GameInput,
 	deviceInputs common.DeviceInputs, gameInputMap common.InputTypeMapping) (common.GameInput, string) {
 	inputLookups := make([]string, 0, 2)
 

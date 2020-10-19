@@ -30,16 +30,16 @@ function copyTextFromElement(element) {
 };
 
 $(function () {
-  let files = [];
-  registerHandlers("fs2020", files)
-  registerHandlers("sws", files)
+  mrcPageReady()
 });
 
-function registerHandlers(game, files) {
-  let inputFile = $('#${game}FilesInput');
-  let addButton = $('#${game}AddButton');
-  let generateButton = $('#${game}GenerateButton');
-  let filesContainer = $('#${game}Files');
+function registerHandlers(game) {
+  let inputFile = $('#' + game + 'FilesInput');
+  let addButton = $('#' + game + 'AddButton');
+  let generateButton = $('#' + game + 'GenerateButton');
+  let filesContainer = $('#' + game + 'Files');
+  let navItem = $('#' + game + 'Nav')[0]
+  let files = []
   inputFile.change(function () {
     inputFileChange(generateButton, inputFile, files, filesContainer);
     $(this).val('') // Makes it possible to add, remove, add same file
@@ -48,8 +48,12 @@ function registerHandlers(game, files) {
     inputFile.click();
   });
   generateButton.click(function () {
-    callBackend('/${game}', files, $('#${game}Progressbar'), $('#${game}Images'))
+    callBackend('/api/' + game,
+      files,
+      $('#' + game + 'Progressbar'),
+      $('#' + game + 'Images'))
   });
+  navItem.className += ' active'
 }
 
 function inputFileChange(generateButton, inputFile, files, filesContainer) {

@@ -1,4 +1,10 @@
-<div id="ed" class="tab-pane fade">
+{{template "header.html" .}}
+<script>
+function mrcPageReady() {
+  registerHandlers("ed")
+}
+</script>
+<div id="ed">
   <div class="image-box-fill">
     <img src="https://www.logolynx.com/images/logolynx/9f/9f906b067c19733515c6f80c149af188.png" />
   </div>
@@ -24,3 +30,4 @@
   <button id="edGenerateButton" type="button" class="btn btn-primary" disabled>Generate Reference Card</button>
   <div id="edImages" /> -->
 </div>
+{{template "footer.html" .}}

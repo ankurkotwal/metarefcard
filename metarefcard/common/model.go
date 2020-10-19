@@ -65,14 +65,19 @@ func GenerateContextColours(contexts MockSet, config *Config) {
 	}
 }
 
-// MatchGameInputToModel takes the game provided bindings with the device map to
+// FuncRequestHandler - handles incoming requests and returns game data, game binds,
+// neededDevices and a context to colour mapping
+type FuncRequestHandler func(files [][]byte, config *Config) (*GameData,
+	GameBindsByDevice, MockSet, MockSet, string)
+
+// FuncMatchGameInputToModel takes the game provided bindings with the device map to
 // build a list of image overlays.
-type MatchGameInputToModel func(deviceName string, actionData GameInput,
+type FuncMatchGameInputToModel func(deviceName string, actionData GameInput,
 	deviceInputs DeviceInputs, gameInputMap InputTypeMapping) (GameInput, string)
 
 // PopulateImageOverlays returns a list of image overlays to put on device images
 func PopulateImageOverlays(neededDevices MockSet, config *Config,
-	gameBinds GameBindsByDevice, gameData *GameData, matchFunc MatchGameInputToModel) OverlaysByImage {
+	gameBinds GameBindsByDevice, gameData *GameData, matchFunc FuncMatchGameInputToModel) OverlaysByImage {
 
 	deviceMap := FilterDevices(neededDevices, config)
 	imageMap := config.ImageMap

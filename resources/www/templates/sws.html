@@ -1,4 +1,10 @@
-<div id="sws" class="tab-pane fade">
+{{template "header.html" .}}
+<script>
+function mrcPageReady() {
+  registerHandlers("sws")
+}
+</script>
+<div id="sws">
     <div class="image-box-fill">
         <img
             src="https://media.contentapi.ea.com/content/dam/ea/lt-pete-mitchell/media/common/sws-zoom-background-rebel-cockpit.png" />
@@ -6,7 +12,7 @@
     <div class="form-group">
         Add input configuration files from
         <b>
-            <span id="swsPath">TODO</span>
+            <span id="swsPath">%Documents%\STAR WARS Squarons Steam\settings</span>
         </b>
         <br>
         <button class="btn btn-dark" onclick="copyTextFromElement(swsPath, console.error)">Copy path to
@@ -25,5 +31,5 @@
     <button id="swsGenerateButton" type="button" class="btn btn-primary" disabled>Generate Reference
         Card</button>
     <div id="swsImages" />
-
 </div>
+{{template "footer.html" .}}
