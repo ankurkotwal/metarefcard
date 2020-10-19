@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"image"
 	"image/jpeg"
-	"log"
 	"math"
 	"sort"
 	"sync"
@@ -41,7 +40,7 @@ func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
 		yLoc := float64(overlayData.PosAndSize.Y) * pixelMultiplier
 
 		if xLoc >= float64(dc.Width()) || yLoc >= float64(dc.Height()) {
-			log.Printf("Error: Overlay outside bounds. File %s overlayData %v defaults %v\n",
+			LogErr("Overlay outside bounds. File %s overlayData %v defaults %v",
 				imageFilename, overlayData.PosAndSize, config.DefaultImage)
 			continue
 		}
@@ -102,7 +101,7 @@ func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
 		var err error
 		logo, err = gg.LoadImage(fmt.Sprintf("%s/%s.png", config.LogoImagesDir, gameLogo))
 		if err != nil {
-			log.Printf("Error: loadImage %s failed. %v\n", imageFilename, err)
+			LogErr("loadImage %s failed. %v", imageFilename, err)
 		}
 		gameLogos[gameLogo] = logo
 	}

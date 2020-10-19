@@ -3,7 +3,6 @@ package sws
 import (
 	"bufio"
 	"bytes"
-	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -70,7 +69,7 @@ func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
 			matches = sharedRegexes.Joystick.FindAllStringSubmatch(line, -1)
 			if matches != nil && len(matches[0][2]) > 0 {
 				if shortName, found := deviceNameMap[matches[0][2]]; !found {
-					log.Printf("Error: SWS Unknown device found %s\n", matches[0][2])
+					common.LogErr("SWS Unknown device found %s", matches[0][2])
 					continue
 				} else {
 					num, err := strconv.Atoi(matches[0][1])
@@ -80,14 +79,14 @@ func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
 						deviceIndex[strconv.Itoa(num)] = shortName
 						deviceNames[shortName] = ""
 					} else {
-						log.Printf("Error: SWS unexpected device number %s\n", matches[0][1])
+						common.LogErr("SWS unexpected device number %s", matches[0][1])
 					}
 				}
 			}
 		}
 
 		if err := scanner.Err(); err != nil {
-			log.Printf("Error: SWS scan file %d. %s\n", idx, err)
+			common.LogErr("SWS scan file %d. %s", idx, err)
 		}
 	}
 
@@ -99,7 +98,7 @@ func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
 			// Get the device first
 			deviceID, found := actionSubMap["deviceid"]
 			if !found {
-				log.Printf("Error: SWS couldn't find deviceId in %s->%s->%v\n", context, action, actionSubMap)
+				common.LogErr("SWS couldn't find deviceId in %s->%s->%v", context, action, actionSubMap)
 				continue
 			}
 			shortName, found := deviceIndex[deviceID]
@@ -123,7 +122,7 @@ func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
 			for actionSub, value := range actionSubMap {
 				field := getInputTypeAsField(actionSub, &actionDetails)
 				if field == nil {
-					log.Printf("Error: SWS unknown inputType %s value %s\n",
+					common.LogErr("SWS unknown inputType %s value %s",
 						actionSub, value)
 				} else {
 					*field = value
@@ -253,7 +252,7 @@ func interpretInput(details *swsActionDetails, device string, context string, ac
 			}
 		}
 	}
-	log.Printf("Error: SWS Unknown input - device %s context %s action %s data %v\n",
+	common.LogErr("SWS Unknown input - device %s context %s action %s data %v",
 		device, context, action, details)
 	return ""
 }

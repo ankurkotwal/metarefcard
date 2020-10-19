@@ -34,17 +34,17 @@ func LoadYaml(filename string, out interface{}, label string) {
 	}
 	debugOutput := false
 	if debugOutput {
-		PrintYamlObject(out, label)
+		DbgMsg(YamlObjectAsString(out, label))
 	}
 }
 
-// PrintYamlObject outputs contents of yaml object with a label
-func PrintYamlObject(in interface{}, label string) {
+// YamlObjectAsString outputs contents of yaml object with a label
+func YamlObjectAsString(in interface{}, label string) string {
 	d, err := yaml.Marshal(in)
 	if err != nil {
 		log.Fatalf("error: yaml.Marshal %v", err)
 	}
-	fmt.Printf("=== %s ===\n%s\n\n", label, string(d))
+	return fmt.Sprintf("=== %s ===\n%s\n\n", label, string(d))
 
 }
 

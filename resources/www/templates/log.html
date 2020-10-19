@@ -1,12 +1,15 @@
 {{if .Logs}}
-    <hr class="my-4 solid">
-    <ul>
-        {{range .Logs}}
-            {{if .IsError}}
-                <li class="msg-info">{{.Msg}}</li>
-            {{else}}
-                <li class="msg-error">{{.Msg}}</li>
-            {{end}}
-        {{end}}
-    </ul>
+  <hr class="my-4 solid">
+  <p>Errors encountered. Please report them with the input files <a
+          href="https://github.com/ankurkotwal/MetaRefCard/issues/new?assignees=&labels=&template=bug_report.md&title=">here</a>.
+  </p>
+  <ul>
+    {{range .Logs}}
+      {{if .IsError}}
+        <li class="msg-error">{{.Msg}}</li>
+      {{else}}
+        <li class="msg-info">{{.Msg}}</li>
+      {{end}}
+    {{end}}
+  </ul>
 {{end}}

@@ -92,25 +92,25 @@ func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToSh
 					var found bool
 					var shortName string
 					if shortName, found = deviceShortNameMap[aDevice]; !found {
-						log.Printf("Error FS2020 could not find short name for %s\n",
+						common.LogErr("FS2020 could not find short name for %s",
 							aDevice)
 						break // Move on to next device
 					}
 					_, found = gameBinds[shortName]
 					if found {
 						out, _ := json.Marshal(aDevice)
-						log.Printf("Error: FS2020 duplicate device: %s\n", out)
+						common.LogErr("FS2020 duplicate device: %s", out)
 						break // Move on to next device
 					} else {
 						if debugOutput {
 							out, _ := json.Marshal(aDevice)
-							log.Printf("Info: FS2020 new device: %s\n", out)
+							common.DbgMsg("Info: FS2020 new device: %s", out)
 						}
 						contextActions = make(common.GameContextActions)
 						neededDevices[shortName] = "" // Add to set
 						gameBinds[shortName] = contextActions
 						if shortName == common.DeviceMissingInfo {
-							log.Printf("Error: FS2020 missing info for device '%s'\n",
+							common.LogErr("FS2020 missing info for device '%s'",
 								shortName)
 						}
 					}
@@ -127,10 +127,10 @@ func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToSh
 					var found bool
 					currentContext, found = contextActions[contextName]
 					if found {
-						log.Printf("Error: FS2020 duplicate context: %s\n", contextName)
+						common.LogErr("FS2020 duplicate context: %s", contextName)
 					} else {
 						if debugOutput {
-							log.Printf("FS2020 new context: %s\n", contextName)
+							common.DbgMsg("FS2020 new context: %s", contextName)
 						}
 						currentContext = make(common.GameActions)
 						contextActions[contextName] = currentContext
@@ -148,10 +148,10 @@ func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToSh
 					var found bool
 					currentAction, found = currentContext[actionName]
 					if found {
-						log.Printf("Error: FS2020 duplicate action: %s\n", actionName)
+						common.LogErr("FS2020 duplicate action: %s", actionName)
 					} else {
 						if debugOutput {
-							log.Printf("FS2020 new action: %s\n", actionName)
+							common.DbgMsg("FS2020 new action: %s", actionName)
 						}
 						currentAction = action
 						currentContext[actionName] = currentAction
@@ -178,7 +178,7 @@ func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToSh
 					value := string([]byte(ty))
 					*currentKey, err = strconv.Atoi(value)
 					if err != nil {
-						log.Printf("Error: FS2020 primary key value %s parsing error\n", value)
+						common.LogErr("FS2020 primary key value %s parsing error", value)
 					}
 				}
 			case xml.EndElement:
@@ -200,25 +200,31 @@ func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToSh
 	}
 
 	if verboseOutput {
-		log.Printf("=== Loaded FS2020 Config ===\n")
-		for shortName, gameDevice := range gameBinds {
-			log.Printf("DeviceName=\"%s\"", shortName)
-			for contextName, actions := range gameDevice {
-				log.Printf("  ContextName=\"%s\"\n", contextName)
-				for actionName, action := range actions {
-					secondaryText := ""
-					if len(action[common.InputSecondary]) != 0 {
-						secondaryText = fmt.Sprintf(" SecondaryInfo=\"%s\"",
-							action[common.InputSecondary])
-					}
-					log.Printf("    ActionName=\"%s\" PrimaryInfo=\"%s\" %s\n",
-						actionName, action[common.InputPrimary], secondaryText)
-				}
-			}
-		}
+		common.DbgMsg(gameBindsAsString(gameBinds))
 	}
 
 	return gameBinds, neededDevices, contexts
+}
+
+func gameBindsAsString(gameBinds common.GameBindsByDevice) string {
+	info := make([]string, 0)
+	info = append(info, "=== Loaded FS2020 Config ===\n")
+	for shortName, gameDevice := range gameBinds {
+		info = append(info, fmt.Sprintf("DeviceName=\"%s\"", shortName))
+		for contextName, actions := range gameDevice {
+			info = append(info, fmt.Sprintf("  ContextName=\"%s\"\n", contextName))
+			for actionName, action := range actions {
+				secondaryText := ""
+				if len(action[common.InputSecondary]) != 0 {
+					secondaryText = fmt.Sprintf(" SecondaryInfo=\"%s\"",
+						action[common.InputSecondary])
+				}
+				info = append(info, fmt.Sprintf("    ActionName=\"%s\" PrimaryInfo=\"%s\" %s\n",
+					actionName, action[common.InputPrimary], secondaryText))
+			}
+		}
+	}
+	return strings.Join(info, "")
 }
 
 // matchGameInputToModel takes the game provided bindings with the device map to
@@ -233,7 +239,7 @@ func matchGameInputToModel(deviceName string, actionData common.GameInput,
 	if input != "" {
 		inputLookups = append(inputLookups, input)
 	} else {
-		log.Printf("Error: FS2020 did not find primary input for %s\n", actionData[common.InputPrimary])
+		common.LogErr("FS2020 did not find primary input for %s", actionData[common.InputPrimary])
 	}
 	// Now the secondary input
 	if len(actionData[common.InputSecondary]) > 0 {
@@ -242,7 +248,7 @@ func matchGameInputToModel(deviceName string, actionData common.GameInput,
 		if input != "" {
 			inputLookups = append(inputLookups, input)
 		} else {
-			log.Printf("Error: FS2020 did not find secondary input for %s\n",
+			common.LogErr("FS2020 did not find secondary input for %s",
 				actionData[common.InputSecondary])
 		}
 	}
@@ -298,17 +304,17 @@ func matchGameInputToModelByRegex(deviceName string, action string,
 		if input, ok := gameInputMap["Slider"]; ok {
 			slider = fmt.Sprintf("%sAxis", input[matches[0][1]])
 		} else {
-			log.Printf("Error: FS2020 unknown action %s for slider on device %s\n", action, deviceName)
+			common.LogErr("FS2020 unknown action %s for slider on device %s", action, deviceName)
 			return ""
 		}
 		if _, ok := inputs[slider]; ok {
 			return slider
 		}
-		log.Printf("Error: FS2020 couldn't find slider %s on device %s\n", slider, deviceName)
+		common.LogErr("FS2020 couldn't find slider %s on device %s", slider, deviceName)
 		return ""
 
 	}
-	log.Printf("Error: FS2020 could not find matching Action %s on device %s\n", action, deviceName)
+	common.LogErr("FS2020 could not find matching Action %s on device %s", action, deviceName)
 	return ""
 }
 

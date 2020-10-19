@@ -22,9 +22,9 @@ A list of the tasks to be done.
 20. ~~Watermark~~
 21. ~~Generate game name + device name~~
 22. ~~FS2020 Warthog inputs not showing~~
-23. Add a message for unknown input
-24. Add a message for unsupported devices. Maybe capture those configs to process later?
-25. Add a message for unknown action
+23. ~~Add a message for unknown input~~
+24. ~~Add a message for unsupported devices. Maybe capture those configs to process later?~~
+25. ~~Add a message for unknown action~~
 26. FS2020 Steam path
 27. Move DeviceNameMapping to Config.go
 28. Confirm if FS2020 can structure inputs appropriately in loadInputFiles.

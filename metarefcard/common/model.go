@@ -2,7 +2,6 @@ package common
 
 import (
 	"fmt"
-	"log"
 	"sort"
 )
 
@@ -32,7 +31,7 @@ func FilterDevices(neededDevices MockSet, config *Config) DeviceMap {
 	// Filter for only the device groups we're interested in
 	for shortName := range neededDevices {
 		if _, found := config.DeviceMap[shortName]; !found {
-			log.Printf("Error: device not found in config %s", shortName)
+			LogErr("device not found in config %s", shortName)
 			continue
 		}
 		neededDevices[shortName] = ""
@@ -44,7 +43,7 @@ func FilterDevices(neededDevices MockSet, config *Config) DeviceMap {
 	}
 
 	if config.DebugOutput {
-		PrintYamlObject(filteredDevices, "Targeted Device Map")
+		DbgMsg(YamlObjectAsString(filteredDevices, "Targeted Device Map"))
 	}
 	return filteredDevices
 }
@@ -102,11 +101,11 @@ func PopulateImageOverlays(neededDevices MockSet, config *Config,
 
 					inputData, found := inputs[input]
 					if !found {
-						log.Printf("Error: %s unknown input to lookup %s for device %s\n",
+						LogErr("%s unknown input to lookup %s for device %s",
 							label, input, shortName)
 					}
 					if inputData.X == 0 && inputData.Y == 0 {
-						log.Printf("Error: %s location 0,0 for %s device %s %v\n",
+						LogErr("%s location 0,0 for %s device %s %v",
 							label, actionName, shortName, inputData)
 						continue
 					}
@@ -133,7 +132,7 @@ func GenerateImageOverlays(overlaysByImage OverlaysByImage, input string, inputD
 		text = label
 	} else {
 		text = actionName
-		log.Printf("Error: %s label not found. %s context %s device %s\n",
+		LogErr("%s label not found. %s context %s device %s",
 			gameLabel, actionName, context, shortName)
 	}
 	texts := make([]string, 1)

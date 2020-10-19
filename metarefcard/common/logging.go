@@ -14,6 +14,11 @@ func RegisterHandler(handler handler) {
 	logHandler = handler
 }
 
+// DbgMsg prints an informational message
+func DbgMsg(format string, v ...interface{}) {
+	log.Println(fmt.Sprintf(format, v...))
+}
+
 // LogMsg logs an informational message
 func LogMsg(format string, v ...interface{}) {
 	msg := fmt.Sprintf(format, v...)

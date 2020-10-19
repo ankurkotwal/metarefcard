@@ -8,7 +8,6 @@ import (
 	"html/template"
 	"image"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"path"
@@ -66,7 +65,7 @@ func initialise() (cliGameArgs, []gameInfo) {
 	for shortName, inputOverrides := range config.InputOverrides {
 		deviceInputs, found := config.DeviceMap[shortName]
 		if !found {
-			log.Printf("Error: Override device not found %s\n", shortName)
+			common.LogErr("Override device not found %s", shortName)
 			continue // Next device
 		}
 		for input, override := range inputOverrides {
@@ -180,7 +179,7 @@ func loadLocalFiles(files []string) [][]byte {
 	for _, filename := range files {
 		file, err := ioutil.ReadFile(filename)
 		if err != nil {
-			log.Printf("Error reading file. %s\n", err)
+			common.LogErr("Error reading file. %s", err)
 		}
 		inputFiles = append(inputFiles, file)
 	}
@@ -190,7 +189,7 @@ func loadLocalFiles(files []string) [][]byte {
 func loadFormFiles(c *gin.Context) [][]byte {
 	form, err := c.MultipartForm()
 	if err != nil {
-		log.Printf("Error getting MultipartForm - %s\n", err)
+		common.LogErr("Error getting MultipartForm - %s", err)
 		return make([][]byte, 0)
 	}
 
@@ -199,12 +198,12 @@ func loadFormFiles(c *gin.Context) [][]byte {
 	for idx, file := range inputFiles {
 		multipart, err := file.Open()
 		if err != nil {
-			log.Printf("Error opening multipart file %s - %s\n", file.Filename, err)
+			common.LogErr("Error opening multipart file %s - %s", file.Filename, err)
 			continue
 		}
 		contents, err := ioutil.ReadAll(multipart)
 		if err != nil {
-			log.Printf("Error reading multipart file %s - %s\n", file.Filename, err)
+			common.LogErr("Error reading multipart file %s - %s", file.Filename, err)
 			continue
 		}
 		files[idx] = contents
@@ -227,8 +226,8 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 	cardTempl := "resources/www/templates/refcard.html"
 	t, err := template.New(path.Base(cardTempl)).ParseFiles(cardTempl)
 	if err != nil {
-		s := fmt.Sprintf("Error parsing image template - %s\n", err)
-		log.Print(s)
+		s := fmt.Sprintf("Error parsing card template - %s", err)
+		common.LogErr(s)
 		if c != nil {
 			c.Data(http.StatusInternalServerError, "text/html; charset=utf-8", []byte(s))
 		}
@@ -243,8 +242,7 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 		}
 		var tpl bytes.Buffer
 		if err := t.Execute(&tpl, image); err != nil {
-			s := fmt.Sprintf("Error executing image template - %s\n", err)
-			log.Print(s)
+			common.LogErr(fmt.Sprintf("Error executing image template - %s", err))
 			continue
 		}
 		imagesAsHTML = append(imagesAsHTML, tpl.Bytes()...)
@@ -253,8 +251,8 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 	logTempl := "resources/www/templates/log.html"
 	l, err := template.New(path.Base(logTempl)).ParseFiles(logTempl)
 	if err != nil {
-		s := fmt.Sprintf("Error parsing image template - %s\n", err)
-		log.Print(s)
+		s := fmt.Sprintf("Error parsing logging template - %s", err)
+		common.LogErr(s)
 		if c != nil {
 			c.Data(http.StatusInternalServerError, "text/html; charset=utf-8", []byte(s))
 		}
@@ -262,8 +260,7 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 		var tpl bytes.Buffer
 		err = l.Execute(&tpl, struct{ Logs []*common.LogEntry }{Logs: logs})
 		if err != nil {
-			s := fmt.Sprintf("Error executing logging template - %s\n", err)
-			log.Print(s)
+			common.LogErr("Error executing logging template - %s", err)
 		}
 		imagesAsHTML = append(imagesAsHTML, tpl.Bytes()...)
 	}
@@ -300,7 +297,7 @@ func generateImages(overlaysByImage common.OverlaysByImage, categories map[strin
 			image, err := gg.LoadImage(fmt.Sprintf("%s/%s.png",
 				config.HotasImagesDir, imageFilename))
 			if err != nil {
-				log.Printf("Error: loadImage %s failed. %v\n", imageFilename, err)
+				common.LogErr("loadImage %s failed. %v", imageFilename, err)
 				channel <- chanData{nil, nil, ""}
 			}
 
