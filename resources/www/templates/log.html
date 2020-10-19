@@ -1,15 +1,17 @@
 {{if .Logs}}
   <hr class="my-4 solid">
-  <p>Errors encountered. Please report them with the input files <a
-          href="https://github.com/ankurkotwal/MetaRefCard/issues/new?assignees=&labels=&template=bug_report.md&title=">here</a>.
-  </p>
-  <ul>
-    {{range .Logs}}
-      {{if .IsError}}
-        <li class="msg-error">{{.Msg}}</li>
-      {{else}}
-        <li class="msg-info">{{.Msg}}</li>
+  <div class="alert alert-dismissible alert-warning">
+    <h4 class="alert-heading"><b>Errors encountered</b></h4>
+    <button class="source-button btn btn-outline-dark btn-sm btn-top-right" role="button"
+      onclick="copyTextFromElement(mrcErrors, console.error)">Copy errors to clipboard</button>
+    <p class="alert-link"> Please report them with the input files <a
+            href="https://github.com/ankurkotwal/MetaRefCard/issues/new?assignees=&labels=&template=bug_report.md&title=">here</a>.
+    </p>
+    <hr class="my-4 solid">
+    <div id="mrcErrors">
+      {{range .Logs}}
+          <p>{{.Msg}}</p>
       {{end}}
-    {{end}}
-  </ul>
+    </div>
+  </div>
 {{end}}
