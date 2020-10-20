@@ -1,7 +1,9 @@
 {{template "header.html" .}}
 <script>
 function mrcPageReady() {
-  registerHandlers("fs2020")
+  let game = 'fs2020';
+  registerHandlers(game);
+  ga('set', 'game', game);
 }
 </script>
 <div id="fs2020">

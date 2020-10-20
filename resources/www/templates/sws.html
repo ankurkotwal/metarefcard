@@ -1,7 +1,9 @@
 {{template "header.html" .}}
 <script>
 function mrcPageReady() {
-  registerHandlers("sws")
+  let game = 'sws';
+  registerHandlers(game);
+  ga('set', 'game', game);
 }
 </script>
 <div id="sws">
