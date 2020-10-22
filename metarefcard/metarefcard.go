@@ -90,6 +90,7 @@ func RunServer() {
 
 	router.LoadHTMLGlob("resources/www/templates/*.html")
 	router.StaticFile("/favicon.ico", "resources/www/static/favicon.ico")
+	router.StaticFile("/logo_metarefcard.png", "resources/www/static/logo_metarefcard.png")
 	router.StaticFile("/main.css", "resources/www/static/main.css")
 	router.StaticFile("/script.js", "resources/www/static/script.js")
 
