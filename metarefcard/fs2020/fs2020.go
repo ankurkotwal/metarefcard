@@ -16,8 +16,11 @@ import (
 var initiliased bool = false
 var sharedRegexes fs2020Regexes
 var sharedGameData *common.GameData
-var label = "fs2020"
-var desc = "Flight Simulator 2020 input configs"
+
+const (
+	label = "fs2020"
+	desc  = "Flight Simulator 2020 input configs"
+)
 
 // GetGameInfo returns the info needed to fit into MetaRefCard
 // Returns:
@@ -42,7 +45,7 @@ func handleRequest(files [][]byte, config *common.Config, log *common.Logger) (*
 		sharedRegexes.Slider = regexp.MustCompile(sharedGameData.Regexes["Slider"])
 		initiliased = true
 	}
-	gameBinds, gameDevices, gameContexts := loadInputFiles(files, sharedGameData.DeviceNameMap,
+	gameBinds, gameDevices, gameContexts := loadInputFiles(files, config.Devices.DeviceToShortNameMap,
 		log, config.DebugOutput, config.VerboseOutput)
 	common.GenerateContextColours(gameContexts, config)
 	return sharedGameData, gameBinds, gameDevices, gameContexts, sharedGameData.Logo

@@ -36,42 +36,8 @@ func initialise(log *common.Logger) (cliGameArgs, []gameInfo) {
 	// Load the configuration
 	common.LoadYaml("config/config.yaml", &config, "Config", log)
 
-	// Load the device model (i.e. non-game specific)
-	var generatedConfig common.GeneratedConfig
-	common.LoadYaml(config.DevicesFile, &generatedConfig, "Full Device Map", log)
-
-	// Add device additions to the main device index
-	for shortName, inputs := range config.DeviceMap {
-		generatedInputs, found := generatedConfig.DeviceMap[shortName]
-		if !found {
-			generatedInputs = make(common.DeviceInputs)
-			generatedConfig.DeviceMap[shortName] = generatedInputs
-		}
-
-		// Already have some inputs. Need to override one at a time
-		for input, additionalInput := range inputs {
-			generatedInputs[input] = additionalInput
-		}
-	}
-	config.DeviceMap = generatedConfig.DeviceMap
-
-	// Add input overrides
-	for shortName, inputOverrides := range config.InputOverrides {
-		deviceInputs, found := config.DeviceMap[shortName]
-		if !found {
-			log.Err("Override device not found %s", shortName)
-			continue // Next device
-		}
-		for input, override := range inputOverrides {
-			deviceInputs[input] = override
-		}
-	}
-
-	// Add image map additions
-	for shortName, image := range config.ImageMap {
-		generatedConfig.ImageMap[shortName] = image
-	}
-	config.ImageMap = generatedConfig.ImageMap
+	// Load the device information
+	common.LoadDevicesInfo(config.DevicesFile, &config.Devices, log)
 
 	return gameArgs, gamesInfo
 }

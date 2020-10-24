@@ -13,8 +13,11 @@ import (
 var initiliased bool = false
 var sharedRegexes swsRegexes
 var sharedGameData *common.GameData
-var label = "sws"
-var desc = "Star Wars Squadrons input configs"
+
+const (
+	label = "sws"
+	desc  = "Star Wars Squadrons input configs"
+)
 
 // GetGameInfo returns the info needed to fit into MetaRefCard
 // Returns:
@@ -37,7 +40,7 @@ func handleRequest(files [][]byte, config *common.Config, log *common.Logger) (*
 		initiliased = true
 	}
 
-	gameBinds, gameDevices, gameContexts := loadInputFiles(files, sharedGameData.DeviceNameMap,
+	gameBinds, gameDevices, gameContexts := loadInputFiles(files, config.Devices.DeviceToShortNameMap,
 		log, config.DebugOutput, config.VerboseOutput)
 	common.GenerateContextColours(gameContexts, config)
 	return sharedGameData, gameBinds, gameDevices, gameContexts, sharedGameData.Logo

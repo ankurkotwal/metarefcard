@@ -119,7 +119,7 @@ func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
 	}
 	dc.SetHexColor(config.ImageHeading.TextColour)
 	dc.SetFontFace(*headingFont)
-	dc.DrawString(fmt.Sprintf("%s", config.DeviceLabels[imageFilename]),
+	dc.DrawString(fmt.Sprintf("%s", config.Devices.DeviceLabelsByImage[imageFilename]),
 		xOffset+config.ImageHeading.Inset.X*pixelMultiplier,
 		config.ImageHeading.Inset.Y*pixelMultiplier)
 	// Generate watermark
@@ -224,7 +224,7 @@ func prepareContexts(contextToTexts map[string][]string) []string {
 // Return the multiplier/scale of image based on actual width vs default width
 func getPixelMultiplier(name string, dc *gg.Context, config *Config) float64 {
 	multiplier := config.PixelMultiplier
-	if dimensions, found := config.ImageSizeOverride[name]; found {
+	if dimensions, found := config.Devices.ImageSizeOverride[name]; found {
 		multiplier = float64(dimensions.W) / float64(config.DefaultImage.W)
 	}
 	return multiplier

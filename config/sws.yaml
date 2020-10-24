@@ -3,9 +3,6 @@ Logo: sws
 Regexes:
   Joystick: ^GstInput.JoystickDevice(\d+)(?:\s+(.*))$
   Bind: ^GstKeyBinding\.Incom(Default|Soldier|Starship)InputConcepts\.Concept(.+)\.(\d+)\.(.+)\s+(.+)$
-DeviceNameMap:
-  Saitek Pro Flight X-55 Rhino Stick: SaitekX55Joystick
-  Saitek Pro Flight X-55 Rhino Throttle: SaitekX55Throttle
 InputMapping2: # Device -> Axis -> Button
   SaitekX55Joystick:
     8: { Axis: XAxis }

@@ -10,18 +10,6 @@ import (
 func LoadGameModel(filename string, label string, debugOutput bool, log *Logger) *GameData {
 	data := GameData{}
 	LoadYaml(filename, &data, label, log)
-
-	fullToShort := DeviceNameFullToShort{}
-	// Update map of game device names to our model device names
-	for fullName, shortName := range data.DeviceNameMap {
-		if shortName != "" {
-			fullToShort[fullName] = shortName
-		} else {
-			fullToShort[fullName] = DeviceMissingInfo
-		}
-	}
-	data.DeviceNameMap = fullToShort
-
 	return &data
 }
 
@@ -30,13 +18,13 @@ func FilterDevices(neededDevices MockSet, config *Config, log *Logger) DeviceMap
 	filteredDevices := make(DeviceMap)
 	// Filter for only the device groups we're interested in
 	for shortName := range neededDevices {
-		if _, found := config.DeviceMap[shortName]; !found {
+		if _, found := config.Devices.Index[shortName]; !found {
 			log.Err("device not found in config %s", shortName)
 			continue
 		}
 		neededDevices[shortName] = ""
 	}
-	for shortName, inputs := range config.DeviceMap {
+	for shortName, inputs := range config.Devices.Index {
 		if _, found := neededDevices[shortName]; found {
 			filteredDevices[shortName] = inputs
 		}
@@ -79,7 +67,7 @@ func PopulateImageOverlays(neededDevices MockSet, config *Config, log *Logger,
 	gameBinds GameBindsByDevice, gameData *GameData, matchFunc FuncMatchGameInputToModel) OverlaysByImage {
 
 	deviceMap := FilterDevices(neededDevices, config, log)
-	imageMap := config.ImageMap
+	imageMap := config.Devices.ImageMap
 
 	// Iterate through our game binds
 	overlaysByImage := make(OverlaysByImage)
