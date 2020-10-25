@@ -32,6 +32,7 @@ A list of the tasks to be done.
 30. Add FS2020 default controller support
 31. Drag and drop target for files
 32. SWS key bindings
-33. Add FS2020 Profile support
-34. Confirm if FS2020 can structure inputs appropriately in loadInputFiles.
-35. Extend to Elite Dangerous
+33. Add Input labels to images
+34. Add FS2020 Profile support
+35. Confirm if FS2020 can structure inputs appropriately in loadInputFiles.
+36. Extend to Elite Dangerous
