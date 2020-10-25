@@ -18,7 +18,7 @@ DefaultLineHeight: 54
 InputPixelXInset: 5
 InputPixelYInset: 5
 
-ImageHeading:
+ImageHeader:
   Font: Orbitron-Regular.ttf
   FontSize:  90
   Inset:

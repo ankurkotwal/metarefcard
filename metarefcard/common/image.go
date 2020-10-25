@@ -95,43 +95,12 @@ func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
 		}
 	}
 
-	// Add game logo
-	logo, found := gameLogos[gameLogo]
-	if !found {
-		var err error
-		logo, err = gg.LoadImage(fmt.Sprintf("%s/%s.png", config.LogoImagesDir, gameLogo))
-		if err != nil {
-			log.Err("loadImage %s failed. %v", imageFilename, err)
-		}
-		gameLogos[gameLogo] = logo
-	}
-	dc.DrawImage(logo, 0, 0)
-	xOffset := float64(logo.Bounds().Max.X)
-
-	// Generate Heading
-	dc.SetHexColor(config.ImageHeading.BackgroundColour)
-	dc.DrawRectangle(xOffset, 0, float64(dc.Width())-xOffset,
-		config.ImageHeading.BackgroundHeight*pixelMultiplier)
-	dc.Fill()
-	if headingFont == nil {
-		headingFont = LoadFont(config.FontsDir, config.ImageHeading.Font,
-			int(math.Round(config.ImageHeading.FontSize*pixelMultiplier)))
-	}
-	dc.SetHexColor(config.ImageHeading.TextColour)
-	dc.SetFontFace(*headingFont)
-	dc.DrawString(fmt.Sprintf("%s", config.Devices.DeviceLabelsByImage[imageFilename]),
-		xOffset+config.ImageHeading.Inset.X*pixelMultiplier,
-		config.ImageHeading.Inset.Y*pixelMultiplier)
-	// Generate watermark
-	if waterMarkFont == nil {
-		waterMarkFont = LoadFont(config.FontsDir, config.Watermark.Font,
-			int(math.Round(config.Watermark.FontSize*pixelMultiplier)))
-	}
-	dc.SetHexColor(config.Watermark.TextColour)
-	dc.SetFontFace(*waterMarkFont)
-	dc.DrawString(fmt.Sprintf("%s (%s)", config.Watermark.Text, config.Version),
-		xOffset+config.Watermark.Location.X*pixelMultiplier,
-		config.Watermark.Location.Y*pixelMultiplier)
+	xOffset := addGameLogo(dc, gameLogo, config.LogoImagesDir, imageFilename, log)
+	addImageHeader(dc, &config.ImageHeader,
+		config.Devices.DeviceLabelsByImage[imageFilename],
+		xOffset, pixelMultiplier, config.FontsDir)
+	addMRCLogo(dc, &config.Watermark, config.Version,
+		xOffset, pixelMultiplier, config.FontsDir)
 
 	var imgBytes bytes.Buffer
 	jpeg.Encode(&imgBytes, dc.Image(), &jpeg.Options{Quality: config.JpgQuality})
@@ -228,4 +197,52 @@ func getPixelMultiplier(name string, dc *gg.Context, config *Config) float64 {
 		multiplier = float64(dimensions.W) / float64(config.DefaultImage.W)
 	}
 	return multiplier
+}
+
+func addGameLogo(dc *gg.Context, gameLogo string, logoImagesDir string,
+	imageFilename string, log *Logger) float64 {
+	// Add game logo
+	logo, found := gameLogos[gameLogo]
+	if !found {
+		var err error
+		logo, err = gg.LoadImage(fmt.Sprintf("%s/%s.png", logoImagesDir, gameLogo))
+		if err != nil {
+			log.Err("loadImage %s failed. %v", imageFilename, err)
+		}
+		gameLogos[gameLogo] = logo
+	}
+	dc.DrawImage(logo, 0, 0)
+	return float64(logo.Bounds().Max.X)
+}
+
+func addImageHeader(dc *gg.Context, imageHeader *HeaderData, label string,
+	xOffset float64, pixelMultiplier float64, fontsDir string) {
+	// Generate header
+	dc.SetHexColor(imageHeader.BackgroundColour)
+	dc.DrawRectangle(xOffset, 0, float64(dc.Width())-xOffset,
+		imageHeader.BackgroundHeight*pixelMultiplier)
+	dc.Fill()
+	if headingFont == nil {
+		headingFont = LoadFont(fontsDir, imageHeader.Font,
+			int(math.Round(imageHeader.FontSize*pixelMultiplier)))
+	}
+	dc.SetHexColor(imageHeader.TextColour)
+	dc.SetFontFace(*headingFont)
+	dc.DrawString(fmt.Sprintf("%s", label),
+		xOffset+imageHeader.Inset.X*pixelMultiplier,
+		imageHeader.Inset.Y*pixelMultiplier)
+}
+
+func addMRCLogo(dc *gg.Context, watermark *WatermarkData, version string,
+	xOffset float64, pixelMultiplier float64, fontsDir string) {
+	// Generate watermark
+	if waterMarkFont == nil {
+		waterMarkFont = LoadFont(fontsDir, watermark.Font,
+			int(math.Round(watermark.FontSize*pixelMultiplier)))
+	}
+	dc.SetHexColor(watermark.TextColour)
+	dc.SetFontFace(*waterMarkFont)
+	dc.DrawString(fmt.Sprintf("%s (%s)", watermark.Text, version),
+		xOffset+watermark.Location.X*pixelMultiplier,
+		watermark.Location.Y*pixelMultiplier)
 }

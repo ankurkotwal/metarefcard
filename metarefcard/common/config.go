@@ -24,28 +24,33 @@ type Config struct {
 	InputPixelXInset  int     `yaml:"InputPixelXInset"`
 	InputPixelYInset  int     `yaml:"InputPixelYInset"`
 
-	ImageHeading struct {
-		Font             string  `yaml:"Font"`
-		FontSize         float64 `yaml:"FontSize"`
-		Inset            Point2d `yaml:"Inset"`
-		TextHeight       float64 `yaml:"TextHeight"`
-		TextColour       string  `yaml:"TextColour"`
-		BackgroundHeight float64 `yaml:"BackgroundHeight"`
-		BackgroundColour string  `yaml:"BackgroundColour"`
-	} `yaml:"ImageHeading"`
-
-	Watermark struct {
-		Text       string  `yaml:"Text"`
-		TextColour string  `yaml:"TextColour"`
-		Font       string  `yaml:"Font"`
-		FontSize   float64 `yaml:"FontSize"`
-		Location   Point2d `yaml:"Location"`
-	} `yaml:"Watermark"`
+	ImageHeader HeaderData    `yaml:"ImageHeader"`
+	Watermark   WatermarkData `yaml:"Watermark"`
 
 	BackgroundColour string   `yaml:"BackgroundColour"`
 	LightColour      string   `yaml:"LightColour"`
 	DarkColour       string   `yaml:"DarkColour"`
 	AlternateColours []string `yaml:"AlternateColours"`
+}
+
+// HeaderData contains necessary data to generate header
+type HeaderData struct {
+	Font             string  `yaml:"Font"`
+	FontSize         float64 `yaml:"FontSize"`
+	Inset            Point2d `yaml:"Inset"`
+	TextHeight       float64 `yaml:"TextHeight"`
+	TextColour       string  `yaml:"TextColour"`
+	BackgroundHeight float64 `yaml:"BackgroundHeight"`
+	BackgroundColour string  `yaml:"BackgroundColour"`
+}
+
+// WatermarkData contains necessary data to generate watermark
+type WatermarkData struct {
+	Text       string  `yaml:"Text"`
+	TextColour string  `yaml:"TextColour"`
+	Font       string  `yaml:"Font"`
+	FontSize   float64 `yaml:"FontSize"`
+	Location   Point2d `yaml:"Location"`
 }
 
 // Point2d contains x and y
