@@ -13,7 +13,12 @@ import (
 	"golang.org/x/image/font"
 )
 
-var waterMarkFont *font.Face = nil
+type dualFont struct {
+	Large *font.Face
+	Small *font.Face
+}
+
+var watermarkFont *dualFont = nil
 var headingFont *font.Face = nil
 var gameLogos map[string]image.Image = make(map[string]image.Image)
 
@@ -46,8 +51,8 @@ func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
 		}
 
 		fontSize := int(math.Round(config.InputFontSize * pixelMultiplier))
-		targetWidth := int(math.Round(float64(overlayData.PosAndSize.W-2*config.InputPixelXInset) * pixelMultiplier))
-		targetHeight := int(math.Round(float64(overlayData.PosAndSize.H-2*config.InputPixelYInset) * pixelMultiplier))
+		targetWidth := int(math.Round((float64(overlayData.PosAndSize.W) - 2*config.InputPixelXInset) * pixelMultiplier))
+		targetHeight := int(math.Round((float64(overlayData.PosAndSize.H) - 2*config.InputPixelYInset) * pixelMultiplier))
 
 		// Iterate through contexts (in order) and texts (already sorted)
 		// to generate text to be displayed
@@ -73,24 +78,17 @@ func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
 		for _, context := range prepareContexts(overlayData.ContextToTexts) {
 			texts := overlayData.ContextToTexts[context]
 			for _, text := range texts {
-				offset, _ := measureString(getFontBySize(fontSize, config), incrementalTexts[idx])
+				offset, _ := measureString(getFontBySize(fontSize,
+					config.FontsDir, config.InputFont), incrementalTexts[idx])
 				idx++
-
-				x := offset + int(math.Round(float64(overlayData.PosAndSize.X+config.InputPixelXInset)*pixelMultiplier))
-				y := int(math.Round(float64(overlayData.PosAndSize.Y+config.InputPixelYInset) * pixelMultiplier))
-				w, h := measureString(getFontBySize(fontSize, config), text)
-				// Vertically center
-				y += (targetHeight - h) / 2
-
-				dc.SetHexColor(categories[context])
-				dc.DrawRoundedRectangle(float64(x), float64(y), float64(w), float64(h), 6)
-				dc.Fill()
-				dc.SetHexColor(config.LightColour)
-				// Decrease font size to fit nicely in the rectangle
-				face := getFontBySize(fontSize-1, config)
-				dc.SetFontFace(face) // Render one font size smaller to fit in rect
-				w2, h2 := measureString(face, text)
-				dc.DrawStringAnchored(text, float64(x+(w-w2)/2), float64(y+(h-h2)/2), 0, 0.83)
+				largeFont := getFontBySize(fontSize, config.FontsDir, config.InputFont)
+				smallFont := getFontBySize(fontSize-1, config.FontsDir, config.InputFont)
+				location := Point2d{X: float64(overlayData.PosAndSize.X),
+					Y: float64(overlayData.PosAndSize.Y)}
+				drawTextWithBackgroundRec(dc, text, float64(offset),
+					location, config.InputPixelXInset, config.InputPixelYInset,
+					targetHeight, pixelMultiplier, largeFont, smallFont,
+					categories[context], config.LightColour)
 			}
 		}
 	}
@@ -100,38 +98,56 @@ func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
 		config.Devices.DeviceLabelsByImage[imageFilename],
 		xOffset, pixelMultiplier, config.FontsDir)
 	addMRCLogo(dc, &config.Watermark, config.Version,
-		xOffset, pixelMultiplier, config.FontsDir)
+		xOffset, float64(config.InputPixelXInset), pixelMultiplier, config.FontsDir)
 
 	var imgBytes bytes.Buffer
 	jpeg.Encode(&imgBytes, dc.Image(), &jpeg.Options{Quality: config.JpgQuality})
 	return &imgBytes
 }
 
-var fontBySize map[int]font.Face = make(map[int]font.Face)
-var fontsMux sync.Mutex
+var inputFontCache map[int]*font.Face = make(map[int]*font.Face)
+var fontsMux sync.RWMutex
 
-func getFontBySize(size int, config *Config) font.Face {
-	fontsMux.Lock()
-	face, found := fontBySize[size]
+func getFontBySize(size int, fontsDir string, fontName string) *font.Face {
+	fontsMux.RLock()
+	// TODO - this assumes that the font is the input font. Should check first!
+	face, found := inputFontCache[size]
+	fontsMux.RUnlock()
 	if !found {
-		face = *LoadFont(config.FontsDir, config.InputFont, size)
-		fontBySize[size] = face
+		// Grab the write lock
+		fontsMux.Lock()
+		// Between the read & write locks, map may have changed, check first.
+		face, found = inputFontCache[size]
+		if !found {
+			face = LoadFont(fontsDir, fontName, size)
+			inputFontCache[size] = face
+		}
+		fontsMux.Unlock()
 	}
-	fontsMux.Unlock()
 	return face
 }
 
 var fontMuxes map[*font.Face]*sync.Mutex = make(map[*font.Face]*sync.Mutex)
+var fontMuxesMux sync.RWMutex
 
-func measureString(fontFace font.Face, text string) (int, int) {
-	mux, found := fontMuxes[&fontFace]
+func measureString(fontFace *font.Face, text string) (int, int) {
+	fontMuxesMux.RLock()
+	mux, found := fontMuxes[fontFace]
+	fontMuxesMux.RUnlock()
 	if !found {
-		mux = &sync.Mutex{}
-		fontMuxes[&fontFace] = mux
+		// Grab the write lock
+		fontMuxesMux.Lock()
+		// Between the read & write locks, map may have changed, check first.
+		mux, found = fontMuxes[fontFace]
+		if !found {
+			mux = &sync.Mutex{}
+			fontMuxes[fontFace] = mux
+		}
+		fontMuxesMux.Unlock()
 	}
 	mux.Lock()
-	calcX := font.MeasureString(fontFace, text).Round()
-	calcY := fontFace.Metrics().Height.Round()
+	calcX := font.MeasureString(*fontFace, text).Round()
+	calcY := (*fontFace).Metrics().Height.Round()
 	mux.Unlock()
 	return calcX, calcY
 }
@@ -144,7 +160,8 @@ func calcFontSize(text string, fontSize int, targetWidth int, targetHeight int,
 	minFontSize := config.InputMinFontSize
 	newFontSize := maxFontSize
 	for {
-		x, y := measureString(getFontBySize(newFontSize, config), text)
+		x, y := measureString(getFontBySize(newFontSize, config.FontsDir,
+			config.InputFont), text)
 		if y > targetHeight {
 			panic("Text is taller than max height")
 		}
@@ -199,6 +216,27 @@ func getPixelMultiplier(name string, dc *gg.Context, config *Config) float64 {
 	return multiplier
 }
 
+func drawTextWithBackgroundRec(dc *gg.Context, text string, xOffset float64,
+	location Point2d, xInset float64, yInset float64, targetHeight int,
+	pixelMultiplier float64, largeFont *font.Face, smallFont *font.Face,
+	backgroundColour string, textColour string) {
+	x := xOffset + (location.X+xInset)*pixelMultiplier
+	y := (location.Y + yInset) * pixelMultiplier
+	w, h := measureString(largeFont, text)
+	// Vertically center
+	y += float64(targetHeight-h) / 2
+
+	dc.SetHexColor(backgroundColour)
+	dc.DrawRoundedRectangle(x, y, float64(w), float64(h), 6)
+	dc.Fill()
+	dc.SetHexColor(textColour)
+	// Decrease font size to fit nicely in the rectangle
+	dc.SetFontFace(*smallFont) // Render one font size smaller to fit in rect
+	w2, h2 := measureString(smallFont, text)
+	dc.DrawStringAnchored(text, x+float64(w-w2)/2, y+float64(h-h2)/2, 0, 0.83)
+
+}
+
 func addGameLogo(dc *gg.Context, gameLogo string, logoImagesDir string,
 	imageFilename string, log *Logger) float64 {
 	// Add game logo
@@ -234,15 +272,17 @@ func addImageHeader(dc *gg.Context, imageHeader *HeaderData, label string,
 }
 
 func addMRCLogo(dc *gg.Context, watermark *WatermarkData, version string,
-	xOffset float64, pixelMultiplier float64, fontsDir string) {
+	xOffset float64, xInset float64, pixelMultiplier float64, fontsDir string) {
+	fontSize := int(math.Round(watermark.FontSize * pixelMultiplier))
 	// Generate watermark
-	if waterMarkFont == nil {
-		waterMarkFont = LoadFont(fontsDir, watermark.Font,
-			int(math.Round(watermark.FontSize*pixelMultiplier)))
+	if watermarkFont == nil {
+		watermarkFont = &dualFont{}
+		watermarkFont.Large = LoadFont(fontsDir, watermark.Font, fontSize)
+		watermarkFont.Small = LoadFont(fontsDir, watermark.Font, fontSize-1)
 	}
-	dc.SetHexColor(watermark.TextColour)
-	dc.SetFontFace(*waterMarkFont)
-	dc.DrawString(fmt.Sprintf("%s (%s)", watermark.Text, version),
-		xOffset+watermark.Location.X*pixelMultiplier,
-		watermark.Location.Y*pixelMultiplier)
+
+	text := fmt.Sprintf("%s v%s", watermark.Text, version)
+	drawTextWithBackgroundRec(dc, text, xOffset, watermark.Location, 0, 0,
+		fontSize, pixelMultiplier, watermarkFont.Large, watermarkFont.Small,
+		watermark.BackgroundColour, watermark.TextColour)
 }

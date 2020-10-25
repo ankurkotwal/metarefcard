@@ -1,6 +1,6 @@
 ---
 AppName: MetaRefCard
-Version: 0.2
+Version: 0.2.0
 DebugOutput: false
 VerboseOutput: false
 DevicesFile: config/devices.yaml
@@ -21,9 +21,7 @@ InputPixelYInset: 5
 ImageHeader:
   Font: Orbitron-Regular.ttf
   FontSize:  90
-  Inset:
-    x: 50
-    y: 100
+  Inset: { x: 50, y: 100 }
   TextHeight: 180
   TextColour: "#ffffffff"
   BackgroundHeight: 200
@@ -31,12 +29,11 @@ ImageHeader:
 
 Watermark:
   Text: MetaRefCard.com
-  TextColour: "#ccccccff"
+  TextColour: "#ffffffff"
+  BackgroundColour: "#373a3cff"
   Font: Dirga.ttf
   FontSize: 44
-  Location:
-    x: 50
-    y: 170
+  Location: { x: 50, y: 136 }
 
 BackgroundColour: "#e9ecefff"
 LightColour: "#ffffffff"

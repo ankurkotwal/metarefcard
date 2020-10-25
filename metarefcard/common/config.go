@@ -21,8 +21,8 @@ type Config struct {
 	InputFontSize     float64 `yaml:"InputFontSize"`
 	InputMinFontSize  int     `yaml:"InputMinFontSize"`
 	DefaultLineHeight int     `yaml:"DefaultLineHeight"`
-	InputPixelXInset  int     `yaml:"InputPixelXInset"`
-	InputPixelYInset  int     `yaml:"InputPixelYInset"`
+	InputPixelXInset  float64 `yaml:"InputPixelXInset"`
+	InputPixelYInset  float64 `yaml:"InputPixelYInset"`
 
 	ImageHeader HeaderData    `yaml:"ImageHeader"`
 	Watermark   WatermarkData `yaml:"Watermark"`
@@ -46,11 +46,12 @@ type HeaderData struct {
 
 // WatermarkData contains necessary data to generate watermark
 type WatermarkData struct {
-	Text       string  `yaml:"Text"`
-	TextColour string  `yaml:"TextColour"`
-	Font       string  `yaml:"Font"`
-	FontSize   float64 `yaml:"FontSize"`
-	Location   Point2d `yaml:"Location"`
+	Text             string  `yaml:"Text"`
+	TextColour       string  `yaml:"TextColour"`
+	BackgroundColour string  `yaml:"BackgroundColour"`
+	Font             string  `yaml:"Font"`
+	FontSize         float64 `yaml:"FontSize"`
+	Location         Point2d `yaml:"Location"`
 }
 
 // Point2d contains x and y
