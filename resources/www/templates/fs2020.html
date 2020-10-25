@@ -11,13 +11,16 @@ function mrcPageReady() {
     <img src="https://assets-prd.ignimgs.com/2020/07/13/microsoft-flight-simulator-button-01b-1594670655053.jpg" />
   </div>
   <div class="form-group">
-    Add input configuration files from
-    <b>
-      <span
-        id="fs2020MsStorePath">%LOCALAPPDATA%\Packages\Microsoft.FlightSimulator_8wekyb3d8bbwe\SystemAppData\wgs</span>
-    </b>
+    Add input configuration files from:<br>
+    <b>Steam Version:</b>
+    <span id="fs2020SteamPath">%PROGRAMFILES%Steam\userdata\&lt;USERDATA&gt;\1250410\remote</span>
     <br>
-    <button class="btn btn-sm btn-outline-dark" onclick="copyTextFromElement(fs2020MsStorePath, console.error)">Copy path to
+    <b>Microsoft Store Version:</b>
+    <span id="fs2020MsStorePath">%LOCALAPPDATA%\Packages\Microsoft.FlightSimulator_8wekyb3d8bbwe\SystemAppData\wgs</span>
+    <br>
+    <button class="btn btn-sm btn-outline-dark" onclick="copyTextFromElement(fs2020SteamPath, console.error)">Copy <b>Steam<b> path to
+      clipboard</button>
+    <button class="btn btn-sm btn-outline-dark" onclick="copyTextFromElement(fs2020MsStorePath, console.error)">Copy <b>MS Store</b> path to
       clipboard</button>
     <p></p>
     <select multiple="" class="form-control col-sm-4" id="fs2020Files" rows="3">

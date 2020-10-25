@@ -26,10 +26,12 @@ A list of the tasks to be done.
 24. ~~Add a message for unsupported devices. Maybe capture those configs to process later?~~
 25. ~~Add a message for unknown action~~
 26. ~~Move DeviceNameMapping to Config.go~~
-27. Improve watermark
-28. FS2020 Steam path
+27. ~~Improve watermark~~
+28. ~~FS2020 Steam path~~
 29. Inkscape 1.0 CLI changes
 30. Add FS2020 default controller support
-31. SWS key bindings
-32. Confirm if FS2020 can structure inputs appropriately in loadInputFiles.
-33. Extend to Elite Dangerous
+31. Drag and drop target for files
+32. SWS key bindings
+33. Add FS2020 Profile support
+34. Confirm if FS2020 can structure inputs appropriately in loadInputFiles.
+35. Extend to Elite Dangerous
