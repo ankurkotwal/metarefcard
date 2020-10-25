@@ -70,7 +70,12 @@ func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToSh
 	for idx, file := range files {
 		_ = idx
 		decoder := xml.NewDecoder(bytes.NewReader(file))
+		skipToNextFile := false
 		for {
+			if skipToNextFile {
+				// Condition is set when something is wrong with this file
+				break
+			}
 			token, err := decoder.Token()
 			if token == nil || err == io.EOF {
 				// EOF means we're done.
@@ -96,8 +101,8 @@ func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToSh
 					var found bool
 					var shortName string
 					if shortName, found = deviceShortNameMap[aDevice]; !found {
-						log.Err("FS2020 could not find short name for %s",
-							aDevice)
+						log.Err("FS2020 Unsupported device \"%s\"", aDevice)
+						skipToNextFile = true
 						break // Move on to next device
 					}
 					_, found = gameBinds[shortName]
