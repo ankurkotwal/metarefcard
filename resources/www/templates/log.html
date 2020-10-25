@@ -4,13 +4,12 @@
     <h4 class="alert-heading"><b>Errors encountered</b></h4>
     <button class="source-button btn btn-outline-dark btn-sm btn-top-right" role="button"
       onclick="copyTextFromElement(mrcErrors, console.error)">Copy errors to clipboard</button>
-    <p class="alert-link"> Please report them with the input files <a
+    <p class="alert-link"> Please report them with the input files <a target="_blank" 
             href="https://github.com/ankurkotwal/MetaRefCard/issues/new?assignees=&labels=&template=bug_report.md&title=">here</a>.
     </p>
     <hr class="my-4 solid">
     <div id="mrcErrors">
-      {{range .Logs}}
-          <p>{{.Msg}}</p>
+      {{range .Logs}}{{.Msg}}<br>
       {{end}}
     </div>
   </div>

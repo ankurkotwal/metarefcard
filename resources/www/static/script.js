@@ -13,7 +13,8 @@ function copyTextFromElement(element) {
 
     var success = false;
     function listener(e) {
-      e.clipboardData.setData("text/plain", element.innerHTML);
+      var content = element.textContent;
+      e.clipboardData.setData("text/plain", content);
       e.preventDefault();
       success = true;
     }
