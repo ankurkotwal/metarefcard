@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 import os
+import re
 import subprocess
+from subprocess import STDOUT
 import yaml
 
 DEBUG_OUTPUT = False
@@ -17,6 +19,15 @@ def initialise():
             print("Error loading config.yaml {e}".format(e=exc))
     if DEBUG_OUTPUT:
         print("Config loaded: {c}\n".format(c=config))
+    devices = {}
+    with open("config/devices.yaml", "r") as stream:
+        try:
+            devices = yaml.safe_load(stream)
+        except yaml.YAMLError as exc:
+            print("Error loading devices.yaml {e}".format(e=exc))
+    if DEBUG_OUTPUT:
+        print("Devices loaded: {c}\n".format(c=config))
+    config["ImageSizeOverride"] = devices["ImageSizeOverride"]
 
     # Find inkscape binary
     inkscape = subprocess.run(
@@ -26,6 +37,17 @@ def initialise():
         exit(2)
     if DEBUG_OUTPUT:
         print("Found inkscape at {i}".format(i=inkscape))
+
+    # Get inkscape version
+    inkscapeVerCheck = subprocess.run(
+        ["inkscape", "--version"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL).stdout.decode("utf-8").rstrip("\n")
+    version = re.search('^Inkscape\s+(\d+)\.(\d+)', inkscapeVerCheck)
+    inkscapeVer = [version.group(1), version.group(2)]
+    if inkscapeVer[0] != "1" and not(inkscapeVer[0] == "0" and inkscapeVer[1] == "92"):
+        print("inkscape unknown version {v}".format(v=inkscapeVer))
+        exit(2)
+    if DEBUG_OUTPUT:
+        print("Found inkscape version: {v}".format(v=inkscapeVer))
 
     # Find inkscape binary
     convert = subprocess.run(
@@ -47,7 +69,7 @@ def initialise():
     dir_logos_out = config["LogoImagesDir"]
     ensureDirExists(dir_logos_out)
 
-    return dir_hotas_images, dir_hotas_out, inkscape, dir_logos, dir_logos_out, convert, config
+    return dir_hotas_images, dir_hotas_out, inkscape, inkscapeVer, dir_logos, dir_logos_out, convert, config
 
 
 def checkDirExists(dir):
@@ -70,24 +92,32 @@ def ensureDirExists(dir):
         print("Found destination dir {d}".format(d=dir))
 
 
-def convertfile(inkscape, svg, defaultwidth, defaultheight, multiplier,
+def convertfile(inkscape, inkscapeVer, svg, defaultwidth, defaultheight, multiplier,
                 overrides, dir_out):
     name = os.path.splitext(os.path.basename(svg))[0]
     out = "{dir}/{out}.png".format(dir=dir_out, out=name)
 
     # Calculate new resolution
-    width = defaultwidth * multiplier
-    height = defaultheight * multiplier
+    width = int(defaultwidth * multiplier)
+    height = int(defaultheight * multiplier)
     if name in overrides:
-        width = int(overrides[name]["h"]) * multiplier
-        height = int(overrides[name]["h"]) * multiplier
+        width = int(overrides[name]["w"] * multiplier)
+        height = int(overrides[name]["h"] * multiplier)
 
+    # TODO Use Inkscape version
     # Convert svg to png with Inkscape
     cmd_export = [inkscape,
                   "--export-png={o}".format(o=out),
                   "-w={w}".format(w=width),
                   "-h={h}".format(h=height),
                   svg]
+    if inkscapeVer[0] == "1":
+        # Version 1 changed the command line
+        cmd_export = [inkscape,
+                      "-o", out,
+                      "-w", "{w}".format(w=width),
+                      "-h", "{h}".format(h=height),
+                      svg]
     convert = subprocess.run(cmd_export,
                              stderr=subprocess.PIPE,
                              stdout=subprocess.PIPE)
@@ -101,7 +131,7 @@ def resizefile(convert, img, height, multiplier, dir_out):
     name = os.path.splitext(os.path.basename(img))[0]
     out = "{dir}/{out}.png".format(dir=dir_out, out=name)
 
-    # Convert svg to png with Inkscape
+    # Convert svg to png with imagemagick
     cmd_export = [convert,
                   "-geometry",
                   "x{m}".format(m=multiplier * height),
@@ -117,12 +147,12 @@ def resizefile(convert, img, height, multiplier, dir_out):
 
 
 def main():
-    dir_hotas_images, dir_hotas_out, inkscape, dir_logos, dir_logos_out, convert, config = initialise()
+    dir_hotas_images, dir_hotas_out, inkscape, inkscapeVer, dir_logos, dir_logos_out, convert, config = initialise()
     overrides = config["ImageSizeOverride"]
     multiplier = float(config["PixelMultiplier"])
     defaultwidth = int(config["DefaultImage"]["w"])
     defaultheight = int(config["DefaultImage"]["h"])
-    backgroundHeight = int(config["ImageHeading"]["BackgroundHeight"])
+    backgroundHeight = int(config["ImageHeader"]["BackgroundHeight"])
 
     logos = []
     for file in os.listdir(dir_logos):
@@ -140,7 +170,7 @@ def main():
             hotases.append("{p}/{f}".format(p=dir_hotas_images, f=file))
     hotases.sort()
     for hotas in hotases:
-        convertfile(inkscape, hotas, defaultwidth, defaultheight,
+        convertfile(inkscape, inkscapeVer, hotas, defaultwidth, defaultheight,
                     multiplier, overrides, dir_hotas_out)
 
     print("Done")
