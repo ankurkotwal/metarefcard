@@ -28,7 +28,7 @@ A list of the tasks to be done.
 26. ~~Move DeviceNameMapping to Config.go~~
 27. ~~Improve watermark~~
 28. ~~FS2020 Steam path~~
-29. Inkscape 1.0 CLI changes
+29. ~~Inkscape 1.0 CLI changes~~
 30. Add FS2020 default controller support
 31. Drag and drop target for files
 32. SWS key bindings
