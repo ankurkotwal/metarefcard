@@ -104,7 +104,6 @@ def convertfile(inkscape, inkscapeVer, svg, defaultwidth, defaultheight, multipl
         width = int(overrides[name]["w"] * multiplier)
         height = int(overrides[name]["h"] * multiplier)
 
-    # TODO Use Inkscape version
     # Convert svg to png with Inkscape
     cmd_export = [inkscape,
                   "--export-png={o}".format(o=out),
@@ -166,7 +165,7 @@ def main():
     hotases = []
     for file in os.listdir(dir_hotas_images):
         # Filter out irrelelvant files
-        if file.endswith(".svg"):
+        if file.endswith(".svg") and not file.startswith("_template"):
             hotases.append("{p}/{f}".format(p=dir_hotas_images, f=file))
     hotases.sort()
     for hotas in hotases:
