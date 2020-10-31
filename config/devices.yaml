@@ -14,36 +14,35 @@ DeviceMap: # Extends generatedDevices.yaml
     10: { x: 2940, y: 993, w: 800, h: 96 } # Top switch right, right stick
     11: { x: 2940, y: 1110, w: 800, h: 96 } # Bottom switch left, right stick
     12: { x: 2940, y: 1210, w: 800, h: 96 } # Bottom switch right, right stick
-    13: { x: 1080, y: 305, w: 800, h: 96 } # Master Alt up
-    14: { x: 1080, y: 405, w: 800, h: 96 } # Master Alt down
-    15: { x: 2000, y: 305, w: 800, h: 96 } # Master Bat up
-    16: { x: 2000, y: 405, w: 800, h: 96 } # Master Bat down
-    17: { x: 2917, y: 305, w: 800, h: 96 } # Avionics Bus1 up
-    18: { x: 2917, y: 405, w: 800, h: 96 } # Avionics Bus1 down
-    19: { x: 2917, y: 553, w: 800, h: 96 } # Avionics Bus2 up
-    20: { x: 2917, y: 653, w: 800, h: 96 } # Avionics Bus2 down
-    21: { x: 165, y: 1523, w: 800, h: 96 } # Bcn up
-    22: { x: 165, y: 1623, w: 800, h: 96 } # Bcn down
-    23: { x: 165, y: 1738, w: 800, h: 96 } # Land up
-    24: { x: 165, y: 1838, w: 800, h: 96 } # Land down
-    25: { x: 165, y: 1952, w: 800, h: 96 } # Taxi up
-    26: { x: 165, y: 2052, w: 800, h: 96 } # Taxi down
-    27: { x: 1241, y: 1753, w: 800, h: 96 } # Nav up
-    28: { x: 1241, y: 1853, w: 800, h: 96 } # Nav down
-    29: { x: 1357, y: 1954, w: 800, h: 96 } # Strobe up
-    30: { x: 1357, y: 2054, w: 800, h: 96 } # Strobe down
-    31: { x: 3207, y: 1550, w: 800, h: 96 } # Magneto Off
-    32: { x: 3207, y: 1650, w: 800, h: 96 } # Magneto Right
-    33: { x: 3207, y: 1750, w: 800, h: 96 } # Magneto Left
-    34: { x: 3207, y: 1850, w: 800, h: 96 } # Magneto Both
-    35: { x: 3207, y: 1950, w: 800, h: 96 } # Magneto Start
+    13: { x: 1092, y: 353, w: 600, h: 96 } # Master Alt up
+    14: { x: -1, y: -1, w: 600, h: 96 } # Master Alt down
+    15: { x: 1692, y: 353, w: 600, h: 96 } # Master Bat up
+    16: { x: -1, y: -1, w: 600, h: 96 } # Master Bat down
+    17: { x: 2292, y: 353, w: 600, h: 96 } # Avionics Bus1 up
+    18: { x: -1, y: -1, w: 600, h: 96 } # Avionics Bus1 down
+    19: { x: 2892, y: 353, w: 600, h: 96 } # Avionics Bus2 up
+    20: { x: -1, y: -1, w: 600, h: 96 } # Avionics Bus2 down
+    21: { x: 78, y: 2025, w: 600, h: 96 } # Bcn up
+    22: { x: -1, y: -1, w: 600, h: 96 } # Bcn down
+    23: { x: 678, y: 2025, w: 600, h: 96 } # Land up
+    24: { x: -1, y: -1, w: 600, h: 96 } # Land down
+    25: { x: 1278, y: 2025, w: 600, h: 96 } # Taxi up
+    26: { x: -1, y: -1, w: 600, h: 96 } # Taxi down
+    27: { x: 1878, y: 2025, w: 600, h: 96 } # Nav up
+    28: { x: -1, y: -1, w: 600, h: 96 } # Nav down
+    29: { x: 2478, y: 2025, w: 600, h: 96 } # Strobe up
+    30: { x: -1, y: -1, w: 600, h: 96 } # Strobe down
+    31: { x: 3207, y: 1462, w: 600, h: 96 } # Magneto Off
+    32: { x: 3207, y: 1562, w: 600, h: 96 } # Magneto Right
+    33: { x: 3207, y: 1662, w: 600, h: 96 } # Magneto Left
+    34: { x: 3207, y: 1762, w: 600, h: 96 } # Magneto Both
+    35: { x: 3207, y: 1862, w: 600, h: 96 } # Magneto Start
     POV1Up: { x: 165, y: 305, w: 800, h: 96 } # PoV hat up
     POV1Right: { x: 165, y: 605, w: 800, h: 96 } # PoV hat right
     POV1Down: { x: 165, y: 505, w: 800, h: 96 } # PoV hat down
     POV1Left: { x: 165, y: 405, w: 800, h: 96 } # PoV hat left
-    XAxis: { x: 2275, y: 1816, w: 800, h: 96 } # Yoke x-axis
-    YAxis: { x: 2275, y: 1916, w: 800, h: 96 } # Yoke y-axis
-    RZAxis: { x: 2275, y: 2016, w: 800, h: 96 } # Yoke rotation
+    XAxis: { x: 2289, y: 1762, w: 800, h: 96 } # Yoke rotation
+    YAxis: { x: 2289, y: 1862, w: 800, h: 96 } # Yoke pull/push
   SaitekX55Throttle:
     1:     { x: 45,  y: 496, w: 852, h: 54 }
     35:    { x: 104, y: 416, w: 852, h: 54 }

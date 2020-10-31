@@ -1635,6 +1635,34 @@
        width="29.767161"
        height="10.089567"
        id="rect5592" />
+    <marker
+       style="overflow:visible"
+       id="TriangleInM-6"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="TriangleInM"
+       inkscape:isstock="true">
+      <path
+         transform="scale(-0.4)"
+         style="fill:#373a3c;fill-opacity:1;fill-rule:evenodd;stroke:#373a3c;stroke-width:1pt;stroke-opacity:1"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         id="path1443-26" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="TriangleOutM-1"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="TriangleOutM"
+       inkscape:isstock="true">
+      <path
+         transform="scale(0.4)"
+         style="fill:#373a3c;fill-opacity:1;fill-rule:evenodd;stroke:#373a3c;stroke-width:1pt;stroke-opacity:1"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         id="path1452-8" />
+    </marker>
   </defs>
   <sodipodi:namedview
      id="base"
@@ -1643,9 +1671,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.32316522"
-     inkscape:cx="366.56958"
-     inkscape:cy="3284.6696"
+     inkscape:zoom="0.22797989"
+     inkscape:cx="2162.1526"
+     inkscape:cy="3164.912"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
@@ -2306,6 +2334,56 @@
            x="-175.60185"
            y="726.29879"><tspan
              style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:7.05556px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold Italic';text-align:center;text-anchor:middle;fill:#373a3c">OFF</tspan></tspan></text>
+    </g>
+    <g
+       id="g10522">
+      <rect
+         style="fill:none;fill-opacity:1;stroke:#373a3c;stroke-width:1.0795;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="rect1205-0"
+         width="632.91278"
+         height="25.378832"
+         x="231.86223"
+         y="772.83789"
+         ry="1.8714372" />
+      <path
+         style="fill:none;stroke:#373a3c;stroke-width:1.05833;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 389.18161,772.29813 c 0,26.45833 0,26.45833 0,26.45833 z"
+         id="path1226-78-0" />
+      <path
+         style="fill:none;stroke:#373a3c;stroke-width:1.05833;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 547.93172,772.29813 c 0,26.45833 0,26.45833 0,26.45833 z"
+         id="path8298" />
+      <path
+         style="fill:none;stroke:#373a3c;stroke-width:1.05833;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 706.68172,772.29813 c 0,26.45833 0,26.45833 0,26.45833 z"
+         id="path8300" />
+    </g>
+    <g
+       id="g10534">
+      <rect
+         style="fill:none;fill-opacity:1;stroke:#373a3c;stroke-width:1.08459;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="rect8302"
+         width="791.4245"
+         height="25.373743"
+         x="231.98138"
+         y="828.87817"
+         ry="1.871062" />
+      <path
+         style="fill:none;stroke:#373a3c;stroke-width:1.05833;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 389.18161,828.33582 c 0,26.45833 0,26.45833 0,26.45833 z"
+         id="path8304" />
+      <path
+         style="fill:none;stroke:#373a3c;stroke-width:1.05833;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 547.93172,828.33582 c 0,26.45833 0,26.45833 0,26.45833 z"
+         id="path8306" />
+      <path
+         style="fill:none;stroke:#373a3c;stroke-width:1.05833;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 706.68172,828.33582 c 0,26.45833 0,26.45833 0,26.45833 z"
+         id="path8308" />
+      <path
+         style="fill:none;stroke:#373a3c;stroke-width:1.05833;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 865.43172,828.33582 c 0,26.45833 0,26.45833 0,26.45833 z"
+         id="path8310" />
     </g>
   </g>
 </svg>
