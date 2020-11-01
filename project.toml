@@ -1,0 +1,27 @@
+[build]
+include = [
+    "config",
+    "metarefcard",
+    "resources",
+    "go.mod",
+    "go.sum",
+    "main.go",
+]
+# exclude = [
+#     ".dockerignore",
+#     ".git",
+#     ".gitattributes",
+#     ".github",
+#     ".gitignore",
+#     ".pythonenv3.8",
+#     ".vscode",
+#     "Dockerfile",
+#     "generateControllerInputs.py",
+#     "generateImages.py",
+#     "LICENSE",
+#     "project.toml",
+#     "README.md",
+#     "resources-source",
+#     "testdata",
+#     "TODO.md",
+# ]

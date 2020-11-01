@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DefaulftInput Primary="1">
+  <Version Num="1238" />
+  <Device DeviceName="Airbus T-A320 Quadrant throttle" GUID="5a4c11c0-5889-11ea-8001-444553540000" ProductID="0407">
+    <Axes>
+      <Axis AxisName="X" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="Y" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="Z" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="rX" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="rY" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="rZ" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="SliderX" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="SliderY" AxisSensitivy="0" AxisDeadZone="0" />
+    </Axes>
+    <Context ContextName="PLANE">
+      <Action ActionName="KEY_GEAR_SET" Flag="2">
+        <Primary>
+          <KEY Information="Button21">20</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_PARKING_BRAKES" Flag="2">
+        <Primary>
+          <KEY Information="Button20">19</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_AUTO_THROTTLE_ARM" Flag="2">
+        <Primary>
+          <KEY Information="Button1">0</KEY>
+        </Primary>
+        <Secondary>
+          <KEY Information="Button2">1</KEY>
+        </Secondary>
+      </Action>
+      <Action ActionName="KEY_STARTER1_SET" Flag="2">
+        <Primary>
+          <KEY Information="Button3">2</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_STARTER2_SET" Flag="2">
+        <Primary>
+          <KEY Information="Button4">3</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_RUDDER_TRIM_LEFT" Flag="2">
+        <Primary>
+          <KEY Information="Button18">17</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_RUDDER_TRIM_RIGHT" Flag="2">
+        <Primary>
+          <KEY Information="Button19">18</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_AXIS_SPOILER_SET" Flag="132">
+        <Primary>
+          <KEY Information="Rotation Z">802</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_TOGGLE_FUEL_VALVE_ENG1" Flag="2">
+        <Primary>
+          <KEY Information="Button3">2</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_TOGGLE_FUEL_VALVE_ENG2" Flag="2">
+        <Primary>
+          <KEY Information="Button4">3</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_AXIS_FLAPS_SET" Flag="132">
+        <Primary>
+          <KEY Information="Axis Z">1058</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_ENGINE_MASTER_1_SET" Flag="2">
+        <Primary>
+          <KEY Information="Button3">2</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_ENGINE_MASTER_2_SET" Flag="2">
+        <Primary>
+          <KEY Information="Button4">3</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_THROTTLE1_AXIS_SET_EX1" Flag="4">
+        <Primary>
+          <KEY Information="Axis X">1026</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_THROTTLE2_AXIS_SET_EX1" Flag="4">
+        <Primary>
+          <KEY Information="Axis Y">1042</KEY>
+        </Primary>
+      </Action>
+    </Context>
+  </Device>
+</DefaulftInput>

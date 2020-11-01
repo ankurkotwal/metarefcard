@@ -1,0 +1,934 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DefaulftInput Primary="1">
+  <Version Num="1238" />
+  <Device DeviceName="XInput Gamepad" GUID="00000000-0000-0000-0000-000000000000" ProductID="0001">
+    <Axes>
+      <Axis AxisName="X" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="Y" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="rX" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="rY" AxisSensitivy="0" AxisDeadZone="0" />
+    </Axes>
+    <Context ContextName="PLANE">
+      <Action ActionName="KEY_GEAR_TOGGLE" Flag="2">
+        <Primary>
+          <KEY Information="LSTICK">8</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_BRAKES" Flag="2">
+        <Primary>
+          <KEY Information="Y">3</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_THROTTLE_INCR" Flag="2">
+        <Primary>
+          <KEY Information="A">0</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_THROTTLE_DECR" Flag="2">
+        <Primary>
+          <KEY Information="B">1</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_ELEV_TRIM_DN" Flag="2">
+        <Primary>
+          <KEY Information="Y">3</KEY>
+          <KEY Information="UP">14</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_ELEV_TRIM_UP" Flag="2">
+        <Primary>
+          <KEY Information="Y">3</KEY>
+          <KEY Information="DOWN">15</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_RUDDER_LEFT" Flag="2">
+        <Primary>
+          <KEY Information="LT">6</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_RUDDER_RIGHT" Flag="2">
+        <Primary>
+          <KEY Information="RT">7</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_PARKING_BRAKES" Flag="2">
+        <Primary>
+          <KEY Information="Y">3</KEY>
+          <KEY Information="B">1</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_FLAPS_INCR" Flag="2">
+        <Primary>
+          <KEY Information="RB">5</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_FLAPS_DECR" Flag="2">
+        <Primary>
+          <KEY Information="LB">4</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_AXIS_ELEVATOR_SET" Flag="132">
+        <Primary>
+          <KEY Information="LANALOG_Y">25</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_AXIS_AILERONS_SET" Flag="4">
+        <Primary>
+          <KEY Information="LANALOG_X">24</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_RUDDER_TRIM_LEFT" Flag="2">
+        <Primary>
+          <KEY Information="Y">3</KEY>
+          <KEY Information="LEFT">12</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_RUDDER_TRIM_RIGHT" Flag="2">
+        <Primary>
+          <KEY Information="Y">3</KEY>
+          <KEY Information="RIGHT">13</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="DEBUG">
+      <Action ActionName="DEBUG_PAD_UP" Flag="2">
+        <Primary>
+          <KEY Information="UP">14</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DEBUG_PAD_DOWN" Flag="2">
+        <Primary>
+          <KEY Information="DOWN">15</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DEBUG_PAD_LEFT" Flag="2">
+        <Primary>
+          <KEY Information="LEFT">12</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DEBUG_PAD_RIGHT" Flag="2">
+        <Primary>
+          <KEY Information="RIGHT">13</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DEBUG_PAD_LSTICK_UP" Flag="1">
+        <Primary>
+          <KEY Information="LANALOG_UP">18</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DEBUG_PAD_LSTICK_DOWN" Flag="1">
+        <Primary>
+          <KEY Information="LANALOG_DOWN">19</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DEBUG_PAD_LSTICK_LEFT" Flag="1">
+        <Primary>
+          <KEY Information="LANALOG_LEFT">16</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DEBUG_PAD_LSTICK_RIGHT" Flag="1">
+        <Primary>
+          <KEY Information="LANALOG_RIGHT">17</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DEBUG_PAD_RSTICK_UP" Flag="1">
+        <Primary>
+          <KEY Information="RANALOG_UP">22</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DEBUG_PAD_RSTICK_DOWN" Flag="1">
+        <Primary>
+          <KEY Information="RANALOG_DOWN">23</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DEBUG_PAD_RSTICK_LEFT" Flag="1">
+        <Primary>
+          <KEY Information="RANALOG_LEFT">20</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DEBUG_PAD_RSTICK_RIGHT" Flag="1">
+        <Primary>
+          <KEY Information="RANALOG_RIGHT">21</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DEBUG_PAD_RIGHT_BUTTON" Flag="2">
+        <Primary>
+          <KEY Information="RB">5</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DEBUG_PAD_LEFT_BUTTON" Flag="2">
+        <Primary>
+          <KEY Information="LB">4</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DEBUG_PAD_RIGHT_TRIGGER" Flag="2">
+        <Primary>
+          <KEY Information="RT">7</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DEBUG_PAD_LEFT_STICK" Flag="2">
+        <Primary>
+          <KEY Information="LSTICK">8</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DEBUG_PAD_RIGHT_STICK" Flag="2">
+        <Primary>
+          <KEY Information="RSTICK">9</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DEBUG_PAD_LEFT_TRIGGER" Flag="2">
+        <Primary>
+          <KEY Information="LT">6</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DEBUG_PAD_START" Flag="2">
+        <Primary>
+          <KEY Information="START">11</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DEBUG_PAD_BACK" Flag="2">
+        <Primary>
+          <KEY Information="BACK">10</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="INGAME_UI">
+      <Action ActionName="KEY_INPUTS_TOOLBAR_PANEL_MOVE_LEFT" Flag="2">
+        <Primary>
+          <KEY Information="RANALOG_LEFT">20</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_INPUTS_TOOLBAR_PANEL_MOVE_RIGHT" Flag="2">
+        <Primary>
+          <KEY Information="RANALOG_RIGHT">21</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_INPUTS_TOOLBAR_PANEL_MOVE_UP" Flag="2">
+        <Primary>
+          <KEY Information="RANALOG_UP">22</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_TOOLBAR_PANEL_MOVE_DOWN" Flag="2">
+        <Primary>
+          <KEY Information="RANALOG_DOWN">23</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_TOOLBAR_PANEL_SIZE_HRZ_INCR" Flag="2">
+        <Primary>
+          <KEY Information="RB">5</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_TOOLBAR_PANEL_SIZE_HRZ_DECR" Flag="2">
+        <Primary>
+          <KEY Information="LB">4</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_TOOLBAR_PANEL_SIZE_VRT_INCR" Flag="2">
+        <Primary>
+          <KEY Information="RT">7</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_TOOLBAR_PANEL_SIZE_VRT_DECR" Flag="2">
+        <Primary>
+          <KEY Information="LT">6</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_TOOLBAR_PANEL_CLOSE" Flag="2">
+        <Primary>
+          <KEY Information="Y">3</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_TOOLBAR_PANEL_MINMAX" Flag="2">
+        <Primary>
+          <KEY Information="X">2</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="MODES">
+      <Action ActionName="KEY_VIEW_MODE" Flag="2">
+        <Primary>
+          <KEY Information="BACK">10</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_COCKPIT_RESET" Flag="2">
+        <Primary>
+          <KEY Information="RSTICK">9</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_CYCLE_PILOTVIEW_NEXT" Flag="2">
+        <Primary>
+          <KEY Information="UP">14</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_CYCLE_PILOTVIEW_BACK" Flag="2">
+        <Primary>
+          <KEY Information="DOWN">15</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="MODE_PAUSE">
+      <Action ActionName="KEY_PAUSE_TOGGLE" Flag="2">
+        <Primary>
+          <KEY Information="START">11</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="SLEW">
+      <Action ActionName="KEY_SLEW_ALTIT_PLUS" Flag="1">
+        <Primary>
+          <KEY Information="RT">7</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_SLEW_ALTIT_MINUS" Flag="1">
+        <Primary>
+          <KEY Information="LT">6</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_SLEW_PITCH_PLUS" Flag="1">
+        <Primary>
+          <KEY Information="RANALOG_DOWN">23</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_SLEW_PITCH_MINUS" Flag="1">
+        <Primary>
+          <KEY Information="RANALOG_UP">22</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_SLEW_AHEAD_PLUS" Flag="1">
+        <Primary>
+          <KEY Information="LANALOG_UP">18</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_SLEW_LEFT" Flag="1">
+        <Primary>
+          <KEY Information="LANALOG_RIGHT">17</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_SLEW_RIGHT" Flag="1">
+        <Primary>
+          <KEY Information="LANALOG_LEFT">16</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_SLEW_HEADING_MINUS" Flag="1">
+        <Primary>
+          <KEY Information="RANALOG_RIGHT">21</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_SLEW_AHEAD_MINUS" Flag="1">
+        <Primary>
+          <KEY Information="LANALOG_DOWN">19</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_SLEW_HEADING_PLUS" Flag="1">
+        <Primary>
+          <KEY Information="RANALOG_LEFT">20</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_SLEW_RESET" Flag="2">
+        <Primary>
+          <KEY Information="RSTICK">9</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="COCKPIT_GLOBAL_CAMERA">
+      <Action ActionName="KEY_COCKPIT_LOOK_LEFT" Flag="1">
+        <Primary>
+          <KEY Information="RANALOG_LEFT">20</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_COCKPIT_LOOK_RIGHT" Flag="1">
+        <Primary>
+          <KEY Information="RANALOG_RIGHT">21</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_COCKPIT_LOOK_UP" Flag="1">
+        <Primary>
+          <KEY Information="RANALOG_UP">22</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_COCKPIT_LOOK_DOWN" Flag="1">
+        <Primary>
+          <KEY Information="RANALOG_DOWN">23</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="EXTERNAL_CAMERA">
+      <Action ActionName="KEY_CAMERACHASE_RESET" Flag="2">
+        <Primary>
+          <KEY Information="RSTICK">9</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_CHASE_QUICKVIEW1" Flag="2">
+        <Primary>
+          <KEY Information="RIGHT">13</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_CHASE_QUICKVIEW2" Flag="2">
+        <Primary>
+          <KEY Information="DOWN">15</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_CHASE_QUICKVIEW3" Flag="2">
+        <Primary>
+          <KEY Information="LEFT">12</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_CHASE_QUICKVIEW4" Flag="2">
+        <Primary>
+          <KEY Information="UP">14</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_CHASE_LOOK_LEFT" Flag="1">
+        <Primary>
+          <KEY Information="RANALOG_LEFT">20</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_CHASE_LOOK_RIGHT" Flag="1">
+        <Primary>
+          <KEY Information="RANALOG_RIGHT">21</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_CHASE_LOOK_UP" Flag="1">
+        <Primary>
+          <KEY Information="RANALOG_UP">22</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_CHASE_LOOK_DOWN" Flag="1">
+        <Primary>
+          <KEY Information="RANALOG_DOWN">23</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="COCKPIT_CAMERA">
+      <Action ActionName="KEY_COCKPIT_QUICKVIEW4" Flag="2">
+        <Primary>
+          <KEY Information="LEFT">12</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_COCKPIT_QUICKVIEW3" Flag="2">
+        <Primary>
+          <KEY Information="RIGHT">13</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="DRONE">
+      <Action ActionName="DRONE_MOVE_FORWARD" Flag="1">
+        <Primary>
+          <KEY Information="LANALOG_UP">18</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_MOVE_BACKWARD" Flag="1">
+        <Primary>
+          <KEY Information="LANALOG_DOWN">19</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_MOVE_LEFT" Flag="1">
+        <Primary>
+          <KEY Information="LANALOG_LEFT">16</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_MOVE_RIGHT" Flag="1">
+        <Primary>
+          <KEY Information="LANALOG_RIGHT">17</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_ROTATE_FORWARD" Flag="1">
+        <Primary>
+          <KEY Information="RANALOG_UP">22</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_ROTATE_BACKWARD" Flag="1">
+        <Primary>
+          <KEY Information="RANALOG_DOWN">23</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_ROTATE_LEFT" Flag="1">
+        <Primary>
+          <KEY Information="RANALOG_LEFT">20</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_ROTATE_RIGHT" Flag="1">
+        <Primary>
+          <KEY Information="RANALOG_RIGHT">21</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_MOVE_UP" Flag="2">
+        <Primary>
+          <KEY Information="RT">7</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_MOVE_DOWN" Flag="2">
+        <Primary>
+          <KEY Information="LT">6</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_ROTATE_UP" Flag="2">
+        <Primary>
+          <KEY Information="LB">4</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_ROTATE_DOWN" Flag="2">
+        <Primary>
+          <KEY Information="RB">5</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_TOGGLE_FREE_FOLLOW_MODE" Flag="2">
+        <Primary>
+          <KEY Information="RSTICK">9</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_TOGGLE_LOCK_MODE" Flag="2">
+        <Primary>
+          <KEY Information="LSTICK">8</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_PLAY_FORWARD" Flag="2">
+        <Primary>
+          <KEY Information="A">0</KEY>
+          <KEY Information="LT">6</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_PLAY_BACKWARD" Flag="2">
+        <Primary>
+          <KEY Information="A">0</KEY>
+          <KEY Information="RT">7</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_SET_BOOKMARK_IN" Flag="2">
+        <Primary>
+          <KEY Information="A">0</KEY>
+          <KEY Information="LB">4</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_SET_BOOKMARK_OUT" Flag="2">
+        <Primary>
+          <KEY Information="A">0</KEY>
+          <KEY Information="RB">5</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_ZOOM_IN" Flag="2">
+        <Primary>
+          <KEY Information="Y">3</KEY>
+          <KEY Information="RT">7</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_ZOOM_OUT" Flag="2">
+        <Primary>
+          <KEY Information="Y">3</KEY>
+          <KEY Information="LT">6</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_EXPOSURE_PLUS" Flag="2">
+        <Primary>
+          <KEY Information="Y">3</KEY>
+          <KEY Information="RB">5</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_EXPOSURE_LESS" Flag="2">
+        <Primary>
+          <KEY Information="Y">3</KEY>
+          <KEY Information="LB">4</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_AUTO_EXPOSURE" Flag="2">
+        <Primary>
+          <KEY Information="Y">3</KEY>
+          <KEY Information="LSTICK">8</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_DEPTH_FIELD_PLUS" Flag="2">
+        <Primary>
+          <KEY Information="B">1</KEY>
+          <KEY Information="RT">7</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_DEPTH_FIELD_LESS" Flag="2">
+        <Primary>
+          <KEY Information="B">1</KEY>
+          <KEY Information="LT">6</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_ACTIVATE_BLUR" Flag="2">
+        <Primary>
+          <KEY Information="B">1</KEY>
+          <KEY Information="Y">3</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_AUTO_FOCUS" Flag="2">
+        <Primary>
+          <KEY Information="B">1</KEY>
+          <KEY Information="LSTICK">8</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_TARGET_OBJECT" Flag="2">
+        <Primary>
+          <KEY Information="X">2</KEY>
+          <KEY Information="LSTICK">8</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_RESET_TARGET_OFFSET" Flag="2">
+        <Primary>
+          <KEY Information="X">2</KEY>
+          <KEY Information="A">0</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_INCREASE_CAMERA_SPEED" Flag="2">
+        <Primary>
+          <KEY Information="X">2</KEY>
+          <KEY Information="LB">4</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_DECREASE_CAMERA_SPEED" Flag="2">
+        <Primary>
+          <KEY Information="X">2</KEY>
+          <KEY Information="RB">5</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_INCREASE_DRONE_SPEED" Flag="2">
+        <Primary>
+          <KEY Information="X">2</KEY>
+          <KEY Information="LT">6</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_DECREASE_DRONE_SPEED" Flag="2">
+        <Primary>
+          <KEY Information="X">2</KEY>
+          <KEY Information="RT">7</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_RESET_HORIZON" Flag="2">
+        <Primary>
+          <KEY Information="RB">5</KEY>
+          <KEY Information="LB">4</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_ACTIVE_VIEW_BOTTOM" Flag="2">
+        <Primary>
+          <KEY Information="X">2</KEY>
+          <KEY Information="Y">3</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="DRONE_ACTIVATE_FRONT_DOF" Flag="2">
+        <Primary>
+          <KEY Information="B">1</KEY>
+          <KEY Information="LEFT">12</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="INSTRUMENTS_CAMERA">
+      <Action ActionName="KEY_COCKPIT_CYCLE" Flag="2">
+        <Primary>
+          <KEY Information="RIGHT">13</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_COCKPIT_BACKCYCLE" Flag="2">
+        <Primary>
+          <KEY Information="LEFT">12</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="FIXED_CAMERA">
+      <Action ActionName="KEY_FIXED_CAM_CYCLE" Flag="2">
+        <Primary>
+          <KEY Information="RIGHT">13</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="MENU">
+      <Action ActionName="MENU_UP" Flag="1">
+        <Primary>
+          <KEY Information="LANALOG_UP">18</KEY>
+        </Primary>
+        <Secondary>
+          <KEY Information="UP">14</KEY>
+        </Secondary>
+      </Action>
+      <Action ActionName="MENU_DOWN" Flag="1">
+        <Primary>
+          <KEY Information="LANALOG_DOWN">19</KEY>
+        </Primary>
+        <Secondary>
+          <KEY Information="DOWN">15</KEY>
+        </Secondary>
+      </Action>
+      <Action ActionName="MENU_RIGHT" Flag="1">
+        <Primary>
+          <KEY Information="LANALOG_RIGHT">17</KEY>
+        </Primary>
+        <Secondary>
+          <KEY Information="RIGHT">13</KEY>
+        </Secondary>
+      </Action>
+      <Action ActionName="MENU_LEFT" Flag="1">
+        <Primary>
+          <KEY Information="LANALOG_LEFT">16</KEY>
+        </Primary>
+        <Secondary>
+          <KEY Information="LEFT">12</KEY>
+        </Secondary>
+      </Action>
+      <Action ActionName="MENU_VALID" Flag="2">
+        <Primary>
+          <KEY Information="A">0</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_CANCEL" Flag="2">
+        <Primary>
+          <KEY Information="Y">3</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_BACK" Flag="2">
+        <Primary>
+          <KEY Information="B">1</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_VALI2" Flag="2">
+        <Primary>
+          <KEY Information="X">2</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_L1" Flag="2">
+        <Primary>
+          <KEY Information="LB">4</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_R1" Flag="2">
+        <Primary>
+          <KEY Information="RB">5</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_L2" Flag="2">
+        <Primary>
+          <KEY Information="LT">6</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_R2" Flag="2">
+        <Primary>
+          <KEY Information="RT">7</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_START" Flag="2">
+        <Primary>
+          <KEY Information="START">11</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_SELECT" Flag="2">
+        <Primary>
+          <KEY Information="BACK">10</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_R3" Flag="2">
+        <Primary>
+          <KEY Information="RSTICK">9</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_L3" Flag="2">
+        <Primary>
+          <KEY Information="LSTICK">8</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_RESET" Flag="2">
+        <Primary>
+          <KEY Information="X">2</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_OPEN" Flag="2">
+        <Primary>
+          <KEY Information="BACK">10</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_APPLY" Flag="2">
+        <Primary>
+          <KEY Information="Y">3</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_QUIT" Flag="2">
+        <Primary>
+          <KEY Information="B">1</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_WM_FILTERS" Flag="2">
+        <Primary>
+          <KEY Information="Y">3</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_CUSTOMIZE" Flag="2">
+        <Primary>
+          <KEY Information="X">2</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_MENU_CALIBRATION" Flag="2">
+        <Primary>
+          <KEY Information="LSTICK">8</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_MENU_CLEAR" Flag="2">
+        <Primary>
+          <KEY Information="RSTICK">9</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_HELP" Flag="2">
+        <Primary>
+          <KEY Information="LSTICK">8</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_FLY" Flag="2">
+        <Primary>
+          <KEY Information="START">11</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_CLOSE" Flag="2">
+        <Primary>
+          <KEY Information="B">1</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_HANGAR_SPECS" Flag="2">
+        <Primary>
+          <KEY Information="Y">3</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_HANGAR_CHANGEAIRCRAFT" Flag="2">
+        <Primary>
+          <KEY Information="X">2</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_HANGAR_LIVERIES" Flag="2">
+        <Primary>
+          <KEY Information="BACK">10</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_RESTART_MISSION" Flag="2">
+        <Primary>
+          <KEY Information="X">2</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_RESET_FREEFLIGHT" Flag="2">
+        <Primary>
+          <KEY Information="X">2</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_BACKTO_MAINMENU" Flag="2">
+        <Primary>
+          <KEY Information="Y">3</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_WM_LEGEND" Flag="2">
+        <Primary>
+          <KEY Information="RSTICK">9</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_PACKAGE_UP" Flag="2">
+        <Primary>
+          <KEY Information="UP">14</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_PACKAGE_DOWN" Flag="2">
+        <Primary>
+          <KEY Information="DOWN">15</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_PACKAGE_DELETE" Flag="2">
+        <Primary>
+          <KEY Information="BACK">10</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_PACKAGE_ACTIVATE" Flag="2">
+        <Primary>
+          <KEY Information="A">0</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_PACKAGE_DEACTIVATE" Flag="2">
+        <Primary>
+          <KEY Information="A">0</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_PACKAGE_HISTORY" Flag="2">
+        <Primary>
+          <KEY Information="X">2</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_PACKAGE_DEPENDENCIES" Flag="2">
+        <Primary>
+          <KEY Information="Y">3</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_MENU_CLEAR_SEARCH" Flag="2">
+        <Primary>
+          <KEY Information="BACK">10</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_MENU_SELECTION_MODE" Flag="2">
+        <Primary>
+          <KEY Information="BACK">10</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_MENU_ADD_TO_SELECTION" Flag="2">
+        <Primary>
+          <KEY Information="BACK">10</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_MENU_WM_NAV_TOGGLE" Flag="2">
+        <Primary>
+          <KEY Information="LANALOG_RIGHT">17</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_MENU_WM_ZOOM_INCR" Flag="2">
+        <Primary>
+          <KEY Information="RT">7</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_MENU_WM_ZOOM_DECR" Flag="2">
+        <Primary>
+          <KEY Information="LT">6</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_MENU_WM_MOVE_LEFT" Flag="2">
+        <Primary>
+          <KEY Information="RANALOG_LEFT">20</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_MENU_WM_MOVE_RIGHT" Flag="2">
+        <Primary>
+          <KEY Information="RANALOG_RIGHT">21</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_MENU_WM_MOVE_UP" Flag="2">
+        <Primary>
+          <KEY Information="RANALOG_UP">22</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_MENU_WM_MOVE_DOWN" Flag="2">
+        <Primary>
+          <KEY Information="RANALOG_DOWN">23</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_MENU_WM_SELECT_LEFT" Flag="2">
+        <Primary>
+          <KEY Information="LANALOG_LEFT">16</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_MENU_WM_SELECT_RIGHT" Flag="2">
+        <Primary>
+          <KEY Information="LANALOG_RIGHT">17</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_MENU_WM_SELECT_UP" Flag="2">
+        <Primary>
+          <KEY Information="LANALOG_UP">18</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_MENU_WM_SELECT_DOWN" Flag="2">
+        <Primary>
+          <KEY Information="LANALOG_DOWN">19</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="SMART_CAMERA">
+      <Action ActionName="KEY_TOGGLE_SMART_CAMERA" Flag="2">
+        <Primary>
+          <KEY Information="X">2</KEY>
+        </Primary>
+      </Action>
+    </Context>
+  </Device>
+</DefaulftInput>

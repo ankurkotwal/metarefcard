@@ -1,0 +1,16 @@
+{
+    "python.autoComplete.extraPaths": [
+        "resources-source/edrefcard"
+    ],
+    "python.analysis.extraPaths": [
+        "resources-source/edrefcard"
+    ],
+    "[yaml]": {
+        "editor.tabSize": 2,
+        "editor.quickSuggestions": {
+            "other": true,
+            "comments": false,
+            "strings": true
+        }
+    }
+}

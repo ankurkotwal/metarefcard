@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DefaulftInput Primary="1">
+  <Version Num="1238" />
+  <Device DeviceName="Saitek Pro Flight Rudder Pedals" GUID="00000000-0000-0000-0000-000000000000" ProductID="0763">
+    <Axes>
+      <Axis AxisName="X" AxisSensitivy="1" AxisDeadZone="6" />
+      <Axis AxisName="Y" AxisSensitivy="1" AxisDeadZone="6" />
+      <Axis AxisName="Z" AxisSensitivy="1" AxisDeadZone="6" />
+      <Axis AxisName="rX" AxisSensitivy="1" AxisDeadZone="6" />
+      <Axis AxisName="rY" AxisSensitivy="1" AxisDeadZone="6" />
+      <Axis AxisName="rZ" AxisSensitivy="1" AxisDeadZone="6" />
+      <Axis AxisName="SliderX" AxisSensitivy="1" AxisDeadZone="6" />
+      <Axis AxisName="SliderY" AxisSensitivy="1" AxisDeadZone="6" />
+    </Axes>
+    <Context ContextName="PLANE">
+      <Action ActionName="KEY_AXIS_RUDDER_SET" Flag="4">
+        <Primary>
+          <KEY Information="Rotation Z">802</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_AXIS_LEFT_BRAKE_SET" Flag="4">
+        <Primary>
+          <KEY Information="Axis X">1026</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_AXIS_RIGHT_BRAKE_SET" Flag="4">
+        <Primary>
+          <KEY Information="Axis Y">1042</KEY>
+        </Primary>
+      </Action>
+    </Context>
+  </Device>
+</DefaulftInput>
