@@ -1,1 +1,0 @@
-* Retrieved fs2020.jpg from https://assets-prd.ignimgs.com/2020/07/13/microsoft-flight-simulator-button-01b-1594670655053.jpg
