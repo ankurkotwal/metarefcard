@@ -13,13 +13,6 @@ import (
 	"golang.org/x/image/font"
 )
 
-type dualFont struct {
-	Large *font.Face
-	Small *font.Face
-}
-
-var watermarkFont *dualFont = nil
-var headingFont *font.Face = nil
 var gameLogos map[string]image.Image = make(map[string]image.Image)
 
 // GenerateImage - generates an image with the provided overlays
@@ -97,7 +90,7 @@ func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
 	xOffset := addGameLogo(dc, gameLogo, config.LogoImagesDir, imageFilename, log)
 	addImageHeader(dc, &config.ImageHeader, profile,
 		config.Devices.DeviceLabelsByImage[imageFilename],
-		xOffset, pixelMultiplier, config.FontsDir)
+		xOffset, pixelMultiplier, config.FontsDir, config.InputMinFontSize)
 	addMRCLogo(dc, &config.Watermark, config.Version,
 		xOffset, float64(config.InputPixelXInset), pixelMultiplier, config.FontsDir)
 
@@ -268,17 +261,18 @@ func addGameLogo(dc *gg.Context, gameLogo string, logoImagesDir string,
 }
 
 func addImageHeader(dc *gg.Context, imageHeader *HeaderData, profile string,
-	label string, xOffset float64, pixelMultiplier float64, fontsDir string) {
+	label string, xOffset float64, pixelMultiplier float64, fontsDir string,
+	minFontSize int) {
 	fontSize := int(math.Round(imageHeader.FontSize * pixelMultiplier))
-	if headingFont == nil {
-		headingFont = LoadFont(fontsDir, imageHeader.Font, fontSize)
-	}
 	// Add profile name to header if its not the MRC default
 	if profile != ProfileDefault {
 		label = fmt.Sprintf("%s (%s)", label, profile)
 	}
-	// TODO
-	// fontSize = calcFontSize(label, fontSize, targetWidth, targetHeight, fontsDir, fontName string, minFontSize)
+	targetWidth := dc.Width() - int(math.Round(xOffset+2*imageHeader.Inset.X*pixelMultiplier))
+	targetHeight := fontSize // Use fontSize as the targetHeight (max height)
+	fontSize = calcFontSize(label, fontSize, targetWidth, targetHeight,
+		fontsDir, imageHeader.Font, minFontSize)
+	headingFont := getFontBySize(fontSize, fontsDir, imageHeader.Font)
 
 	// Generate header
 	dc.SetHexColor(imageHeader.BackgroundColour)
@@ -295,14 +289,10 @@ func addMRCLogo(dc *gg.Context, watermark *WatermarkData, version string,
 	xOffset float64, xInset float64, pixelMultiplier float64, fontsDir string) {
 	fontSize := int(math.Round(watermark.FontSize * pixelMultiplier))
 	// Generate watermark
-	if watermarkFont == nil {
-		watermarkFont = &dualFont{}
-		watermarkFont.Large = LoadFont(fontsDir, watermark.Font, fontSize)
-		watermarkFont.Small = LoadFont(fontsDir, watermark.Font, fontSize-1)
-	}
-
 	text := fmt.Sprintf("%s v%s", watermark.Text, version)
 	drawTextWithBackgroundRec(dc, text, xOffset, watermark.Location, 0, 0,
-		fontSize, pixelMultiplier, watermarkFont.Large, watermarkFont.Small,
+		fontSize, pixelMultiplier,
+		getFontBySize(fontSize, fontsDir, watermark.Font),
+		getFontBySize(fontSize-1, fontsDir, watermark.Font),
 		watermark.BackgroundColour, watermark.TextColour)
 }

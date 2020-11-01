@@ -29,7 +29,7 @@ A list of the tasks to be done.
 27. ~~Improve watermark~~
 28. ~~FS2020 Steam path~~
 29. ~~Inkscape 1.0 CLI changes~~
-30. FS2020 - multiprofile support
+30. ~~FS2020 - multiprofile support~~
 31. Add FS2020 default controller support
 32. Drag and drop target for files
 33. SWS key bindings
