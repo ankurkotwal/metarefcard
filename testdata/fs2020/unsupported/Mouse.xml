@@ -1,0 +1,228 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DefaulftInput Primary="1">
+  <Version Num="1238" />
+  <Device DeviceName="Mouse" GUID="378de44c-56ef-11d1-bc8c-00a0c91405dd" ProductID="378D">
+    <Context ContextName="PLANE">
+      <Action ActionName="KEY_DME" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_MIDDLE">2</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="DEBUG">
+      <Action ActionName="KEY_CHASE_MODE" Flag="1">
+        <Primary>
+          <KEY Information="MOUSE_MIDDLE">2</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="MODES">
+      <Action ActionName="KEY_COCKPIT_FOCUS" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_RIGHT">1</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="COCKPIT_GLOBAL_CAMERA">
+      <Action ActionName="KEY_ZOOM_COCKPIT" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_WHEEL_UP">5</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_DEZOOM_COCKPIT" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_WHEEL_DOWN">6</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_COCKPIT_LOCKABLE_LOOK_LEFT" Flag="1">
+        <Primary>
+          <KEY Information="MOUSE_DELTA_LEFT">7</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_COCKPIT_LOCKABLE_LOOK_RIGHT" Flag="1">
+        <Primary>
+          <KEY Information="MOUSE_DELTA_RIGHT">8</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_COCKPIT_LOCKABLE_LOOK_UP" Flag="1">
+        <Primary>
+          <KEY Information="MOUSE_DELTA_DOWN">10</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_COCKPIT_LOCKABLE_LOOK_DOWN" Flag="1">
+        <Primary>
+          <KEY Information="MOUSE_DELTA_UP">9</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="EXTERNAL_CAMERA">
+      <Action ActionName="KEY_TOGGLE_FIXED_CAMERACHASE" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_MIDDLE">2</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_ZOOM_CHASE" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_WHEEL_UP">5</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_DEZOOM_CHASE" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_WHEEL_DOWN">6</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_CHASE_FOCUS" Flag="1">
+        <Primary>
+          <KEY Information="MOUSE_RIGHT">1</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_CHASE_LOCKABLE_LOOK_LEFT" Flag="1">
+        <Primary>
+          <KEY Information="MOUSE_DELTA_LEFT">7</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_CHASE_LOCKABLE_LOOK_RIGHT" Flag="1">
+        <Primary>
+          <KEY Information="MOUSE_DELTA_RIGHT">8</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_CHASE_LOCKABLE_LOOK_UP" Flag="1">
+        <Primary>
+          <KEY Information="MOUSE_DELTA_DOWN">10</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_CHASE_LOCKABLE_LOOK_DOWN" Flag="1">
+        <Primary>
+          <KEY Information="MOUSE_DELTA_UP">9</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_TOGGLE_FIXED_CAMERACHASE_HOLD" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_RIGHT">1</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="COCKPIT_CAMERA">
+      <Action ActionName="KEY_COCKPIT_MODE" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_MIDDLE">2</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_COCKPIT_MODE_HOLD" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_RIGHT">1</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="INSTRUMENTS_CAMERA">
+      <Action ActionName="KEY_INSTRUMENT_MODE" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_MIDDLE">2</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_INSTRUMENT_MODE_HOLD" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_RIGHT">1</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="MENU">
+      <Action ActionName="MENU_MOUSE0" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_LEFT">0</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_MOUSE1" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_RIGHT">1</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_MOUSE_LEFT" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_DELTA_LEFT">7</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_MOUSE_RIGHT" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_DELTA_RIGHT">8</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_MOUSE_DOWN" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_DELTA_DOWN">10</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_MOUSE_UP" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_DELTA_UP">9</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="MENU_MOUSE">
+      <Action ActionName="MENU_MOUSE0" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_LEFT">0</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_MOUSE1" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_RIGHT">1</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_MOUSE_LEFT" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_DELTA_LEFT">7</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_MOUSE_RIGHT" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_DELTA_RIGHT">8</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_MOUSE_DOWN" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_DELTA_DOWN">10</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="MENU_MOUSE_UP" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_DELTA_UP">9</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="DEVMODE">
+      <Action ActionName="KEY_DEVMODECAMERA_ZOOM_IN" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_WHEEL_UP">5</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_DEVMODECAMERA_ZOOM_OUT" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_WHEEL_DOWN">6</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_DEVMODECAMERA_TRANSLATION" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_MIDDLE">2</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="DEVMODECAMERA">
+      <Action ActionName="KEY_DEVMODECAMERA_ZOOM_IN" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_WHEEL_UP">5</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_DEVMODECAMERA_ZOOM_OUT" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_WHEEL_DOWN">6</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_DEVMODECAMERA_TRANSLATION" Flag="2">
+        <Primary>
+          <KEY Information="MOUSE_MIDDLE">2</KEY>
+        </Primary>
+      </Action>
+    </Context>
+  </Device>
+</DefaulftInput>
