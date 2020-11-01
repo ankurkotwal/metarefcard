@@ -6,7 +6,6 @@ import (
 	"flag"
 	"fmt"
 	"html/template"
-	"image"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -252,58 +251,22 @@ func prepareGeneratorData(overlaysByProfile common.OverlaysByProfile) ([]string,
 	return profiles, imageNamesByProfile, numFiles
 }
 
-type chanData struct {
-	Dc            *gg.Context
-	Profile       string
-	Image         *image.Image
-	ImageFilename string
-}
-
 func generateImages(overlaysByProfile common.OverlaysByProfile, categories map[string]string,
 	gameLabel string, log *common.Logger) []*bytes.Buffer {
 
 	profiles, imageNamesByProfile, numFiles := prepareGeneratorData(overlaysByProfile)
-	channel := make(chan chanData)
-
-	for profile, imagesNames := range imageNamesByProfile {
-		for _, imageName := range imagesNames {
-			go func(imageFilename string, profileName string) {
-				image, err := gg.LoadImage(fmt.Sprintf("%s/%s.png",
-					config.HotasImagesDir, imageFilename))
-				if err != nil {
-					log.Err("loadImage %s failed. %v", imageFilename, err)
-					channel <- chanData{nil, "", nil, ""}
-				}
-
-				// Load the image
-				dc := gg.NewContext(image.Bounds().Size().X, image.Bounds().Size().Y)
-
-				channel <- chanData{dc, profileName, &image, imageFilename}
-			}(imageName, profile)
-
-		}
-	}
-
-	// Create a map of images to generate because we need to create them in
-	// a sorted order.
-	imagesToGenerate := make(map[string]map[string]*chanData)
-	for i := 0; i < numFiles; i++ {
-		data := <-channel
-		imageByName, found := imagesToGenerate[data.Profile]
-		if !found {
-			// New profile, add to index
-			imageByName = make(map[string]*chanData)
-			imagesToGenerate[data.Profile] = imageByName
-		}
-		imageByName[data.ImageFilename] = &data
-	}
-
 	files := make([]*bytes.Buffer, 0, numFiles)
-	// Iterate using the sorted structures to have order stability
 	for _, profile := range profiles {
-		for _, imageName := range imageNamesByProfile[profile] {
-			data := imagesToGenerate[profile][imageName]
-			imgBytes := common.GenerateImage(data.Dc, data.Image, data.ImageFilename,
+		imagesNames := imageNamesByProfile[profile]
+		for _, imageName := range imagesNames {
+			image, err := gg.LoadImage(fmt.Sprintf("%s/%s.png", config.HotasImagesDir, imageName))
+			if err != nil {
+				log.Err("loadImage %s failed. %v", imageName, err)
+			}
+
+			// Load the image
+			dc := gg.NewContext(image.Bounds().Size().X, image.Bounds().Size().Y)
+			imgBytes := common.GenerateImage(dc, &image, imageName,
 				profile, overlaysByProfile[profile], categories, config, log, gameLabel)
 			if imgBytes != nil {
 				files = append(files, imgBytes)
