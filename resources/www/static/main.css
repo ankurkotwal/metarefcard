@@ -2,15 +2,21 @@ hr.solid {
 border-top: 1px solid;
 }
 
-.image-box-crop {
+.image-box-crop-center {
 max-width: 1000px;
 height: 250px;
 }
 
-.image-box-crop img {
+.image-box-crop-center img {
 width: 100%;
-height: 100%;
+height: 250px;
 object-fit: cover;
+}
+
+.image-box-crop-top {
+max-width: 1000px;
+/* max-height: 250px; */
+object-position: 0%, 100%;
 }
 
 .image-box-fill {
@@ -20,7 +26,7 @@ height: 250px;
 
 .image-box-fill img {
 height: 100%;
-object-fit: contain;
+object-fit: none;
 }
 
 .msg-info {
