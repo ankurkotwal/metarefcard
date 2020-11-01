@@ -266,7 +266,7 @@ func generateImages(overlaysByProfile common.OverlaysByProfile, categories map[s
 
 			// Load the image
 			dc := gg.NewContext(image.Bounds().Size().X, image.Bounds().Size().Y)
-			imgBytes := common.GenerateImage(dc, &image, imageName,
+			imgBytes := common.GenerateImage(dc, image, imageName,
 				profile, overlaysByProfile[profile], categories, config, log, gameLabel)
 			if imgBytes != nil {
 				files = append(files, imgBytes)

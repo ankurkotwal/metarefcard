@@ -49,7 +49,7 @@ func YamlObjectAsString(in interface{}, label string) string {
 }
 
 // LoadFont loads a font into memory and returns it.
-func LoadFont(dir string, name string, size int) *font.Face {
+func LoadFont(dir string, name string, size int) font.Face {
 	fontPath := fmt.Sprintf("%s/%s", dir, name)
 
 	fontBytes, err := ioutil.ReadFile(fontPath)
@@ -63,5 +63,5 @@ func LoadFont(dir string, name string, size int) *font.Face {
 	face := truetype.NewFace(f, &truetype.Options{
 		Size: float64(size),
 	})
-	return &face
+	return face
 }
