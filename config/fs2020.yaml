@@ -49,7 +49,7 @@ InputLabels:
   KEY_AVIONICS_MASTER_1_SET: "Set Avionics Master 1"
   KEY_AVIONICS_MASTER_2_OFF: "Avionics Master 2 Off"
   KEY_AVIONICS_MASTER_2_ON: "Avionics Master 2 On"
-  KEY_AVIONICS_MASTER_2_SET: "Set Avionics Master 1"
+  KEY_AVIONICS_MASTER_2_SET: "Set Avionics Master 2"
   KEY_AVIONICS_MASTER_SET: "Set Avionics Master"
   KEY_AXIS_AILERONS_SET : "Ailerons"
   KEY_AXIS_ELEV_TRIM_SET : "Elevator Trim"
