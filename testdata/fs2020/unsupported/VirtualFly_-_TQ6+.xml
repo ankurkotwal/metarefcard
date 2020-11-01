@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DefaulftInput Primary="1">
+  <Version Num="1238" />
+  <Device DeviceName="VirtualFly - TQ6+" GUID="d36d62d0-53ec-11ea-800a-444553540000" ProductID="0DA2">
+    <Axes>
+      <Axis AxisName="X" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="Y" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="Z" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="rX" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="rY" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="rZ" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="SliderX" AxisSensitivy="0" AxisDeadZone="0" />
+      <Axis AxisName="SliderY" AxisSensitivy="0" AxisDeadZone="0" />
+    </Axes>
+    <Context ContextName="PLANE">
+      <Action ActionName="KEY_AXIS_MIXTURE1_SET" Flag="4">
+        <Primary>
+          <KEY Information="Rotation Y">786</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_AXIS_MIXTURE2_SET" Flag="4">
+        <Primary>
+          <KEY Information="Rotation Z">802</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_THROTTLE1_AXIS_SET_EX1" Flag="4">
+        <Primary>
+          <KEY Information="Axis X">1026</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_THROTTLE2_AXIS_SET_EX1" Flag="4">
+        <Primary>
+          <KEY Information="Axis Y">1042</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_PROP_PITCH1_AXIS_SET_EX1" Flag="4">
+        <Primary>
+          <KEY Information="Axis Z">1058</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_PROP_PITCH2_AXIS_SET_EX1" Flag="4">
+        <Primary>
+          <KEY Information="Rotation X">770</KEY>
+        </Primary>
+      </Action>
+    </Context>
+  </Device>
+</DefaulftInput>

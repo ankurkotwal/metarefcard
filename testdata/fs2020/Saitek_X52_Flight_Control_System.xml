@@ -1,0 +1,198 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DefaulftInput Primary="1">
+  <Version Num="1238" />
+  <Device DeviceName="Saitek X52 Flight Control System" GUID="9a117810-f09c-11e7-8002-444553540000" ProductID="075C">
+    <Axes>
+      <Axis AxisName="X" AxisSensitivy="-50" AxisDeadZone="2" />
+      <Axis AxisName="Y" AxisSensitivy="-50" AxisDeadZone="0" />
+      <Axis AxisName="Z" AxisSensitivy="1" AxisDeadZone="2" />
+      <Axis AxisName="rX" AxisSensitivy="1" AxisDeadZone="2" />
+      <Axis AxisName="rY" AxisSensitivy="1" AxisDeadZone="2" />
+      <Axis AxisName="rZ" AxisSensitivy="-50" AxisDeadZone="2" />
+      <Axis AxisName="SliderX" AxisSensitivy="1" AxisDeadZone="2" />
+      <Axis AxisName="SliderY" AxisSensitivy="1" AxisDeadZone="2" />
+    </Axes>
+    <Context ContextName="PLANE">
+      <Action ActionName="KEY_ENGINE" Flag="2">
+        <Primary>
+          <KEY Information="Button8">7</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_GEAR_TOGGLE" Flag="2">
+        <Primary>
+          <KEY Information="Button12">11</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_ALL_LIGHTS_TOGGLE" Flag="2">
+        <Primary>
+          <KEY Information="Button13">12</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_AP_MASTER" Flag="2">
+        <Primary>
+          <KEY Information="Button2">1</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_BRAKES" Flag="2">
+        <Primary>
+          <KEY Information="Button6">5</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_SPOILERS_TOGGLE" Flag="2">
+        <Primary>
+          <KEY Information="Button11">10</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_ELEV_TRIM_DN" Flag="2">
+        <Primary>
+          <KEY Information="Button18">17</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_ELEV_TRIM_UP" Flag="2">
+        <Primary>
+          <KEY Information="Button16">15</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_PARKING_BRAKES" Flag="2">
+        <Primary>
+          <KEY Information="Button14">13</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_FLAPS_INCR" Flag="2">
+        <Primary>
+          <KEY Information="Button9">8</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_FLAPS_DECR" Flag="2">
+        <Primary>
+          <KEY Information="Button10">9</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_AXIS_ELEVATOR_SET" Flag="4">
+        <Primary>
+          <KEY Information="Axis Y">1042</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_AXIS_AILERONS_SET" Flag="4">
+        <Primary>
+          <KEY Information="Axis X">1026</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_AXIS_RUDDER_SET" Flag="4">
+        <Primary>
+          <KEY Information="Rotation Z">802</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_RUDDER_TRIM_LEFT" Flag="2">
+        <Primary>
+          <KEY Information="Button19">18</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_RUDDER_TRIM_RIGHT" Flag="2">
+        <Primary>
+          <KEY Information="Button17">16</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_AXIS_MIXTURE_SET" Flag="4">
+        <Primary>
+          <KEY Information="Rotation Y">786</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_TOGGLE_FEATHER_SWITCHES" Flag="2">
+        <Primary>
+          <KEY Information="Button30">29</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_THROTTLE_REVERSE_THRUST_TOGGLE" Flag="2">
+        <Primary>
+          <KEY Information="Button7">6</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_THROTTLE_AXIS_SET_EX1" Flag="4">
+        <Primary>
+          <KEY Information="Axis Z">1058</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_PROP_PITCH_AXIS_SET_EX1" Flag="4">
+        <Primary>
+          <KEY Information="Rotation X">770</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="MODES">
+      <Action ActionName="KEY_COCKPIT_RESET" Flag="2">
+        <Primary>
+          <KEY Information="Button4">3</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_CYCLE_PILOTVIEW_NEXT" Flag="2">
+        <Primary>
+          <KEY Information="POV1_UP">256</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_CYCLE_PILOTVIEW_BACK" Flag="2">
+        <Primary>
+          <KEY Information="POV1_DOWN">258</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="EXTERNAL_CAMERA">
+      <Action ActionName="KEY_CHASE_QUICKVIEW1" Flag="2">
+        <Primary>
+          <KEY Information="POV1_RIGHT">257</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_CHASE_QUICKVIEW2" Flag="2">
+        <Primary>
+          <KEY Information="POV1_DOWN">258</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_CHASE_QUICKVIEW3" Flag="2">
+        <Primary>
+          <KEY Information="POV1_LEFT">259</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_CHASE_QUICKVIEW4" Flag="2">
+        <Primary>
+          <KEY Information="POV1_UP">256</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="COCKPIT_CAMERA">
+      <Action ActionName="KEY_COCKPIT_QUICKVIEW4" Flag="2">
+        <Primary>
+          <KEY Information="POV1_LEFT">259</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_COCKPIT_QUICKVIEW3" Flag="2">
+        <Primary>
+          <KEY Information="POV1_RIGHT">257</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_COCKPIT_UPPER" Flag="2">
+        <Primary>
+          <KEY Information="Button5">4</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="INSTRUMENTS_CAMERA">
+      <Action ActionName="KEY_COCKPIT_CYCLE" Flag="2">
+        <Primary>
+          <KEY Information="POV1_RIGHT">257</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_COCKPIT_BACKCYCLE" Flag="2">
+        <Primary>
+          <KEY Information="POV1_LEFT">259</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="SMART_CAMERA">
+      <Action ActionName="KEY_TOGGLE_SMART_CAMERA" Flag="2">
+        <Primary>
+          <KEY Information="Button1">0</KEY>
+        </Primary>
+      </Action>
+    </Context>
+  </Device>
+</DefaulftInput>

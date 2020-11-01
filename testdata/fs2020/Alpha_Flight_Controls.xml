@@ -1,0 +1,207 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DefaulftInput Primary="1">
+  <Version Num="1238" />
+  <Device DeviceName="Alpha Flight Controls" GUID="48473d10-eab1-11e9-8001-444553540000" ProductID="1900">
+    <Axes>
+      <Axis AxisName="X" AxisSensitivy="0" AxisDeadZone="2" />
+      <Axis AxisName="Y" AxisSensitivy="0" AxisDeadZone="2" />
+      <Axis AxisName="Z" AxisSensitivy="0" AxisDeadZone="2" />
+      <Axis AxisName="rX" AxisSensitivy="0" AxisDeadZone="2" />
+      <Axis AxisName="rY" AxisSensitivy="0" AxisDeadZone="2" />
+      <Axis AxisName="rZ" AxisSensitivy="0" AxisDeadZone="2" />
+      <Axis AxisName="SliderX" AxisSensitivy="0" AxisDeadZone="2" />
+      <Axis AxisName="SliderY" AxisSensitivy="0" AxisDeadZone="2" />
+    </Axes>
+    <Context ContextName="PLANE">
+      <Action ActionName="KEY_AP_MASTER" Flag="2">
+        <Primary>
+          <KEY Information="Button4">3</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_ELEV_TRIM_DN" Flag="2">
+        <Primary>
+          <KEY Information="Button6">5</KEY>
+          <KEY Information="Button8">7</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_ELEV_TRIM_UP" Flag="2">
+        <Primary>
+          <KEY Information="Button5">4</KEY>
+          <KEY Information="Button7">6</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_AXIS_ELEVATOR_SET" Flag="4">
+        <Primary>
+          <KEY Information="Axis Y">1042</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_AXIS_AILERONS_SET" Flag="4">
+        <Primary>
+          <KEY Information="Axis X">1026</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_MAGNETO_OFF" Flag="2">
+        <Primary>
+          <KEY Information="Button31">30</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_MAGNETO_RIGHT" Flag="2">
+        <Primary>
+          <KEY Information="Button32">31</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_MAGNETO_LEFT" Flag="2">
+        <Primary>
+          <KEY Information="Button33">32</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_MAGNETO_BOTH" Flag="2">
+        <Primary>
+          <KEY Information="Button34">33</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_MAGNETO_START" Flag="2">
+        <Primary>
+          <KEY Information="Button35">34</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_STROBES_SET" Flag="2">
+        <Primary>
+          <KEY Information="Button29">28</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_LANDING_LIGHTS_SET" Flag="2">
+        <Primary>
+          <KEY Information="Button23">22</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_RUDDER_TRIM_LEFT" Flag="2">
+        <Primary>
+          <KEY Information="Button9">8</KEY>
+          <KEY Information="Button11">10</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_RUDDER_TRIM_RIGHT" Flag="2">
+        <Primary>
+          <KEY Information="Button10">9</KEY>
+          <KEY Information="Button12">11</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_MASTER_BATTERY_SET" Flag="2">
+        <Primary>
+          <KEY Information="Button15">14</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_ALTERNATOR_SET" Flag="2">
+        <Primary>
+          <KEY Information="Button13">12</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_AVIONICS_MASTER_1_SET" Flag="2">
+        <Primary>
+          <KEY Information="Button17">16</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_AVIONICS_MASTER_2_SET" Flag="2">
+        <Primary>
+          <KEY Information="Button19">18</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_TAXI_LIGHTS_SET" Flag="2">
+        <Primary>
+          <KEY Information="Button25">24</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_BEACON_LIGHTS_SET" Flag="2">
+        <Primary>
+          <KEY Information="Button21">20</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_NAV_LIGHTS_SET" Flag="2">
+        <Primary>
+          <KEY Information="Button27">26</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="MODES">
+      <Action ActionName="KEY_VIEW_MODE" Flag="2">
+        <Primary>
+          <KEY Information="Button3">2</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_COCKPIT_RESET" Flag="2">
+        <Primary>
+          <KEY Information="Button2">1</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_CYCLE_PILOTVIEW_NEXT" Flag="2">
+        <Primary>
+          <KEY Information="POV1_UP">256</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_CYCLE_PILOTVIEW_BACK" Flag="2">
+        <Primary>
+          <KEY Information="POV1_DOWN">258</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="EXTERNAL_CAMERA">
+      <Action ActionName="KEY_CAMERACHASE_RESET" Flag="2">
+        <Primary>
+          <KEY Information="Button2">1</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_CHASE_QUICKVIEW1" Flag="2">
+        <Primary>
+          <KEY Information="POV1_RIGHT">257</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_CHASE_QUICKVIEW2" Flag="2">
+        <Primary>
+          <KEY Information="POV1_DOWN">258</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_CHASE_QUICKVIEW3" Flag="2">
+        <Primary>
+          <KEY Information="POV1_LEFT">259</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_CHASE_QUICKVIEW4" Flag="2">
+        <Primary>
+          <KEY Information="POV1_UP">256</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="COCKPIT_CAMERA">
+      <Action ActionName="KEY_COCKPIT_QUICKVIEW4" Flag="2">
+        <Primary>
+          <KEY Information="POV1_LEFT">259</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_COCKPIT_QUICKVIEW3" Flag="2">
+        <Primary>
+          <KEY Information="POV1_RIGHT">257</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="INSTRUMENTS_CAMERA">
+      <Action ActionName="KEY_COCKPIT_CYCLE" Flag="2">
+        <Primary>
+          <KEY Information="POV1_RIGHT">257</KEY>
+        </Primary>
+      </Action>
+      <Action ActionName="KEY_COCKPIT_BACKCYCLE" Flag="2">
+        <Primary>
+          <KEY Information="POV1_LEFT">259</KEY>
+        </Primary>
+      </Action>
+    </Context>
+    <Context ContextName="SMART_CAMERA">
+      <Action ActionName="KEY_TOGGLE_SMART_CAMERA" Flag="2">
+        <Primary>
+          <KEY Information="Button1">0</KEY>
+        </Primary>
+      </Action>
+    </Context>
+  </Device>
+</DefaulftInput>

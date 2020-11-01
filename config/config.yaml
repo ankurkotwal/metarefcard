@@ -1,0 +1,54 @@
+---
+AppName: MetaRefCard
+Version: 0.2.0
+DebugOutput: false
+VerboseOutput: false
+DevicesFile: config/devices.yaml
+DefaultImage: { w: 3840, h: 2160 }
+PixelMultiplier: 0.5
+HotasImagesDir: resources/hotas-images
+LogoImagesDir: resources/game-logos
+JpgQuality: 90
+
+FontsDir: resources/fonts
+InputFont: YanoneKaffeesatz-Regular.ttf
+InputFontSize: 40
+InputMinFontSize: 13
+DefaultLineHeight: 54
+InputPixelXInset: 5
+InputPixelYInset: 5
+
+ImageHeader:
+  Font: Orbitron-Regular.ttf
+  FontSize:  90
+  Inset: { x: 50, y: 100 }
+  TextHeight: 180
+  TextColour: "#ffffffff"
+  BackgroundHeight: 200
+  BackgroundColour: "#2780e3ff"
+
+Watermark:
+  Text: MetaRefCard.com
+  TextColour: "#ffffffff"
+  BackgroundColour: "#373a3cff"
+  Font: Dirga.ttf
+  FontSize: 44
+  Location: { x: 50, y: 136 }
+
+BackgroundColour: "#e9ecefff"
+LightColour: "#ffffffff"
+DarkColour: "#373a3cff"
+AlternateColours:
+  - "#2780e3ff" # Blue
+  - "#ff0039ff" # Red
+  - "#ff7518ff" # Orange
+  - "#3fb618ff" # Green
+  - "#9954bbff" # Purple
+  - "#373a3cff" # Almost Black
+  - "#2780e3a6" # Blue, lower opacity
+  - "#ff0039a6" # Red, lower opacity
+  - "#ff7518a6" # Orange, lower opacity
+  - "#3fb618a6" # Green, lower opacity
+  - "#9954bba6" # Purple, lower opacity
+  - "#373a3ca6" # Almost Black, lower opacity
+...
