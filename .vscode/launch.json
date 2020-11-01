@@ -16,7 +16,7 @@
                 "--sws",
                 "${workspaceFolder}/testdata/sws/Saitek_Pro_Flight_X-55_Rhino.profile",
                 "--fs2020",
-                "${workspaceFolder}/testdata/fs2020/unsupported/Alpha_Flight_Controls.xml",
+                "${workspaceFolder}/testdata/fs2020/Alpha_Flight_Controls.xml",
                 "--fs2020",
                 "${workspaceFolder}/testdata/fs2020/Saitek_Pro_Flight_X-55_Rhino_Stick.xml",
                 "--fs2020",
