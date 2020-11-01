@@ -46,11 +46,12 @@ func RunServer() {
 	log := common.NewLog()
 	gameArgs, gamesInfo := initialise(log)
 
+	if !debugMode {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	router := gin.Default()
 	if debugMode {
 		pprof.Register(router)
-	} else {
-		gin.SetMode(gin.ReleaseMode)
 	}
 
 	router.LoadHTMLGlob("resources/www/templates/*.html")
