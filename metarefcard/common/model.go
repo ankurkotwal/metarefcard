@@ -55,7 +55,7 @@ func GenerateContextColours(contexts MockSet, config *Config) {
 // FuncRequestHandler - handles incoming requests and returns game data, game binds,
 // neededDevices and a context to colour mapping
 type FuncRequestHandler func(files [][]byte, config *Config, log *Logger) (*GameData,
-	GameBindsByDevice, MockSet, MockSet, string)
+	GameBindsByProfile, MockSet, MockSet, string)
 
 // FuncMatchGameInputToModel takes the game provided bindings with the device map to
 // build a list of image overlays.
@@ -64,47 +64,51 @@ type FuncMatchGameInputToModel func(deviceName string, actionData GameInput,
 
 // PopulateImageOverlays returns a list of image overlays to put on device images
 func PopulateImageOverlays(neededDevices MockSet, config *Config, log *Logger,
-	gameBinds GameBindsByDevice, gameData *GameData, matchFunc FuncMatchGameInputToModel) OverlaysByImage {
+	gameBindsByProfile GameBindsByProfile, gameData *GameData, matchFunc FuncMatchGameInputToModel) OverlaysByProfile {
 
 	deviceMap := FilterDevices(neededDevices, config, log)
 	imageMap := config.Devices.ImageMap
 
 	// Iterate through our game binds
-	overlaysByImage := make(OverlaysByImage)
-	for shortName, gameDevice := range gameBinds {
-		inputs := deviceMap[shortName]
-		image := imageMap[shortName]
-		for context, actions := range gameDevice {
-			for actionName, gameInput := range actions {
+	overlaysByProfile := make(OverlaysByProfile)
+	for profile, gameBinds := range gameBindsByProfile {
+		overlaysByImage := make(OverlaysByImage)
+		overlaysByProfile[profile] = overlaysByImage
+		for shortName, gameDevice := range gameBinds {
+			inputs := deviceMap[shortName]
+			image := imageMap[shortName]
+			for context, actions := range gameDevice {
+				for actionName, gameInput := range actions {
 
-				inputLookups, label := matchFunc(shortName, gameInput, inputs,
-					(*gameData).InputMap[shortName], log)
+					inputLookups, label := matchFunc(shortName, gameInput, inputs,
+						(*gameData).InputMap[shortName], log)
 
-				for idx, input := range inputLookups {
-					if idx != 0 && len(input) == 0 {
-						// Ok to have no input if its not the primary input
-						// i.e. Might not have a secondary input
-						continue
-					}
+					for idx, input := range inputLookups {
+						if idx != 0 && len(input) == 0 {
+							// Ok to have no input if its not the primary input
+							// i.e. Might not have a secondary input
+							continue
+						}
 
-					inputData, found := inputs[input]
-					if !found {
-						log.Err("%s unknown input to lookup %s for device %s",
-							label, input, shortName)
+						inputData, found := inputs[input]
+						if !found {
+							log.Err("%s unknown input to lookup %s for device %s",
+								label, input, shortName)
+						}
+						if inputData.X == 0 && inputData.Y == 0 {
+							log.Err("%s location 0,0 for %s device %s %v",
+								label, actionName, shortName, inputData)
+							continue
+						}
+						GenerateImageOverlays(overlaysByImage, input, &inputData,
+							gameData, actionName, context, shortName, image, label, log)
 					}
-					if inputData.X == 0 && inputData.Y == 0 {
-						log.Err("%s location 0,0 for %s device %s %v",
-							label, actionName, shortName, inputData)
-						continue
-					}
-					GenerateImageOverlays(overlaysByImage, input, &inputData,
-						gameData, actionName, context, shortName, image, label, log)
 				}
 			}
 		}
 	}
 
-	return overlaysByImage
+	return overlaysByProfile
 }
 
 // GenerateImageOverlays - creates the image overlays into overlaysByImage

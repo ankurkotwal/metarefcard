@@ -31,7 +31,7 @@ func GetGameInfo() (string, string, common.FuncRequestHandler, common.FuncMatchG
 
 // handleRequest services the request to load files
 func handleRequest(files [][]byte, config *common.Config, log *common.Logger) (*common.GameData,
-	common.GameBindsByDevice, common.MockSet, common.MockSet, string) {
+	common.GameBindsByProfile, common.MockSet, common.MockSet, string) {
 	if !initiliased {
 		sharedGameData = common.LoadGameModel("config/sws.yaml",
 			"StarWarsSquadrons Data", config.DebugOutput, log)
@@ -48,9 +48,11 @@ func handleRequest(files [][]byte, config *common.Config, log *common.Logger) (*
 
 // Load the game config files (provided by user)
 func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
-	log *common.Logger, bool, verboseOutput bool) (common.GameBindsByDevice,
+	log *common.Logger, bool, verboseOutput bool) (common.GameBindsByProfile,
 	common.MockSet, common.MockSet) {
-	gameBinds := make(common.GameBindsByDevice)
+	gameBindsByProfile := make(common.GameBindsByProfile)
+	gameBinds := make(common.GameDeviceContextActions)
+	gameBindsByProfile[common.ProfileDefault] = gameBinds
 	deviceNames := make(common.MockSet)
 	contexts := make(common.MockSet)
 
@@ -148,7 +150,7 @@ func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
 		}
 	}
 
-	return gameBinds, deviceNames, contexts
+	return gameBindsByProfile, deviceNames, contexts
 }
 
 func addAction(contextActionIndex swsContextActionIndex,

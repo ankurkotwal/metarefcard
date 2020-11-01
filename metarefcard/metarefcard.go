@@ -232,59 +232,82 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 	}
 }
 
-func prepareGeneratorData(overlaysByImage common.OverlaysByImage) []string {
-	// Generate sorted list of image names
-	imageNames := make([]string, 0)
-	for name := range overlaysByImage {
-		imageNames = append(imageNames, name)
+// Returns a sorted list of profile names, a map containing sorted image names by profile and a count of files
+func prepareGeneratorData(overlaysByProfile common.OverlaysByProfile) ([]string, map[string][]string, int) {
+	profiles := make([]string, 0, len(overlaysByProfile))
+	imageNamesByProfile := make(map[string][]string)
+	numFiles := 0
+	for profile, overlaysByImage := range overlaysByProfile {
+		profiles = append(profiles, profile)
+		// Generate sorted list of image names
+		imageNames := make([]string, 0, len(overlaysByImage))
+		for name := range overlaysByImage {
+			imageNames = append(imageNames, name)
+			numFiles++
+		}
+		sort.Strings(imageNames)
+		imageNamesByProfile[profile] = imageNames
 	}
-	sort.Strings(imageNames)
-	return imageNames
+	sort.Strings(profiles)
+	return profiles, imageNamesByProfile, numFiles
 }
 
 type chanData struct {
 	Dc            *gg.Context
+	Profile       string
 	Image         *image.Image
 	ImageFilename string
 }
 
-func generateImages(overlaysByImage common.OverlaysByImage, categories map[string]string,
+func generateImages(overlaysByProfile common.OverlaysByProfile, categories map[string]string,
 	gameLabel string, log *common.Logger) []*bytes.Buffer {
 
-	imageNames := prepareGeneratorData(overlaysByImage)
-
-	files := make([]*bytes.Buffer, 0, len(imageNames))
+	profiles, imageNamesByProfile, numFiles := prepareGeneratorData(overlaysByProfile)
 	channel := make(chan chanData)
-	for _, imageName := range imageNames {
-		go func(imageFilename string) {
-			image, err := gg.LoadImage(fmt.Sprintf("%s/%s.png",
-				config.HotasImagesDir, imageFilename))
-			if err != nil {
-				log.Err("loadImage %s failed. %v", imageFilename, err)
-				channel <- chanData{nil, nil, ""}
-			}
 
-			// Load the image
-			dc := gg.NewContext(image.Bounds().Size().X, image.Bounds().Size().Y)
+	for profile, imagesNames := range imageNamesByProfile {
+		for _, imageName := range imagesNames {
+			go func(imageFilename string, profileName string) {
+				image, err := gg.LoadImage(fmt.Sprintf("%s/%s.png",
+					config.HotasImagesDir, imageFilename))
+				if err != nil {
+					log.Err("loadImage %s failed. %v", imageFilename, err)
+					channel <- chanData{nil, "", nil, ""}
+				}
 
-			channel <- chanData{dc, &image, imageFilename}
-		}(imageName)
+				// Load the image
+				dc := gg.NewContext(image.Bounds().Size().X, image.Bounds().Size().Y)
 
+				channel <- chanData{dc, profileName, &image, imageFilename}
+			}(imageName, profile)
+
+		}
 	}
 
-	imagesByName := make(map[string]*chanData)
-	for i := 0; i < len(imageNames); i++ {
+	// Create a map of images to generate because we need to create them in
+	// a sorted order.
+	imagesToGenerate := make(map[string]map[string]*chanData)
+	for i := 0; i < numFiles; i++ {
 		data := <-channel
-		imagesByName[data.ImageFilename] = &data
+		imageByName, found := imagesToGenerate[data.Profile]
+		if !found {
+			// New profile, add to index
+			imageByName = make(map[string]*chanData)
+			imagesToGenerate[data.Profile] = imageByName
+		}
+		imageByName[data.ImageFilename] = &data
 	}
 
-	for _, imageFilename := range imageNames {
-		data := imagesByName[imageFilename]
-		// Sort by image filename
-		imgBytes := common.GenerateImage(data.Dc, data.Image, data.ImageFilename,
-			overlaysByImage, categories, config, log, gameLabel)
-		if imgBytes != nil {
-			files = append(files, imgBytes)
+	files := make([]*bytes.Buffer, 0, numFiles)
+	// Iterate using the sorted structures to have order stability
+	for _, profile := range profiles {
+		for _, imageName := range imageNamesByProfile[profile] {
+			data := imagesToGenerate[profile][imageName]
+			imgBytes := common.GenerateImage(data.Dc, data.Image, data.ImageFilename,
+				profile, overlaysByProfile[profile], categories, config, log, gameLabel)
+			if imgBytes != nil {
+				files = append(files, imgBytes)
+			}
 		}
 	}
 	return files

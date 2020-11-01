@@ -24,7 +24,7 @@ var gameLogos map[string]image.Image = make(map[string]image.Image)
 
 // GenerateImage - generates an image with the provided overlays
 func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
-	overlaysByImage OverlaysByImage, categories map[string]string,
+	profile string, overlaysByImage OverlaysByImage, categories map[string]string,
 	config *Config, log *Logger, gameLogo string) *bytes.Buffer {
 
 	// Set the background colour
@@ -71,7 +71,8 @@ func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
 				incrementalTexts = append(incrementalTexts, fullText+padding)
 			}
 		}
-		fontSize = calcFontSize(fullText, fontSize, targetWidth, targetHeight, config)
+		fontSize = calcFontSize(fullText, fontSize, targetWidth, targetHeight,
+			config.FontsDir, config.InputFont, config.InputMinFontSize)
 		// Now create overlays for each text
 		// Ugh, second loop through texts
 		idx := 0
@@ -94,7 +95,7 @@ func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
 	}
 
 	xOffset := addGameLogo(dc, gameLogo, config.LogoImagesDir, imageFilename, log)
-	addImageHeader(dc, &config.ImageHeader,
+	addImageHeader(dc, &config.ImageHeader, profile,
 		config.Devices.DeviceLabelsByImage[imageFilename],
 		xOffset, pixelMultiplier, config.FontsDir)
 	addMRCLogo(dc, &config.Watermark, config.Version,
@@ -105,25 +106,40 @@ func GenerateImage(dc *gg.Context, image *image.Image, imageFilename string,
 	return &imgBytes
 }
 
-var inputFontCache map[int]*font.Face = make(map[int]*font.Face)
+var fontCache map[string]map[int]*font.Face = make(map[string]map[int]*font.Face)
 var fontsMux sync.RWMutex
 
 func getFontBySize(size int, fontsDir string, fontName string) *font.Face {
 	fontsMux.RLock()
-	// TODO - this assumes that the font is the input font. Should check first!
-	face, found := inputFontCache[size]
-	fontsMux.RUnlock()
+	fontsBySize, found := fontCache[fontName]
 	if !found {
-		// Grab the write lock
+		// First time seeing this font
+		fontsMux.RUnlock()
 		fontsMux.Lock()
-		// Between the read & write locks, map may have changed, check first.
-		face, found = inputFontCache[size]
+		// Between the read unlock and the write lock, this could've been modified
+		fontsBySize, found = fontCache[fontName]
 		if !found {
-			face = LoadFont(fontsDir, fontName, size)
-			inputFontCache[size] = face
+			fontsBySize = make(map[int]*font.Face)
+			fontCache[fontName] = fontsBySize
 		}
 		fontsMux.Unlock()
+		fontsMux.RLock()
 	}
+	face, found := fontsBySize[size]
+	if !found {
+		// first time seeing this found size
+		fontsMux.RUnlock()
+		fontsMux.Lock()
+		// Between the read unlock and the write lock, this could've been modified
+		face, found = fontsBySize[size]
+		if !found {
+			face = LoadFont(fontsDir, fontName, size)
+			fontsBySize[size] = face
+		}
+		fontsMux.Unlock()
+		return face
+	}
+	fontsMux.RUnlock()
 	return face
 }
 
@@ -154,14 +170,12 @@ func measureString(fontFace *font.Face, text string) (int, int) {
 
 // Resize font till it fits
 func calcFontSize(text string, fontSize int, targetWidth int, targetHeight int,
-	config *Config) int {
+	fontsDir string, fontName string, minFontSize int) int {
 	// Max height in pixels is targetHeight (fontSize = height)
 	maxFontSize := targetHeight
-	minFontSize := config.InputMinFontSize
 	newFontSize := maxFontSize
 	for {
-		x, y := measureString(getFontBySize(newFontSize, config.FontsDir,
-			config.InputFont), text)
+		x, y := measureString(getFontBySize(newFontSize, fontsDir, fontName), text)
 		if y > targetHeight {
 			panic("Text is taller than max height")
 		}
@@ -253,21 +267,27 @@ func addGameLogo(dc *gg.Context, gameLogo string, logoImagesDir string,
 	return float64(logo.Bounds().Max.X)
 }
 
-func addImageHeader(dc *gg.Context, imageHeader *HeaderData, label string,
-	xOffset float64, pixelMultiplier float64, fontsDir string) {
+func addImageHeader(dc *gg.Context, imageHeader *HeaderData, profile string,
+	label string, xOffset float64, pixelMultiplier float64, fontsDir string) {
+	fontSize := int(math.Round(imageHeader.FontSize * pixelMultiplier))
+	if headingFont == nil {
+		headingFont = LoadFont(fontsDir, imageHeader.Font, fontSize)
+	}
+	// Add profile name to header if its not the MRC default
+	if profile != ProfileDefault {
+		label = fmt.Sprintf("%s (%s)", label, profile)
+	}
+	// TODO
+	// fontSize = calcFontSize(label, fontSize, targetWidth, targetHeight, fontsDir, fontName string, minFontSize)
+
 	// Generate header
 	dc.SetHexColor(imageHeader.BackgroundColour)
 	dc.DrawRectangle(xOffset, 0, float64(dc.Width())-xOffset,
 		imageHeader.BackgroundHeight*pixelMultiplier)
 	dc.Fill()
-	if headingFont == nil {
-		headingFont = LoadFont(fontsDir, imageHeader.Font,
-			int(math.Round(imageHeader.FontSize*pixelMultiplier)))
-	}
 	dc.SetHexColor(imageHeader.TextColour)
 	dc.SetFontFace(*headingFont)
-	dc.DrawString(fmt.Sprintf("%s", label),
-		xOffset+imageHeader.Inset.X*pixelMultiplier,
+	dc.DrawString(label, xOffset+imageHeader.Inset.X*pixelMultiplier,
 		imageHeader.Inset.Y*pixelMultiplier)
 }
 

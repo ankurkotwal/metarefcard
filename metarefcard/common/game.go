@@ -1,6 +1,10 @@
 package common
 
-import "regexp"
+import (
+	"fmt"
+	"regexp"
+	"strings"
+)
 
 // GameData holds the game's parsed data
 type GameData struct {
@@ -23,10 +27,16 @@ const (
 	DeviceUnknown = "DeviceUnknown"
 	// DeviceMissingInfo - only know the name of device
 	DeviceMissingInfo = "DeviceMissingInfo"
+	// ProfileDefault - the name of the default profile
+	ProfileDefault = "default_metarefcard"
 )
 
 // RegexByName - map of named regex strings
 type RegexByName map[string]*regexp.Regexp
+
+// OverlaysByProfile - image overlay object indexed by profile
+// Profile -> OverlaysByImage
+type OverlaysByProfile map[string]OverlaysByImage
 
 // OverlaysByImage - image overlay data indexed by image name
 // Image -> Device:Input -> OverlayData
@@ -38,8 +48,11 @@ type OverlayData struct {
 	PosAndSize     *InputData
 }
 
-// GameBindsByDevice - Short name -> Context -> Action -> Primary/Secondary -> Key
-type GameBindsByDevice map[string]GameContextActions
+// GameBindsByProfile - Profile -> Short name -> Context -> Action -> Primary/Secondary -> Key
+type GameBindsByProfile map[string]GameDeviceContextActions
+
+// GameDeviceContextActions - Short name -> Context -> Action -> Primary/Secondary -> Key
+type GameDeviceContextActions map[string]GameContextActions
 
 // GameContextActions - Context -> Action
 type GameContextActions map[string]GameActions
@@ -58,3 +71,28 @@ const (
 	// NumInputs - number of inputs.
 	NumInputs = 2
 )
+
+// GameBindsAsString returns the object as a printable string
+func GameBindsAsString(gameBindsByProfile GameBindsByProfile) string {
+	info := make([]string, 0)
+	info = append(info, "=== Loaded FS2020 Config ===\n")
+	for profile, gameBinds := range gameBindsByProfile {
+		info = append(info, fmt.Sprintf("Profile=\"%s\"", profile))
+		for shortName, gameDevice := range gameBinds {
+			info = append(info, fmt.Sprintf("  DeviceName=\"%s\"", shortName))
+			for contextName, actions := range gameDevice {
+				info = append(info, fmt.Sprintf("    ContextName=\"%s\"\n", contextName))
+				for actionName, action := range actions {
+					secondaryText := ""
+					if len(action[InputSecondary]) != 0 {
+						secondaryText = fmt.Sprintf("   SecondaryInfo=\"%s\"",
+							action[InputSecondary])
+					}
+					info = append(info, fmt.Sprintf("      ActionName=\"%s\" PrimaryInfo=\"%s\" %s\n",
+						actionName, action[InputPrimary], secondaryText))
+				}
+			}
+		}
+	}
+	return strings.Join(info, "")
+}

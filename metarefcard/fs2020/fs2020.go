@@ -34,7 +34,7 @@ func GetGameInfo() (string, string, common.FuncRequestHandler, common.FuncMatchG
 
 // handleRequest services the request to load files
 func handleRequest(files [][]byte, config *common.Config, log *common.Logger) (*common.GameData,
-	common.GameBindsByDevice, common.MockSet, common.MockSet, string) {
+	common.GameBindsByProfile, common.MockSet, common.MockSet, string) {
 	if !initiliased {
 		sharedGameData = common.LoadGameModel("config/fs2020.yaml",
 			"FS2020 Data", config.DebugOutput, log)
@@ -53,10 +53,12 @@ func handleRequest(files [][]byte, config *common.Config, log *common.Logger) (*
 
 // Load the game config files (provided by user)
 func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToShort,
-	log *common.Logger, debugOutput bool, verboseOutput bool) (common.GameBindsByDevice,
+	log *common.Logger, debugOutput bool, verboseOutput bool) (common.GameBindsByProfile,
 	common.MockSet, common.MockSet) {
 
-	gameBinds := make(common.GameBindsByDevice)
+	gameBinds := make(common.GameBindsByProfile)
+	defaultProfile := common.ProfileDefault
+	gameBinds[defaultProfile] = make(common.GameDeviceContextActions)
 	neededDevices := make(common.MockSet)
 	contexts := make(common.MockSet)
 
@@ -66,9 +68,11 @@ func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToSh
 	currentAction := make(common.GameInput, common.NumInputs)
 	currentKeyType := keyUnknown
 	var currentKey *int
+	var currentProfile *string
 
 	for idx, file := range files {
 		_ = idx
+		currentProfile = &defaultProfile
 		decoder := xml.NewDecoder(bytes.NewReader(file))
 		skipToNextFile := false
 		for {
@@ -88,6 +92,8 @@ func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToSh
 			switch ty := token.(type) {
 			case xml.StartElement:
 				switch ty.Name.Local {
+				case "FriendlyName":
+					currentProfile = nil
 				case "Device":
 					// Found new device
 					var aDevice string
@@ -105,7 +111,7 @@ func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToSh
 						skipToNextFile = true
 						break // Move on to next device
 					}
-					_, found = gameBinds[shortName]
+					_, found = gameBinds[*currentProfile][shortName]
 					if found {
 						out, _ := json.Marshal(aDevice)
 						log.Err("FS2020 duplicate device: %s", out)
@@ -117,7 +123,7 @@ func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToSh
 						}
 						contextActions = make(common.GameContextActions)
 						neededDevices[shortName] = "" // Add to set
-						gameBinds[shortName] = contextActions
+						gameBinds[*currentProfile][shortName] = contextActions
 						if shortName == common.DeviceMissingInfo {
 							log.Err("FS2020 missing info for device '%s'",
 								shortName)
@@ -183,6 +189,10 @@ func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToSh
 					}
 				}
 			case xml.CharData:
+				if currentProfile == nil {
+					value := string([]byte(ty))
+					currentProfile = &value
+				}
 				if currentKey != nil {
 					value := string([]byte(ty))
 					*currentKey, err = strconv.Atoi(value)
@@ -192,6 +202,13 @@ func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToSh
 				}
 			case xml.EndElement:
 				switch ty.Name.Local {
+				case "FriendlyName":
+					if len(*currentProfile) == 0 {
+						currentProfile = &defaultProfile
+					}
+					if gameBinds[*currentProfile] == nil {
+						gameBinds[*currentProfile] = make(common.GameDeviceContextActions)
+					}
 				case "Device":
 				case "Context":
 					currentContext = nil
@@ -209,31 +226,10 @@ func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToSh
 	}
 
 	if verboseOutput {
-		log.Dbg(gameBindsAsString(gameBinds))
+		log.Dbg(common.GameBindsAsString(gameBinds))
 	}
 
 	return gameBinds, neededDevices, contexts
-}
-
-func gameBindsAsString(gameBinds common.GameBindsByDevice) string {
-	info := make([]string, 0)
-	info = append(info, "=== Loaded FS2020 Config ===\n")
-	for shortName, gameDevice := range gameBinds {
-		info = append(info, fmt.Sprintf("DeviceName=\"%s\"", shortName))
-		for contextName, actions := range gameDevice {
-			info = append(info, fmt.Sprintf("  ContextName=\"%s\"\n", contextName))
-			for actionName, action := range actions {
-				secondaryText := ""
-				if len(action[common.InputSecondary]) != 0 {
-					secondaryText = fmt.Sprintf(" SecondaryInfo=\"%s\"",
-						action[common.InputSecondary])
-				}
-				info = append(info, fmt.Sprintf("    ActionName=\"%s\" PrimaryInfo=\"%s\" %s\n",
-					actionName, action[common.InputPrimary], secondaryText))
-			}
-		}
-	}
-	return strings.Join(info, "")
 }
 
 // matchGameInputToModel takes the game provided bindings with the device map to
