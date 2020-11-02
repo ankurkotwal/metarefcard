@@ -200,8 +200,9 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 	type base64Image struct {
 		Base64Contents string
 	}
-	base64Size := 2 * imgNumBytes
-	imagesAsHTML := make([]byte, 0, base64Size)
+	base64Size := (4 * imgNumBytes) / 3
+	imagesAsHTML := make([]byte, base64Size)
+	buffOffset := 0
 	for _, file := range generatedFiles {
 		image := base64Image{
 			Base64Contents: base64.StdEncoding.EncodeToString(file.Bytes()),
@@ -211,7 +212,8 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 			log.Err(fmt.Sprintf("Error executing image template - %s", err))
 			continue
 		}
-		imagesAsHTML = append(imagesAsHTML, tpl.Bytes()...)
+		copy(imagesAsHTML[buffOffset:], tpl.Bytes())
+		buffOffset += tpl.Len()
 	}
 	// Generate HTML
 	logTempl := "resources/www/templates/log.html"
