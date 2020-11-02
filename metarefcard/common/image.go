@@ -25,6 +25,7 @@ func GenerateImage(dc *gg.Context, image image.Image, imageFilename string,
 	dc.SetRGB(0, 0, 0)
 	pixelMultiplier := getPixelMultiplier(imageFilename, dc, config)
 
+	fontFaceCache := make(map[int]font.Face)
 	overlayDataRange := overlaysByImage[imageFilename]
 	for _, overlayData := range overlayDataRange {
 		// Skip known bad locations
@@ -61,7 +62,7 @@ func GenerateImage(dc *gg.Context, image image.Image, imageFilename string,
 				incrementalTexts = append(incrementalTexts, fullText+padding)
 			}
 		}
-		fontSize = calcFontSize(fullText, fontSize, targetWidth, targetHeight,
+		fontSize = calcFontSize(fullText, fontFaceCache, fontSize, targetWidth, targetHeight,
 			config.FontsDir, config.InputFont, config.InputMinFontSize)
 		// Now create overlays for each text
 		// Ugh, second loop through texts
@@ -69,11 +70,10 @@ func GenerateImage(dc *gg.Context, image image.Image, imageFilename string,
 		for _, context := range prepareContexts(overlayData.ContextToTexts) {
 			texts := overlayData.ContextToTexts[context]
 			for _, text := range texts {
-				offset, _ := measureString(LoadFont(config.FontsDir,
-					config.InputFont, fontSize), incrementalTexts[idx])
+				largeFont := loadFont(fontFaceCache, config.FontsDir, config.InputFont, fontSize)
+				smallFont := loadFont(fontFaceCache, config.FontsDir, config.InputFont, fontSize-1)
+				offset, _ := measureString(largeFont, incrementalTexts[idx])
 				idx++
-				largeFont := LoadFont(config.FontsDir, config.InputFont, fontSize)
-				smallFont := LoadFont(config.FontsDir, config.InputFont, fontSize-1)
 				location := Point2d{X: float64(overlayData.PosAndSize.X),
 					Y: float64(overlayData.PosAndSize.Y)}
 				drawTextWithBackgroundRec(dc, text, float64(offset),
@@ -103,13 +103,20 @@ func measureString(fontFace font.Face, text string) (int, int) {
 }
 
 // Resize font till it fits
-func calcFontSize(text string, fontSize int, targetWidth int, targetHeight int,
-	fontsDir string, fontName string, minFontSize int) int {
+func calcFontSize(text string, fontFaceCache map[int]font.Face,
+	fontSize int, targetWidth int, targetHeight int, fontsDir string,
+	fontName string, minFontSize int) int {
 	// Max height in pixels is targetHeight (fontSize = height)
 	maxFontSize := targetHeight
 	newFontSize := maxFontSize
 	for {
-		x, y := measureString(LoadFont(fontsDir, fontName, newFontSize), text)
+		var fontFace font.Face
+		if fontFaceCache == nil {
+			fontFace = loadFontUncached(fontsDir, fontName, newFontSize)
+		} else {
+			fontFace = loadFont(fontFaceCache, fontsDir, fontName, newFontSize)
+		}
+		x, y := measureString(fontFace, text)
 		if y > targetHeight {
 			panic("Text is taller than max height")
 		}
@@ -206,9 +213,9 @@ func addImageHeader(dc *gg.Context, imageHeader *HeaderData, profile string,
 	}
 	targetWidth := dc.Width() - int(math.Round(xOffset+2*imageHeader.Inset.X*pixelMultiplier))
 	targetHeight := fontSize // Use fontSize as the targetHeight (max height)
-	fontSize = calcFontSize(label, fontSize, targetWidth, targetHeight,
+	fontSize = calcFontSize(label, nil, fontSize, targetWidth, targetHeight,
 		fontsDir, imageHeader.Font, minFontSize)
-	headingFont := LoadFont(fontsDir, imageHeader.Font, fontSize)
+	headingFont := loadFontUncached(fontsDir, imageHeader.Font, fontSize)
 
 	// Generate header
 	dc.SetHexColor(imageHeader.BackgroundColour)
@@ -228,7 +235,7 @@ func addMRCLogo(dc *gg.Context, watermark *WatermarkData, version string,
 	text := fmt.Sprintf("%s v%s", watermark.Text, version)
 	drawTextWithBackgroundRec(dc, text, xOffset, watermark.Location, 0, 0,
 		fontSize, pixelMultiplier,
-		LoadFont(fontsDir, watermark.Font, fontSize),
-		LoadFont(fontsDir, watermark.Font, fontSize-1),
+		loadFontUncached(fontsDir, watermark.Font, fontSize),
+		loadFontUncached(fontsDir, watermark.Font, fontSize-1),
 		watermark.BackgroundColour, watermark.TextColour)
 }

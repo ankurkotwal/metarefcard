@@ -48,20 +48,36 @@ func YamlObjectAsString(in interface{}, label string) string {
 
 }
 
-// LoadFont loads a font into memory and returns it.
-func LoadFont(dir string, name string, size int) font.Face {
-	fontPath := fmt.Sprintf("%s/%s", dir, name)
+var fontCache map[string]*truetype.Font = make(map[string]*truetype.Font)
 
-	fontBytes, err := ioutil.ReadFile(fontPath)
-	if err != nil {
-		panic(err)
+// loadFont loads a font into memory and returns it.
+func loadFontUncached(dir string, name string, size int) font.Face {
+	var font *truetype.Font
+	var found bool
+	if font, found = fontCache[name]; !found {
+		fontPath := fmt.Sprintf("%s/%s", dir, name)
+		fontBytes, err := ioutil.ReadFile(fontPath)
+		if err != nil {
+			panic(err)
+		}
+		font, err = truetype.Parse(fontBytes)
+		if err != nil {
+			panic(err)
+		}
 	}
-	f, err := truetype.Parse(fontBytes)
-	if err != nil {
-		panic(err)
-	}
-	face := truetype.NewFace(f, &truetype.Options{
+	face := truetype.NewFace(font, &truetype.Options{
 		Size: float64(size),
 	})
 	return face
+}
+
+func loadFont(fontFaceCache map[int]font.Face, dir string, name string,
+	size int) font.Face {
+	if fontFace, found := fontFaceCache[size]; found {
+		return fontFace
+	}
+	fontFace := loadFontUncached(dir, name, size)
+	fontFaceCache[size] = fontFace
+	return fontFace
+
 }
