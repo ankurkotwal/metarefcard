@@ -7,10 +7,10 @@ import (
 
 // LoadGameModel - load game specific data from our model. Update the device names
 // (map game device name to our model names)
-func LoadGameModel(filename string, label string, debugOutput bool, log *Logger) *GameData {
+func LoadGameModel(filename string, label string, debugOutput bool, log *Logger) GameData {
 	data := GameData{}
 	LoadYaml(filename, &data, label, log)
-	return &data
+	return data
 }
 
 // FilterDevices - Returns only the devices that the caller is asking for
@@ -54,7 +54,7 @@ func GenerateContextColours(contexts MockSet, config *Config) {
 
 // FuncRequestHandler - handles incoming requests and returns game data, game binds,
 // neededDevices and a context to colour mapping
-type FuncRequestHandler func(files [][]byte, config *Config, log *Logger) (*GameData,
+type FuncRequestHandler func(files [][]byte, config *Config, log *Logger) (GameData,
 	GameBindsByProfile, MockSet, MockSet, string)
 
 // FuncMatchGameInputToModel takes the game provided bindings with the device map to
@@ -64,7 +64,7 @@ type FuncMatchGameInputToModel func(deviceName string, actionData GameInput,
 
 // PopulateImageOverlays returns a list of image overlays to put on device images
 func PopulateImageOverlays(neededDevices MockSet, config *Config, log *Logger,
-	gameBindsByProfile GameBindsByProfile, gameData *GameData, matchFunc FuncMatchGameInputToModel) OverlaysByProfile {
+	gameBindsByProfile GameBindsByProfile, gameData GameData, matchFunc FuncMatchGameInputToModel) OverlaysByProfile {
 
 	deviceMap := FilterDevices(neededDevices, config, log)
 	imageMap := config.Devices.ImageMap
@@ -81,7 +81,7 @@ func PopulateImageOverlays(neededDevices MockSet, config *Config, log *Logger,
 				for actionName, gameInput := range actions {
 
 					inputLookups, label := matchFunc(shortName, gameInput, inputs,
-						(*gameData).InputMap[shortName], log)
+						gameData.InputMap[shortName], log)
 
 					for idx, input := range inputLookups {
 						if idx != 0 && len(input) == 0 {
@@ -100,7 +100,7 @@ func PopulateImageOverlays(neededDevices MockSet, config *Config, log *Logger,
 								label, actionName, shortName, inputData)
 							continue
 						}
-						GenerateImageOverlays(overlaysByImage, input, &inputData,
+						GenerateImageOverlays(overlaysByImage, input, inputData,
 							gameData, actionName, context, shortName, image, label, log)
 					}
 				}
@@ -112,15 +112,15 @@ func PopulateImageOverlays(neededDevices MockSet, config *Config, log *Logger,
 }
 
 // GenerateImageOverlays - creates the image overlays into overlaysByImage
-func GenerateImageOverlays(overlaysByImage OverlaysByImage, input string, inputData *InputData,
-	gameData *GameData, actionName string, context string, shortName string,
+func GenerateImageOverlays(overlaysByImage OverlaysByImage, input string, inputData InputData,
+	gameData GameData, actionName string, context string, shortName string,
 	image string, gameLabel string, log *Logger) {
 	var overlayData OverlayData
 	overlayData.ContextToTexts = make(map[string][]string)
 	overlayData.PosAndSize = inputData
 	var text string
 	// Game data might have a better label for this text
-	if label, found := (*gameData).InputLabels[actionName]; found {
+	if label, found := gameData.InputLabels[actionName]; found {
 		text = label
 	} else {
 		text = actionName
@@ -135,14 +135,14 @@ func GenerateImageOverlays(overlaysByImage OverlaysByImage, input string, inputD
 	deviceAndInput := fmt.Sprintf("%s:%s", shortName, input)
 	if overlay, found := overlaysByImage[image]; !found {
 		// First time adding this image
-		overlay := make(map[string]*OverlayData)
+		overlay := make(map[string]OverlayData)
 		overlaysByImage[image] = overlay
-		overlay[deviceAndInput] = &overlayData
+		overlay[deviceAndInput] = overlayData
 	} else {
 		// Now find by input
 		if previousOverlayData, found := overlay[deviceAndInput]; !found {
 			// Not new image but new overlayData
-			overlay[deviceAndInput] = &overlayData
+			overlay[deviceAndInput] = overlayData
 		} else {
 			// Concatenate input
 			texts = append(previousOverlayData.ContextToTexts[context], text)

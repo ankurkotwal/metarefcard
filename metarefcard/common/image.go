@@ -15,7 +15,7 @@ import (
 // GenerateImage - generates an image with the provided overlays
 func GenerateImage(dc *gg.Context, image image.Image, imageFilename string,
 	profile string, overlaysByImage OverlaysByImage, categories map[string]string,
-	config *Config, log *Logger, gameLogo string) *bytes.Buffer {
+	config *Config, log *Logger, gameLogo string) bytes.Buffer {
 
 	// Set the background colour
 	dc.SetHexColor(config.BackgroundColour)
@@ -93,7 +93,7 @@ func GenerateImage(dc *gg.Context, image image.Image, imageFilename string,
 
 	var imgBytes bytes.Buffer
 	jpeg.Encode(&imgBytes, dc.Image(), &jpeg.Options{Quality: config.JpgQuality})
-	return &imgBytes
+	return imgBytes
 }
 
 func measureString(fontFace font.Face, text string) (int, int) {

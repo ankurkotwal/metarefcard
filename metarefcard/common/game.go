@@ -40,12 +40,12 @@ type OverlaysByProfile map[string]OverlaysByImage
 
 // OverlaysByImage - image overlay data indexed by image name
 // Image -> Device:Input -> OverlayData
-type OverlaysByImage map[string]map[string]*OverlayData
+type OverlaysByImage map[string]map[string]OverlayData
 
 // OverlayData - data about what to put in overlay, grouping and location
 type OverlayData struct {
 	ContextToTexts map[string][]string
-	PosAndSize     *InputData
+	PosAndSize     InputData
 }
 
 // GameBindsByProfile - Profile -> Short name -> Context -> Action -> Primary/Secondary -> Key

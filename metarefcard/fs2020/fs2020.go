@@ -15,7 +15,7 @@ import (
 
 var initiliased bool = false
 var sharedRegexes fs2020Regexes
-var sharedGameData *common.GameData
+var sharedGameData common.GameData
 
 const (
 	label = "fs2020"
@@ -33,7 +33,7 @@ func GetGameInfo() (string, string, common.FuncRequestHandler, common.FuncMatchG
 }
 
 // handleRequest services the request to load files
-func handleRequest(files [][]byte, config *common.Config, log *common.Logger) (*common.GameData,
+func handleRequest(files [][]byte, config *common.Config, log *common.Logger) (common.GameData,
 	common.GameBindsByProfile, common.MockSet, common.MockSet, string) {
 	if !initiliased {
 		sharedGameData = common.LoadGameModel("config/fs2020.yaml",

@@ -12,5 +12,7 @@ LICENSE
 project.toml
 README.md
 resources-source
+scratch
 testdata
+tools
 TODO.md

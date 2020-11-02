@@ -183,7 +183,7 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 		gameBinds, gameData, matchFunc)
 
 	// Now generate images from the overlays
-	generatedFiles := generateImages(overlaysByImage, gameContexts, gameLogo, log)
+	generatedFiles, imgNumBytes := generateImages(overlaysByImage, gameContexts, gameLogo, log)
 
 	// Generate HTML
 	cardTempl := "resources/www/templates/refcard.html"
@@ -196,11 +196,14 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 		}
 		return
 	}
-	imagesAsHTML := []byte{}
+
+	type base64Image struct {
+		Base64Contents string
+	}
+	base64Size := 2 * imgNumBytes
+	imagesAsHTML := make([]byte, 0, base64Size)
 	for _, file := range generatedFiles {
-		image := struct {
-			Base64Contents string
-		}{
+		image := base64Image{
 			Base64Contents: base64.StdEncoding.EncodeToString(file.Bytes()),
 		}
 		var tpl bytes.Buffer
@@ -253,10 +256,12 @@ func prepareGeneratorData(overlaysByProfile common.OverlaysByProfile) ([]string,
 }
 
 func generateImages(overlaysByProfile common.OverlaysByProfile, categories map[string]string,
-	gameLabel string, log *common.Logger) []*bytes.Buffer {
+	gameLabel string, log *common.Logger) ([]bytes.Buffer, int) {
 
 	profiles, imageNamesByProfile, numFiles := prepareGeneratorData(overlaysByProfile)
-	files := make([]*bytes.Buffer, 0, numFiles)
+	files := make([]bytes.Buffer, 0, numFiles)
+	var numBytes int
+	var dc *gg.Context = nil
 	for _, profile := range profiles {
 		imagesNames := imageNamesByProfile[profile]
 		for _, imageName := range imagesNames {
@@ -266,13 +271,16 @@ func generateImages(overlaysByProfile common.OverlaysByProfile, categories map[s
 			}
 
 			// Load the image
-			dc := gg.NewContext(image.Bounds().Size().X, image.Bounds().Size().Y)
+			width := image.Bounds().Size().X
+			height := image.Bounds().Size().Y
+			if dc == nil || dc.Width() != width || dc.Height() != height {
+				dc = gg.NewContext(width, height)
+			}
 			imgBytes := common.GenerateImage(dc, image, imageName,
 				profile, overlaysByProfile[profile], categories, config, log, gameLabel)
-			if imgBytes != nil {
-				files = append(files, imgBytes)
-			}
+			files = append(files, imgBytes)
+			numBytes += imgBytes.Len()
 		}
 	}
-	return files
+	return files, numBytes
 }

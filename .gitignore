@@ -2,6 +2,7 @@
 debug.xml
 debug.profile
 __debug_bin
+scratch
 
 ##### Output files #####
 out/
