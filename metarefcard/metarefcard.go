@@ -200,7 +200,7 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 	type base64Image struct {
 		Base64Contents string
 	}
-	base64Size := (4 * imgNumBytes) / 3
+	base64Size := (3 * imgNumBytes) / 2
 	imagesAsHTML := make([]byte, base64Size)
 	buffOffset := 0
 	for _, file := range generatedFiles {
