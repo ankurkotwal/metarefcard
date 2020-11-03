@@ -88,16 +88,19 @@
             ]
         },
         {
-            "name": "debugging",
+            "name": "benchmark",
             "type": "go",
             "request": "launch",
-            "mode": "auto",
-            "program": "${workspaceFolder}/main.go",
+            "mode": "test",
+            "program": "${workspaceRoot}",
             "env": {},
             "args": [
-                "-d", // Expose GET Handlers
-                "--fs2020",
-                "${workspaceFolder}/testdata/fs2020/unsupported/PS4.xml",
+                "-test.bench=.",
+                "-test.benchmem",
+                "-test.memprofile",
+                "scratch/memprofile",
+                "-test.cpuprofile",
+                "scratch/cpuprofile"
             ]
         },
         {

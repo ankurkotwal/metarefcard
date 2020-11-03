@@ -51,7 +51,7 @@ func YamlObjectAsString(in interface{}, label string) string {
 var fontCache map[string]*truetype.Font = make(map[string]*truetype.Font)
 
 // loadFont loads a font into memory and returns it.
-func loadFontUncached(dir string, name string, size int) font.Face {
+func loadFont(dir string, name string, size int) font.Face {
 	var font *truetype.Font
 	var found bool
 	if font, found = fontCache[name]; !found {
@@ -64,6 +64,7 @@ func loadFontUncached(dir string, name string, size int) font.Face {
 		if err != nil {
 			panic(err)
 		}
+		fontCache[name] = font
 	}
 	face := truetype.NewFace(font, &truetype.Options{
 		Size: float64(size),
@@ -71,13 +72,14 @@ func loadFontUncached(dir string, name string, size int) font.Face {
 	return face
 }
 
-func loadFont(fontFaceCache map[int]font.Face, dir string, name string,
-	size int) font.Face {
-	if fontFace, found := fontFaceCache[size]; found {
+type fontFaceCache map[int]font.Face
+
+func (cache fontFaceCache) loadFont(dir string, name string, size int) font.Face {
+	if fontFace, found := cache[size]; found {
 		return fontFace
 	}
-	fontFace := loadFontUncached(dir, name, size)
-	fontFaceCache[size] = fontFace
+	fontFace := loadFont(dir, name, size)
+	cache[size] = fontFace
 	return fontFace
 
 }

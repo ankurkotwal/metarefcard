@@ -3,14 +3,12 @@ package metarefcard
 import (
 	"bytes"
 	"encoding/base64"
-	"flag"
 	"fmt"
 	"html/template"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
-	"path/filepath"
 	"sort"
 
 	"github.com/ankurkotwal/MetaRefCard/metarefcard/common"
@@ -22,29 +20,26 @@ import (
 )
 
 var config *common.Config
-var debugMode = false
 
-type gameInfo func() (string, string, common.FuncRequestHandler,
+// GameInfo is the info needed to fit into MetaRefCard
+// Returns:
+//   * Game label / name
+//   * User friendly command line description
+//   * Func handler for incoming request
+//   * Func that matches the game input format to MRC's model
+type GameInfo func() (string, string, common.FuncRequestHandler,
 	common.FuncMatchGameInputToModel)
 
-// Initialise the package
-func initialise(log *common.Logger) (cliGameArgs, []gameInfo) {
-	gamesInfo := []gameInfo{fs2020.GetGameInfo, sws.GetGameInfo}
-	gameArgs := parseCliArgs(&debugMode, gamesInfo)
+// GamesInfo returns GameInfo
+var GamesInfo []GameInfo = []GameInfo{fs2020.GetGameInfo, sws.GetGameInfo}
 
+// GetServer will run the server
+func GetServer(debugMode bool, gameArgs CliGameArgs) (*gin.Engine, string) {
+	log := common.NewLog()
 	// Load the configuration
 	common.LoadYaml("config/config.yaml", &config, "Config", log)
-
 	// Load the device information
 	common.LoadDevicesInfo(config.DevicesFile, &config.Devices, log)
-
-	return gameArgs, gamesInfo
-}
-
-// RunServer will run the server
-func RunServer() {
-	log := common.NewLog()
-	gameArgs, gamesInfo := initialise(log)
 
 	if !debugMode {
 		gin.SetMode(gin.ReleaseMode)
@@ -65,7 +60,7 @@ func RunServer() {
 		c.Redirect(http.StatusFound, "/fs2020")
 	})
 
-	for _, game := range gamesInfo {
+	for _, game := range GamesInfo {
 		label, _, handleRequest, matchGameInputToModel := game()
 		router.GET(fmt.Sprintf("/%s", label), func(c *gin.Context) {
 			c.HTML(http.StatusOK, fmt.Sprintf("%s.html", label), gin.H{
@@ -93,46 +88,7 @@ func RunServer() {
 	if len(port) == 0 {
 		port = "8080"
 	}
-	router.Run(fmt.Sprintf(":%s", port))
-
-}
-
-type cliGameArgs map[string]*arrayFlags
-
-// arrayFlags are used for storing a list of CLI values
-type arrayFlags []string
-
-func (i *arrayFlags) String() string {
-	return ""
-}
-
-// Set adds to the ArrayFlag
-func (i *arrayFlags) Set(value string) error {
-	*i = append(*i, value)
-	return nil
-}
-
-func parseCliArgs(debugMode *bool, games []gameInfo) cliGameArgs {
-	gameFiles := make(cliGameArgs)
-	flag.Usage = func() {
-		fmt.Printf("Usage: %s file...\n\n", filepath.Base(os.Args[0]))
-		fmt.Printf("file\tSupported game input configration.\n")
-		flag.PrintDefaults()
-	}
-	flag.BoolVar(debugMode, "d", false, "Debug mode & deploy GET handlers.")
-	for _, getGameInfo := range games {
-		label, desc, _, _ := getGameInfo()
-		args, found := gameFiles[label]
-		if !found {
-			arrayFlags := make(arrayFlags, 0)
-			args = &arrayFlags
-			gameFiles[label] = args
-		}
-		flag.Var(args, label, desc)
-	}
-	flag.Parse()
-
-	return gameFiles
+	return router, fmt.Sprintf(":%s", port)
 }
 
 func loadLocalFiles(files []string, log *common.Logger) [][]byte {
@@ -183,7 +139,7 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 		gameBinds, gameData, matchFunc)
 
 	// Now generate images from the overlays
-	generatedFiles, imgNumBytes := generateImages(overlaysByImage, gameContexts, gameLogo, log)
+	generatedFiles, _ := generateImages(overlaysByImage, gameContexts, gameLogo, log)
 
 	// Generate HTML
 	cardTempl := "resources/www/templates/refcard.html"
@@ -200,9 +156,6 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 	type base64Image struct {
 		Base64Contents string
 	}
-	base64Size := (3 * imgNumBytes) / 2
-	imagesAsHTML := make([]byte, base64Size)
-	buffOffset := 0
 	for _, file := range generatedFiles {
 		image := base64Image{
 			Base64Contents: base64.StdEncoding.EncodeToString(file.Bytes()),
@@ -212,8 +165,7 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 			log.Err(fmt.Sprintf("Error executing image template - %s", err))
 			continue
 		}
-		copy(imagesAsHTML[buffOffset:], tpl.Bytes())
-		buffOffset += tpl.Len()
+		c.Data(http.StatusOK, "text/html; charset=utf-8", tpl.Bytes())
 	}
 	// Generate HTML
 	logTempl := "resources/www/templates/log.html"
@@ -221,19 +173,14 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 	if err != nil {
 		s := fmt.Sprintf("Error parsing logging template - %s", err)
 		log.Err(s)
-		if c != nil {
-			c.Data(http.StatusInternalServerError, "text/html; charset=utf-8", []byte(s))
-		}
+		c.Data(http.StatusInternalServerError, "text/html; charset=utf-8", []byte(s))
 	} else {
 		var tpl bytes.Buffer
 		err = l.Execute(&tpl, struct{ Logs []*common.LogEntry }{Logs: *log})
 		if err != nil {
 			log.Err("Error executing logging template - %s", err)
 		}
-		imagesAsHTML = append(imagesAsHTML, tpl.Bytes()...)
-	}
-	if c != nil {
-		c.Data(http.StatusOK, "text/html; charset=utf-8", imagesAsHTML)
+		c.Data(http.StatusOK, "text/html; charset=utf-8", tpl.Bytes())
 	}
 }
 
@@ -278,11 +225,28 @@ func generateImages(overlaysByProfile common.OverlaysByProfile, categories map[s
 			if dc == nil || dc.Width() != width || dc.Height() != height {
 				dc = gg.NewContext(width, height)
 			}
-			imgBytes := common.GenerateImage(dc, image, imageName,
-				profile, overlaysByProfile[profile], categories, config, log, gameLabel)
+			imgBytes := common.GenerateImage(dc, image, imageName, profile,
+				overlaysByProfile[profile][imageName], categories, config, log,
+				gameLabel)
 			files = append(files, imgBytes)
 			numBytes += imgBytes.Len()
 		}
 	}
 	return files, numBytes
+}
+
+// CliGameArgs are the per-game arguments specified on the command line
+type CliGameArgs map[string]*ArrayFlags
+
+// ArrayFlags are used for storing a list of CLI values
+type ArrayFlags []string
+
+func (i *ArrayFlags) String() string {
+	return ""
+}
+
+// Set adds to the ArrayFlag
+func (i *ArrayFlags) Set(value string) error {
+	*i = append(*i, value)
+	return nil
 }

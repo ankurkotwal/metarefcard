@@ -14,7 +14,7 @@ import (
 
 // GenerateImage - generates an image with the provided overlays
 func GenerateImage(dc *gg.Context, image image.Image, imageFilename string,
-	profile string, overlaysByImage OverlaysByImage, categories map[string]string,
+	profile string, overlayDataRange map[string]OverlayData, categories map[string]string,
 	config *Config, log *Logger, gameLogo string) bytes.Buffer {
 
 	// Set the background colour
@@ -23,10 +23,11 @@ func GenerateImage(dc *gg.Context, image image.Image, imageFilename string,
 	// Apply the image on top
 	dc.DrawImage(image, 0, 0)
 	dc.SetRGB(0, 0, 0)
-	pixelMultiplier := getPixelMultiplier(imageFilename, dc, config)
+	pixelMultiplier := getPixelMultiplier(imageFilename, config)
 
-	fontFaceCache := make(map[int]font.Face)
-	overlayDataRange := overlaysByImage[imageFilename]
+	width := float64(dc.Width())
+	height := float64(dc.Height())
+	fontFaceCache := make(fontFaceCache)
 	for _, overlayData := range overlayDataRange {
 		// Skip known bad locations
 		if overlayData.PosAndSize.X == -1 || overlayData.PosAndSize.Y == -1 {
@@ -35,15 +36,17 @@ func GenerateImage(dc *gg.Context, image image.Image, imageFilename string,
 		xLoc := float64(overlayData.PosAndSize.X) * pixelMultiplier
 		yLoc := float64(overlayData.PosAndSize.Y) * pixelMultiplier
 
-		if xLoc >= float64(dc.Width()) || yLoc >= float64(dc.Height()) {
+		if xLoc >= width || yLoc >= height {
 			log.Err("Overlay outside bounds. File %s overlayData %v defaults %v",
 				imageFilename, overlayData.PosAndSize, config.DefaultImage)
 			continue
 		}
 
 		fontSize := int(math.Round(config.InputFontSize * pixelMultiplier))
-		targetWidth := int(math.Round((float64(overlayData.PosAndSize.W) - 2*config.InputPixelXInset) * pixelMultiplier))
-		targetHeight := int(math.Round((float64(overlayData.PosAndSize.H) - 2*config.InputPixelYInset) * pixelMultiplier))
+		targetWidth := int(math.Round((float64(overlayData.PosAndSize.W) -
+			2*config.InputPixelXInset) * pixelMultiplier))
+		targetHeight := int(math.Round((float64(overlayData.PosAndSize.H) -
+			2*config.InputPixelYInset) * pixelMultiplier))
 
 		// Iterate through contexts (in order) and texts (already sorted)
 		// to generate text to be displayed
@@ -70,8 +73,8 @@ func GenerateImage(dc *gg.Context, image image.Image, imageFilename string,
 		for _, context := range prepareContexts(overlayData.ContextToTexts) {
 			texts := overlayData.ContextToTexts[context]
 			for _, text := range texts {
-				largeFont := loadFont(fontFaceCache, config.FontsDir, config.InputFont, fontSize)
-				smallFont := loadFont(fontFaceCache, config.FontsDir, config.InputFont, fontSize-1)
+				largeFont := fontFaceCache.loadFont(config.FontsDir, config.InputFont, fontSize)
+				smallFont := fontFaceCache.loadFont(config.FontsDir, config.InputFont, fontSize-1)
 				offset, _ := measureString(largeFont, incrementalTexts[idx])
 				idx++
 				location := Point2d{X: float64(overlayData.PosAndSize.X),
@@ -103,7 +106,7 @@ func measureString(fontFace font.Face, text string) (int, int) {
 }
 
 // Resize font till it fits
-func calcFontSize(text string, fontFaceCache map[int]font.Face,
+func calcFontSize(text string, fontFaceCache fontFaceCache,
 	fontSize int, targetWidth int, targetHeight int, fontsDir string,
 	fontName string, minFontSize int) int {
 	// Max height in pixels is targetHeight (fontSize = height)
@@ -112,9 +115,9 @@ func calcFontSize(text string, fontFaceCache map[int]font.Face,
 	for {
 		var fontFace font.Face
 		if fontFaceCache == nil {
-			fontFace = loadFontUncached(fontsDir, fontName, newFontSize)
+			fontFace = loadFont(fontsDir, fontName, newFontSize)
 		} else {
-			fontFace = loadFont(fontFaceCache, fontsDir, fontName, newFontSize)
+			fontFace = fontFaceCache.loadFont(fontsDir, fontName, newFontSize)
 		}
 		x, y := measureString(fontFace, text)
 		if y > targetHeight {
@@ -163,7 +166,7 @@ func prepareContexts(contextToTexts map[string][]string) []string {
 }
 
 // Return the multiplier/scale of image based on actual width vs default width
-func getPixelMultiplier(name string, dc *gg.Context, config *Config) float64 {
+func getPixelMultiplier(name string, config *Config) float64 {
 	multiplier := config.PixelMultiplier
 	if dimensions, found := config.Devices.ImageSizeOverride[name]; found {
 		multiplier = float64(dimensions.W) / float64(config.DefaultImage.W)
@@ -180,6 +183,7 @@ func drawTextWithBackgroundRec(dc *gg.Context, text string, xOffset float64,
 	w, h := measureString(largeFont, text)
 	// Vertically center
 	y += float64(targetHeight-h) / 2
+	w2, h2 := measureString(smallFont, text)
 
 	dc.SetHexColor(backgroundColour)
 	dc.DrawRoundedRectangle(x, y, float64(w), float64(h), 6)
@@ -187,9 +191,7 @@ func drawTextWithBackgroundRec(dc *gg.Context, text string, xOffset float64,
 	dc.SetHexColor(textColour)
 	// Decrease font size to fit nicely in the rectangle
 	dc.SetFontFace(smallFont) // Render one font size smaller to fit in rect
-	w2, h2 := measureString(smallFont, text)
 	dc.DrawStringAnchored(text, x+float64(w-w2)/2, y+float64(h-h2)/2, 0, 0.83)
-
 }
 
 func addGameLogo(dc *gg.Context, gameLogo string, logoImagesDir string,
@@ -215,7 +217,7 @@ func addImageHeader(dc *gg.Context, imageHeader *HeaderData, profile string,
 	targetHeight := fontSize // Use fontSize as the targetHeight (max height)
 	fontSize = calcFontSize(label, nil, fontSize, targetWidth, targetHeight,
 		fontsDir, imageHeader.Font, minFontSize)
-	headingFont := loadFontUncached(fontsDir, imageHeader.Font, fontSize)
+	headingFont := loadFont(fontsDir, imageHeader.Font, fontSize)
 
 	// Generate header
 	dc.SetHexColor(imageHeader.BackgroundColour)
@@ -235,7 +237,7 @@ func addMRCLogo(dc *gg.Context, watermark *WatermarkData, version string,
 	text := fmt.Sprintf("%s v%s", watermark.Text, version)
 	drawTextWithBackgroundRec(dc, text, xOffset, watermark.Location, 0, 0,
 		fontSize, pixelMultiplier,
-		loadFontUncached(fontsDir, watermark.Font, fontSize),
-		loadFontUncached(fontsDir, watermark.Font, fontSize-1),
+		loadFont(fontsDir, watermark.Font, fontSize),
+		loadFont(fontsDir, watermark.Font, fontSize-1),
 		watermark.BackgroundColour, watermark.TextColour)
 }
