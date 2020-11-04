@@ -6,11 +6,12 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/ankurkotwal/MetaRefCard/metarefcard/common"
 )
 
-var initiliased bool = false
+var firstInit sync.Once
 var sharedRegexes swsRegexes
 var sharedGameData common.GameData
 
@@ -32,13 +33,12 @@ func GetGameInfo() (string, string, common.FuncRequestHandler, common.FuncMatchG
 // handleRequest services the request to load files
 func handleRequest(files [][]byte, config *common.Config, log *common.Logger) (common.GameData,
 	common.GameBindsByProfile, common.MockSet, common.MockSet, string) {
-	if !initiliased {
+	firstInit.Do(func() {
 		sharedGameData = common.LoadGameModel("config/sws.yaml",
 			"StarWarsSquadrons Data", config.DebugOutput, log)
 		sharedRegexes.Bind = regexp.MustCompile(sharedGameData.Regexes["Bind"])
 		sharedRegexes.Joystick = regexp.MustCompile(sharedGameData.Regexes["Joystick"])
-		initiliased = true
-	}
+	})
 
 	gameBinds, gameDevices, gameContexts := loadInputFiles(files, config.Devices.DeviceToShortNameMap,
 		log, config.DebugOutput, config.VerboseOutput)
