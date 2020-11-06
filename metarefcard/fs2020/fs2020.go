@@ -9,11 +9,12 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/ankurkotwal/MetaRefCard/metarefcard/common"
 )
 
-var initiliased bool = false
+var firstInit sync.Once
 var sharedRegexes fs2020Regexes
 var sharedGameData common.GameData
 
@@ -35,7 +36,7 @@ func GetGameInfo() (string, string, common.FuncRequestHandler, common.FuncMatchG
 // handleRequest services the request to load files
 func handleRequest(files [][]byte, config *common.Config, log *common.Logger) (common.GameData,
 	common.GameBindsByProfile, common.MockSet, common.MockSet, string) {
-	if !initiliased {
+	firstInit.Do(func() {
 		sharedGameData = common.LoadGameModel("config/fs2020.yaml",
 			"FS2020 Data", config.DebugOutput, log)
 		sharedRegexes.Button = regexp.MustCompile(sharedGameData.Regexes["Button"])
@@ -43,8 +44,7 @@ func handleRequest(files [][]byte, config *common.Config, log *common.Logger) (c
 		sharedRegexes.Pov = regexp.MustCompile(sharedGameData.Regexes["Pov"])
 		sharedRegexes.Rotation = regexp.MustCompile(sharedGameData.Regexes["Rotation"])
 		sharedRegexes.Slider = regexp.MustCompile(sharedGameData.Regexes["Slider"])
-		initiliased = true
-	}
+	})
 	gameBinds, gameDevices, gameContexts := loadInputFiles(files, config.Devices.DeviceToShortNameMap,
 		log, config.DebugOutput, config.VerboseOutput)
 	common.GenerateContextColours(gameContexts, config)
