@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"sync"
 
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
@@ -48,13 +49,14 @@ func YamlObjectAsString(in interface{}, label string) string {
 
 }
 
-var fontCache map[string]*truetype.Font = make(map[string]*truetype.Font)
+var fontCache sync.Map
 
 // loadFont loads a font into memory and returns it.
 func loadFont(dir string, name string, size int) font.Face {
 	var font *truetype.Font
-	var found bool
-	if font, found = fontCache[name]; !found {
+	if v, found := fontCache.Load(name); found {
+		font = v.(*truetype.Font)
+	} else {
 		fontPath := fmt.Sprintf("%s/%s", dir, name)
 		fontBytes, err := ioutil.ReadFile(fontPath)
 		if err != nil {
@@ -64,7 +66,7 @@ func loadFont(dir string, name string, size int) font.Face {
 		if err != nil {
 			panic(err)
 		}
-		fontCache[name] = font
+		fontCache.Store(name, font)
 	}
 	face := truetype.NewFace(font, &truetype.Options{
 		Size: float64(size),
