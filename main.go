@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -12,7 +13,10 @@ import (
 func main() {
 	debugMode, gameArgs := parseCliArgs()
 	router, port := metarefcard.GetServer(debugMode, gameArgs)
-	router.Run(port)
+	err := router.Run(port)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func parseCliArgs() (bool, metarefcard.CliGameArgs) {
