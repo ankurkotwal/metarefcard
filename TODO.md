@@ -30,10 +30,10 @@ A list of the tasks to be done.
 28. ~~FS2020 Steam path~~
 29. ~~Inkscape 1.0 CLI changes~~
 30. ~~FS2020 - multiprofile support~~
-31. Add FS2020 default controller support
-32. Drag and drop target for files
-33. SWS key bindings
-34. Add Input labels to images
-35. Add FS2020 Profile support
+31. ~~Add FS2020 Profile support~~
+32. Add FS2020 default controller support
+33. Drag and drop target for files
+34. SWS key bindings
+35. Add Input labels to images
 36. Confirm if FS2020 can structure inputs appropriately in loadInputFiles.
 37. Extend to Elite Dangerous
