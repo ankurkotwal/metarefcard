@@ -1862,10 +1862,10 @@
   </defs>
   <sodipodi:namedview
      id="base"
-     pagecolor="#ffffff"
+     pagecolor="#e9ecef"
      bordercolor="#666666"
      borderopacity="1.0"
-     inkscape:pageopacity="0.0"
+     inkscape:pageopacity="1"
      inkscape:pageshadow="2"
      inkscape:zoom="0.70710678"
      inkscape:cx="2269.9414"
@@ -1877,10 +1877,10 @@
      showguides="true"
      inkscape:guide-bbox="true"
      units="px"
-     inkscape:window-width="3840"
-     inkscape:window-height="2066"
-     inkscape:window-x="-11"
-     inkscape:window-y="-11"
+     inkscape:window-width="1920"
+     inkscape:window-height="1016"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
      inkscape:window-maximized="1">
     <sodipodi:guide
        position="200.32738,518.58335"
@@ -1895,7 +1895,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -2368,8 +2368,8 @@
          x="8.5837841"
          y="0"
          transform="translate(948.93349,-199.97885)"><tspan
-           x="-178.82819"
-           y="726.16552"><tspan
+           x="-178.82991"
+           y="726.29879"><tspan
              style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:7.05556px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold Italic';text-align:center;text-anchor:middle;fill:#373a3c">BOTH</tspan></tspan></text>
       <text
          xml:space="preserve"
@@ -2378,8 +2378,8 @@
          x="8.5837841"
          y="0"
          transform="translate(949.56498,-173.52052)"><tspan
-           x="-175.43304"
-           y="726.16552"><tspan
+           x="-175.18672"
+           y="726.29879"><tspan
              style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:7.05556px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold Italic';text-align:center;text-anchor:middle;fill:#373a3c">STA</tspan></tspan></text>
       <text
          xml:space="preserve"
@@ -2389,7 +2389,7 @@
          y="0"
          transform="translate(949.52742,-226.53021)"><tspan
            x="-170.03113"
-           y="726.16552"><tspan
+           y="726.29879"><tspan
              style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:7.05556px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold Italic';text-align:center;text-anchor:middle;fill:#373a3c">L</tspan></tspan></text>
       <text
          xml:space="preserve"
@@ -2398,8 +2398,8 @@
          x="8.5837841"
          y="0"
          transform="translate(949.46679,-252.98854)"><tspan
-           x="-170.54273"
-           y="726.16552"><tspan
+           x="-170.49966"
+           y="726.29879"><tspan
              style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:7.05556px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold Italic';text-align:center;text-anchor:middle;fill:#373a3c">R</tspan></tspan></text>
       <text
          xml:space="preserve"
@@ -2408,8 +2408,8 @@
          x="8.5837841"
          y="0"
          transform="translate(949.17052,-279.35386)"><tspan
-           x="-175.37103"
-           y="726.16552"><tspan
+           x="-175.60185"
+           y="726.29879"><tspan
              style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:7.05556px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold Italic';text-align:center;text-anchor:middle;fill:#373a3c">OFF</tspan></tspan></text>
     </g>
     <path

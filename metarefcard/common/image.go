@@ -3,7 +3,6 @@ package common
 import (
 	"bytes"
 	"fmt"
-	"image"
 	"image/jpeg"
 	"math"
 	"sort"
@@ -13,20 +12,20 @@ import (
 )
 
 // GenerateImage - generates an image with the provided overlays
-func GenerateImage(dc *gg.Context, image image.Image, imageFilename string,
-	profile string, overlayDataRange map[string]OverlayData, categories map[string]string,
+func GenerateImage(imageName string, imageFilename string, profile string,
+	overlayDataRange map[string]OverlayData, categories map[string]string,
 	config *Config, log *Logger, gameLogo string) bytes.Buffer {
 
-	// Set the background colour
-	dc.SetHexColor(config.BackgroundColour)
-	dc.Clear()
-	// Apply the image on top
-	dc.DrawImage(image, 0, 0)
-	dc.SetRGB(0, 0, 0)
+	image, err := gg.LoadImage(fmt.Sprintf("%s/%s.png", config.HotasImagesDir, imageName))
+	if err != nil {
+		log.Err("loadImage %s failed. %v", imageName, err)
+	}
+
+	dc := gg.NewContextForImage(image)
 	pixelMultiplier := getPixelMultiplier(imageFilename, config)
 
-	width := float64(dc.Width())
-	height := float64(dc.Height())
+	width := float64(image.Bounds().Size().X)
+	height := float64(image.Bounds().Size().Y)
 	fontFaceCache := make(fontFaceCache)
 	for _, overlayData := range overlayDataRange {
 		// Skip known bad locations

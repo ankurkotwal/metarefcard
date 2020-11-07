@@ -14,7 +14,6 @@ import (
 	"github.com/ankurkotwal/MetaRefCard/metarefcard/common"
 	"github.com/ankurkotwal/MetaRefCard/metarefcard/fs2020"
 	"github.com/ankurkotwal/MetaRefCard/metarefcard/sws"
-	"github.com/fogleman/gg"
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 )
@@ -210,22 +209,11 @@ func generateImages(overlaysByProfile common.OverlaysByProfile, categories map[s
 	profiles, imageNamesByProfile, numFiles := prepareGeneratorData(overlaysByProfile)
 	files := make([]bytes.Buffer, 0, numFiles)
 	var numBytes int
-	var dc *gg.Context = nil
 	for _, profile := range profiles {
 		imagesNames := imageNamesByProfile[profile]
 		for _, imageName := range imagesNames {
-			image, err := gg.LoadImage(fmt.Sprintf("%s/%s.png", config.HotasImagesDir, imageName))
-			if err != nil {
-				log.Err("loadImage %s failed. %v", imageName, err)
-			}
-
 			// Load the image
-			width := image.Bounds().Size().X
-			height := image.Bounds().Size().Y
-			if dc == nil || dc.Width() != width || dc.Height() != height {
-				dc = gg.NewContext(width, height)
-			}
-			imgBytes := common.GenerateImage(dc, image, imageName, profile,
+			imgBytes := common.GenerateImage(imageName, imageName, profile,
 				overlaysByProfile[profile][imageName], categories, config, log,
 				gameLabel)
 			files = append(files, imgBytes)

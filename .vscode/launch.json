@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "all",
+            "name": "MetaRefCard",
             "type": "go",
             "request": "launch",
             "mode": "auto",
@@ -88,20 +88,20 @@
             ]
         },
         {
-            "name": "benchmark",
+            "name": "test",
             "type": "go",
             "request": "launch",
             "mode": "test",
             "program": "${workspaceRoot}",
             "env": {},
-            "args": [
-                "-test.bench=.",
-                "-test.benchmem",
-                "-test.memprofile",
-                "scratch/memprofile",
-                "-test.cpuprofile",
-                "scratch/cpuprofile"
-            ]
+            "args": []
+        },
+        {
+            "name": "generateImages.py",
+            "type": "python",
+            "request": "launch",
+            "program": "generateImages.py",
+            "console": "integratedTerminal",
         },
         {
             "name": "Python",

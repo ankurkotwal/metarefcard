@@ -17,19 +17,19 @@
    style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.41421;"
    id="svg10789"
    sodipodi:docname="x52.svg"
-   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"><metadata
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)"><metadata
    id="metadata10793"><rdf:RDF><cc:Work
        rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
-         rdf:resource="http://purl.org/dc/dcmitype/StillImage" /></cc:Work></rdf:RDF></metadata><sodipodi:namedview
-   pagecolor="#ffffff"
+         rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><sodipodi:namedview
+   pagecolor="#e9ecef"
    bordercolor="#666666"
    borderopacity="1"
    objecttolerance="10"
    gridtolerance="10"
    guidetolerance="10"
-   inkscape:pageopacity="0"
+   inkscape:pageopacity="1"
    inkscape:pageshadow="2"
-   inkscape:window-width="640"
+   inkscape:window-width="878"
    inkscape:window-height="480"
    id="namedview10791"
    showgrid="false"
@@ -39,7 +39,8 @@
    inkscape:window-x="0"
    inkscape:window-y="27"
    inkscape:window-maximized="0"
-   inkscape:current-layer="svg10789" />
+   inkscape:current-layer="svg10789"
+   inkscape:document-rotation="0" />
     <g
    id="Background"
    transform="matrix(1.20648,0,0,1.20648,-219.49,-671.774)">
@@ -229,9 +230,9 @@
    transform="matrix(1,0,0,1,2810.69,-675.016)"
    id="g10409">
             <text
-   x="291.643px"
-   y="1630.53px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:72px;"
+   x="291.64301"
+   y="1630.53"
+   style="font-size:72px;font-family:ArialMT, Arial, sans-serif"
    id="text10407">o</text>
 
         </g>
@@ -306,9 +307,9 @@
    transform="matrix(1,0,0,1,1290.53,759.272)"
    id="g10443">
                 <text
-   x="1782.31px"
-   y="409.428px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1782.3101"
+   y="409.42801"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10441">↑</text>
 
             </g>
@@ -316,9 +317,9 @@
    transform="matrix(1,0,0,1,1344.74,562.725)"
    id="g10447">
                 <text
-   x="1728.09px"
-   y="613.637px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1728.09"
+   y="613.63702"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10445">↓</text>
 
             </g>
@@ -330,9 +331,9 @@
    transform="matrix(1,0,0,1,1276.71,335.22)"
    id="g10453">
                 <text
-   x="1783.29px"
-   y="879.788px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1783.29"
+   y="879.78802"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10451">←</text>
 
             </g>
@@ -340,9 +341,9 @@
    transform="matrix(1,0,0,1,1293.4,245.768)"
    id="g10457">
                 <text
-   x="1775.31px"
-   y="969.531px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1775.3101"
+   y="969.53101"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10455">→</text>
 
             </g>
@@ -397,9 +398,9 @@
    transform="matrix(1,0,0,1,1146.62,-261.368)"
    id="g10479">
             <text
-   x="291.643px"
-   y="1630.53px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:72px;"
+   x="291.64301"
+   y="1630.53"
+   style="font-size:72px;font-family:ArialMT, Arial, sans-serif"
    id="text10477">o</text>
 
         </g>
@@ -442,9 +443,9 @@
    transform="matrix(1,0,0,1,1146.62,-261.368)"
    id="g10496">
             <text
-   x="291.643px"
-   y="1630.53px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:72px;"
+   x="291.64301"
+   y="1630.53"
+   style="font-size:72px;font-family:ArialMT, Arial, sans-serif"
    id="text10494">o</text>
 
         </g>
@@ -477,9 +478,9 @@
    transform="matrix(1,0,0,1,1290.53,759.272)"
    id="g10510">
                 <text
-   x="1782.31px"
-   y="409.428px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1782.3101"
+   y="409.42801"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10508">↑</text>
 
             </g>
@@ -487,9 +488,9 @@
    transform="matrix(1,0,0,1,1344.74,562.725)"
    id="g10514">
                 <text
-   x="1728.09px"
-   y="613.637px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1728.09"
+   y="613.63702"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10512">↓</text>
 
             </g>
@@ -501,9 +502,9 @@
    transform="matrix(1,0,0,1,1276.71,335.22)"
    id="g10520">
                 <text
-   x="1783.29px"
-   y="879.788px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1783.29"
+   y="879.78802"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10518">←</text>
 
             </g>
@@ -511,9 +512,9 @@
    transform="matrix(1,0,0,1,1293.4,245.768)"
    id="g10524">
                 <text
-   x="1775.31px"
-   y="969.531px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1775.3101"
+   y="969.53101"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10522">→</text>
 
             </g>
@@ -522,9 +523,9 @@
    transform="matrix(1,0,0,1,762.71,430.94)"
    id="g10530">
             <text
-   x="291.643px"
-   y="1630.53px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:72px;"
+   x="291.64301"
+   y="1630.53"
+   style="font-size:72px;font-family:ArialMT, Arial, sans-serif"
    id="text10528">o</text>
 
         </g>
@@ -533,9 +534,9 @@
    transform="matrix(1,0,0,1,-229.972,-831.289)"
    id="g10536">
         <text
-   x="291.643px"
-   y="1630.53px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:72px;"
+   x="291.64301"
+   y="1630.53"
+   style="font-size:72px;font-family:ArialMT, Arial, sans-serif"
    id="text10534">o</text>
 
     </g>
@@ -554,9 +555,9 @@
    transform="matrix(1,0,0,1,1246.84,564.648)"
    id="g10544">
             <text
-   x="1782.31px"
-   y="409.428px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1782.3101"
+   y="409.42801"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10542">↑</text>
 
         </g>
@@ -564,9 +565,9 @@
    transform="matrix(1,0,0,1,1301.06,471.635)"
    id="g10548">
             <text
-   x="1728.09px"
-   y="613.637px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1728.09"
+   y="613.63702"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10546">↓</text>
 
         </g>
@@ -574,9 +575,9 @@
    transform="matrix(1,0,0,1,1237.34,261.082)"
    id="g10552">
             <text
-   x="1783.29px"
-   y="879.788px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1783.29"
+   y="879.78802"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10550">←</text>
 
         </g>
@@ -584,9 +585,9 @@
    transform="matrix(1,0,0,1,1245.32,60.1435)"
    id="g10556">
             <text
-   x="1775.31px"
-   y="969.531px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1775.3101"
+   y="969.53101"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10554">→</text>
 
         </g>
@@ -617,9 +618,9 @@
    transform="matrix(1,0,0,1,1212.02,511.558)"
    id="g10570">
             <text
-   x="1782.31px"
-   y="409.428px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1782.3101"
+   y="409.42801"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10568">↑</text>
 
         </g>
@@ -627,9 +628,9 @@
    transform="matrix(1,0,0,1,1266.23,418.545)"
    id="g10574">
             <text
-   x="1728.09px"
-   y="613.637px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1728.09"
+   y="613.63702"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10572">↓</text>
 
         </g>
@@ -637,9 +638,9 @@
    transform="matrix(1,0,0,1,1202.52,207.992)"
    id="g10578">
             <text
-   x="1783.29px"
-   y="879.788px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1783.29"
+   y="879.78802"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10576">←</text>
 
         </g>
@@ -647,9 +648,9 @@
    transform="matrix(1,0,0,1,1210.5,7.05327)"
    id="g10582">
             <text
-   x="1775.31px"
-   y="969.531px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1775.3101"
+   y="969.53101"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10580">→</text>
 
         </g>
@@ -680,9 +681,9 @@
    transform="matrix(1,0,0,1,1212.02,511.558)"
    id="g10596">
             <text
-   x="1782.31px"
-   y="409.428px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1782.3101"
+   y="409.42801"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10594">↑</text>
 
         </g>
@@ -690,9 +691,9 @@
    transform="matrix(1,0,0,1,1266.23,418.545)"
    id="g10600">
             <text
-   x="1728.09px"
-   y="613.637px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1728.09"
+   y="613.63702"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10598">↓</text>
 
         </g>
@@ -700,9 +701,9 @@
    transform="matrix(1,0,0,1,1202.52,207.992)"
    id="g10604">
             <text
-   x="1783.29px"
-   y="879.788px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1783.29"
+   y="879.78802"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10602">←</text>
 
         </g>
@@ -710,9 +711,9 @@
    transform="matrix(1,0,0,1,1210.5,7.05327)"
    id="g10608">
             <text
-   x="1775.31px"
-   y="969.531px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1775.3101"
+   y="969.53101"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10606">→</text>
 
         </g>
@@ -862,9 +863,9 @@
    transform="matrix(1,0,0,1,-1508.87,1559.72)"
    id="g10682">
             <text
-   x="1782.31px"
-   y="409.428px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1782.3101"
+   y="409.42801"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10680">↑</text>
 
         </g>
@@ -872,9 +873,9 @@
    transform="matrix(1,0,0,1,-1454.65,1412.75)"
    id="g10686">
             <text
-   x="1728.09px"
-   y="613.637px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1728.09"
+   y="613.63702"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10684">↓</text>
 
         </g>
@@ -905,9 +906,9 @@
    transform="matrix(1,0,0,1,-1508.87,1559.72)"
    id="g10700">
             <text
-   x="1782.31px"
-   y="409.428px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1782.3101"
+   y="409.42801"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10698">↑</text>
 
         </g>
@@ -915,9 +916,9 @@
    transform="matrix(1,0,0,1,-1454.65,1412.75)"
    id="g10704">
             <text
-   x="1728.09px"
-   y="613.637px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1728.09"
+   y="613.63702"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10702">↓</text>
 
         </g>
@@ -948,9 +949,9 @@
    transform="matrix(1,0,0,1,-1508.87,1559.72)"
    id="g10718">
             <text
-   x="1782.31px"
-   y="409.428px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1782.3101"
+   y="409.42801"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10716">↑</text>
 
         </g>
@@ -958,9 +959,9 @@
    transform="matrix(1,0,0,1,-1454.65,1412.75)"
    id="g10722">
             <text
-   x="1728.09px"
-   y="613.637px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1728.09"
+   y="613.63702"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10720">↓</text>
 
         </g>
@@ -994,9 +995,9 @@
    transform="matrix(1,0,0,1,1290.53,759.272)"
    id="g10736">
                 <text
-   x="1782.31px"
-   y="409.428px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1782.3101"
+   y="409.42801"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10734">↑</text>
 
             </g>
@@ -1004,9 +1005,9 @@
    transform="matrix(1,0,0,1,1344.74,562.725)"
    id="g10740">
                 <text
-   x="1728.09px"
-   y="613.637px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1728.09"
+   y="613.63702"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10738">↓</text>
 
             </g>
@@ -1038,9 +1039,9 @@
    transform="matrix(1,0,0,1,1290.53,759.272)"
    id="g10756">
             <text
-   x="1782.31px"
-   y="409.428px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1782.3101"
+   y="409.42801"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10754">↑</text>
 
         </g>
@@ -1048,9 +1049,9 @@
    transform="matrix(1,0,0,1,1344.74,562.725)"
    id="g10760">
             <text
-   x="1728.09px"
-   y="613.637px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1728.09"
+   y="613.63702"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10758">↓</text>
 
         </g>
@@ -1084,9 +1085,9 @@
    transform="matrix(1,0,0,1,1276.71,335.22)"
    id="g10774">
                 <text
-   x="1783.29px"
-   y="879.788px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1783.29"
+   y="879.78802"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10772">←</text>
 
             </g>
@@ -1094,9 +1095,9 @@
    transform="matrix(1,0,0,1,1293.4,245.768)"
    id="g10778">
                 <text
-   x="1775.31px"
-   y="969.531px"
-   style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;"
+   x="1775.3101"
+   y="969.53101"
+   style="font-size:48px;font-family:ArialMT, Arial, sans-serif"
    id="text10776">→</text>
 
             </g>
