@@ -22,7 +22,7 @@ then
     echo "ERROR: Failed to run '$CMD'"
 fi
 # Let it startup
-sleep 2
+sleep 5
 
 # Get MRC pid
 PID=`ps f | grep MetaRefCard | grep -v grep | awk {'print $1'}`

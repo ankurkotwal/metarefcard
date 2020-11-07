@@ -8,6 +8,7 @@ FROM ${BUILDER_IMAGE} as builder
 # Git is required for fetching the dependencies.
 # Ca-certificates is required to call HTTPS endpoints.
 RUN apk update && apk add --no-cache git ca-certificates tzdata && update-ca-certificates
+RUN apk add --no-cache libjpeg-turbo-dev libjpeg-turbo-static gcc libc-dev
 
 # Create appuser
 ENV USER=appuser
@@ -29,7 +30,7 @@ COPY . .
 RUN go get -d -v
 
 # Build the binary
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build \
     -ldflags='-w -s -extldflags "-static"' -a \
     -o /go/bin/metarefcard .
 

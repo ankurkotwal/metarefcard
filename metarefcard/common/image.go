@@ -3,11 +3,11 @@ package common
 import (
 	"bytes"
 	"fmt"
-	"image/jpeg"
 	"math"
 	"sort"
 
 	"github.com/fogleman/gg"
+	"github.com/pixiv/go-libjpeg/jpeg"
 	"golang.org/x/image/font"
 )
 
@@ -94,7 +94,7 @@ func GenerateImage(imageName string, imageFilename string, profile string,
 		xOffset, float64(config.InputPixelXInset), pixelMultiplier, config.FontsDir)
 
 	var imgBytes bytes.Buffer
-	jpeg.Encode(&imgBytes, dc.Image(), &jpeg.Options{Quality: config.JpgQuality})
+	jpeg.Encode(&imgBytes, dc.Image(), &jpeg.EncoderOptions{Quality: config.JpgQuality})
 	return imgBytes
 }
 
