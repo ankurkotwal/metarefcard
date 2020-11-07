@@ -93,9 +93,9 @@ def ensureDirExists(dir):
 
 
 def convertfile(inkscape, inkscapeVer, svg, defaultwidth, defaultheight, multiplier,
-                overrides, dir_out):
+                overrides, dir_out, convert):
     name = os.path.splitext(os.path.basename(svg))[0]
-    out = "{dir}/{out}.png".format(dir=dir_out, out=name)
+    out = "{dir}/{out}".format(dir=dir_out, out=name)
 
     # Calculate new resolution
     width = int(defaultwidth * multiplier)
@@ -106,34 +106,46 @@ def convertfile(inkscape, inkscapeVer, svg, defaultwidth, defaultheight, multipl
 
     # Convert svg to png with Inkscape
     cmd_export = [inkscape,
-                  "--export-png={o}".format(o=out),
+                  "--export-png={o}.png".format(o=out),
                   "-w={w}".format(w=width),
                   "-h={h}".format(h=height),
                   svg]
     if inkscapeVer[0] == "1":
         # Version 1 changed the command line
         cmd_export = [inkscape,
-                      "-o", out,
+                      "-o", "{o}.png".format(o=out),
                       "-w", "{w}".format(w=width),
                       "-h", "{h}".format(h=height),
                       svg]
-    convert = subprocess.run(cmd_export,
-                             stderr=subprocess.PIPE,
-                             stdout=subprocess.PIPE)
-    if convert.returncode != 0:
-        print("Error: Failed to convert {f}".format(f=name))
+    # Export the svg to png
+    export = subprocess.run(cmd_export,
+                            stderr=subprocess.PIPE,
+                            stdout=subprocess.PIPE)
+    if export.returncode != 0:
+        print("Error: Failed to export {f}".format(f=name))
+        return
+    # Convert png to jpg
+    cmd_convert = [convert,
+                   "-quality", "100",
+                   "{o}.png".format(o=out),
+                   "{o}.jpg".format(o=out)]
+    converted = subprocess.run(cmd_convert, capture_output=True)
+    if converted.returncode != 0:
+        print("Error: Failed to convert {o}".format(o=out))
     else:
         print("Converted {f}".format(f=name))
+    # Remove the temporary png
+    os.remove("{o}.png".format(o=out))
 
 
 def resizefile(convert, img, height, multiplier, dir_out):
     name = os.path.splitext(os.path.basename(img))[0]
-    out = "{dir}/{out}.png".format(dir=dir_out, out=name)
+    out = "{dir}/{out}.jpg".format(dir=dir_out, out=name)
 
     # Convert svg to png with imagemagick
     cmd_export = [convert,
-                  "-geometry",
-                  "x{m}".format(m=multiplier * height),
+                  "-quality", "100",
+                  "-geometry", "x{m}".format(m=multiplier * height),
                   img,
                   out]
     convert = subprocess.run(cmd_export,
@@ -170,7 +182,7 @@ def main():
     hotases.sort()
     for hotas in hotases:
         convertfile(inkscape, inkscapeVer, hotas, defaultwidth, defaultheight,
-                    multiplier, overrides, dir_hotas_out)
+                    multiplier, overrides, dir_hotas_out, convert)
 
     print("Done")
     exit(0)

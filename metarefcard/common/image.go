@@ -3,7 +3,9 @@ package common
 import (
 	"bytes"
 	"fmt"
+	"image"
 	"math"
+	"os"
 	"sort"
 
 	"github.com/fogleman/gg"
@@ -11,21 +13,87 @@ import (
 	"golang.org/x/image/font"
 )
 
-// GenerateImage - generates an image with the provided overlays
-func GenerateImage(imageName string, imageFilename string, profile string,
-	overlayDataRange map[string]OverlayData, categories map[string]string,
-	config *Config, log *Logger, gameLogo string) bytes.Buffer {
+// GenerateImages returns the generated images
+func GenerateImages(overlaysByProfile OverlaysByProfile,
+	categories map[string]string,
+	gameLabel string, config *Config, log *Logger) ([]bytes.Buffer, int) {
 
-	image, err := gg.LoadImage(fmt.Sprintf("%s/%s.png", config.HotasImagesDir, imageName))
+	profiles, imageNamesByProfile, numFiles := prepImgGenData(overlaysByProfile)
+	files := make([]bytes.Buffer, 0, numFiles)
+	var numBytes int
+
+	// Add game logo
+	logoFilename := fmt.Sprintf("%s/%s.jpg", config.LogoImagesDir, gameLabel)
+	logo, err := decodeJpg(logoFilename, log)
 	if err != nil {
-		log.Err("loadImage %s failed. %v", imageName, err)
+		log.Err("loadImage %s failed. %v", logoFilename, err)
+		return files, numBytes
 	}
 
-	dc := gg.NewContextForImage(image)
-	pixelMultiplier := getPixelMultiplier(imageFilename, config)
+	for _, profile := range profiles {
+		imagesNames := imageNamesByProfile[profile]
+		for _, imageName := range imagesNames {
+			pixelMultiplier := getPixelMultiplier(imageName, config)
+			imageFilename := fmt.Sprintf("%s/%s.jpg", config.HotasImagesDir,
+				imageName)
+			image, err := decodeJpg(imageFilename, log)
+			if err != nil || image == nil {
+				log.Err("loadImage %s failed. %v", imageName, err)
+				continue
+			}
+			dc := gg.NewContextForRGBA(image)
 
-	width := float64(image.Bounds().Size().X)
-	height := float64(image.Bounds().Size().Y)
+			dc.DrawImage(logo, 0, 0)
+			xOffset := float64(logo.Bounds().Max.X)
+			addImageHeader(dc, &config.ImageHeader, profile,
+				config.Devices.DeviceLabelsByImage[imageFilename],
+				xOffset, pixelMultiplier, config.FontsDir,
+				config.InputMinFontSize)
+			addMRCLogo(dc, &config.Watermark, config.Version,
+				xOffset, float64(config.InputPixelXInset), pixelMultiplier,
+				config.FontsDir)
+
+			// Load the image
+			imgBytes := populateImage(dc, imageFilename, image.Bounds().Size(),
+				pixelMultiplier, overlaysByProfile[profile][imageName],
+				categories, config, log)
+			files = append(files, imgBytes)
+			numBytes += imgBytes.Len()
+		}
+	}
+	return files, numBytes
+}
+
+// Returns a sorted list of profile names, a map containing sorted image names
+// by profile and a count of files
+func prepImgGenData(overlaysByProfile OverlaysByProfile) ([]string,
+	map[string][]string, int) {
+
+	profiles := make([]string, 0, len(overlaysByProfile))
+	imageNamesByProfile := make(map[string][]string)
+	numFiles := 0
+	for profile, overlaysByImage := range overlaysByProfile {
+		profiles = append(profiles, profile)
+		// Generate sorted list of image names
+		imageNames := make([]string, 0, len(overlaysByImage))
+		for name := range overlaysByImage {
+			imageNames = append(imageNames, name)
+			numFiles++
+		}
+		sort.Strings(imageNames)
+		imageNamesByProfile[profile] = imageNames
+	}
+	sort.Strings(profiles)
+	return profiles, imageNamesByProfile, numFiles
+}
+
+// GenerateImage - generates an image with the provided overlays
+func populateImage(dc *gg.Context, imageFilename string, imgSize image.Point,
+	pixelMultiplier float64, overlayDataRange map[string]OverlayData,
+	categories map[string]string, config *Config, log *Logger) bytes.Buffer {
+
+	width := float64(imgSize.X)
+	height := float64(imgSize.Y)
 	fontFaceCache := make(fontFaceCache)
 	for _, overlayData := range overlayDataRange {
 		// Skip known bad locations
@@ -64,16 +132,19 @@ func GenerateImage(imageName string, imageFilename string, profile string,
 				incrementalTexts = append(incrementalTexts, fullText+padding)
 			}
 		}
-		fontSize = calcFontSize(fullText, fontFaceCache, fontSize, targetWidth, targetHeight,
-			config.FontsDir, config.InputFont, config.InputMinFontSize)
+		fontSize = calcFontSize(fullText, fontFaceCache, fontSize, targetWidth,
+			targetHeight, config.FontsDir, config.InputFont,
+			config.InputMinFontSize)
 		// Now create overlays for each text
 		// Ugh, second loop through texts
 		idx := 0
 		for _, context := range prepareContexts(overlayData.ContextToTexts) {
 			texts := overlayData.ContextToTexts[context]
 			for _, text := range texts {
-				largeFont := fontFaceCache.loadFont(config.FontsDir, config.InputFont, fontSize)
-				smallFont := fontFaceCache.loadFont(config.FontsDir, config.InputFont, fontSize-1)
+				largeFont := fontFaceCache.loadFont(config.FontsDir,
+					config.InputFont, fontSize)
+				smallFont := fontFaceCache.loadFont(config.FontsDir,
+					config.InputFont, fontSize-1)
 				offset, _ := measureString(largeFont, incrementalTexts[idx])
 				idx++
 				location := Point2d{X: float64(overlayData.PosAndSize.X),
@@ -86,16 +157,27 @@ func GenerateImage(imageName string, imageFilename string, profile string,
 		}
 	}
 
-	xOffset := addGameLogo(dc, gameLogo, config.LogoImagesDir, imageFilename, log)
-	addImageHeader(dc, &config.ImageHeader, profile,
-		config.Devices.DeviceLabelsByImage[imageFilename],
-		xOffset, pixelMultiplier, config.FontsDir, config.InputMinFontSize)
-	addMRCLogo(dc, &config.Watermark, config.Version,
-		xOffset, float64(config.InputPixelXInset), pixelMultiplier, config.FontsDir)
-
 	var imgBytes bytes.Buffer
-	jpeg.Encode(&imgBytes, dc.Image(), &jpeg.EncoderOptions{Quality: config.JpgQuality})
+	jpeg.Encode(&imgBytes, dc.Image(),
+		&jpeg.EncoderOptions{Quality: config.JpgQuality})
 	return imgBytes
+}
+
+func decodeJpg(imageName string, log *Logger) (image *image.RGBA, err error) {
+	var r *os.File
+	r, err = os.Open(imageName)
+	if err != nil {
+		log.Err("failed to open: %v", err)
+		return
+	}
+	defer r.Close()
+
+	image, err = jpeg.DecodeIntoRGBA(r, &jpeg.DecoderOptions{})
+	if err != nil {
+		log.Err("failed to decode: %v", err)
+		return
+	}
+	return
 }
 
 func measureString(fontFace font.Face, text string) (int, int) {
@@ -193,17 +275,6 @@ func drawTextWithBackgroundRec(dc *gg.Context, text string, xOffset float64,
 	dc.DrawStringAnchored(text, x+float64(w-w2)/2, y+float64(h-h2)/2, 0, 0.83)
 }
 
-func addGameLogo(dc *gg.Context, gameLogo string, logoImagesDir string,
-	imageFilename string, log *Logger) float64 {
-	// Add game logo
-	logo, err := gg.LoadImage(fmt.Sprintf("%s/%s.png", logoImagesDir, gameLogo))
-	if err != nil {
-		log.Err("loadImage %s failed. %v", imageFilename, err)
-	}
-	dc.DrawImage(logo, 0, 0)
-	return float64(logo.Bounds().Max.X)
-}
-
 func addImageHeader(dc *gg.Context, imageHeader *HeaderData, profile string,
 	label string, xOffset float64, pixelMultiplier float64, fontsDir string,
 	minFontSize int) {
@@ -212,7 +283,8 @@ func addImageHeader(dc *gg.Context, imageHeader *HeaderData, profile string,
 	if profile != ProfileDefault {
 		label = fmt.Sprintf("%s (%s)", label, profile)
 	}
-	targetWidth := dc.Width() - int(math.Round(xOffset+2*imageHeader.Inset.X*pixelMultiplier))
+	targetWidth := dc.Width() -
+		int(math.Round(xOffset+2*imageHeader.Inset.X*pixelMultiplier))
 	targetHeight := fontSize // Use fontSize as the targetHeight (max height)
 	fontSize = calcFontSize(label, nil, fontSize, targetWidth, targetHeight,
 		fontsDir, imageHeader.Font, minFontSize)

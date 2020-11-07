@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"sort"
 
 	"github.com/ankurkotwal/MetaRefCard/metarefcard/common"
 	"github.com/ankurkotwal/MetaRefCard/metarefcard/fs2020"
@@ -138,7 +137,8 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 		gameBinds, gameData, matchFunc)
 
 	// Now generate images from the overlays
-	generatedFiles, _ := generateImages(overlaysByImage, gameContexts, gameLogo, log)
+	generatedFiles, _ := common.GenerateImages(overlaysByImage, gameContexts,
+		gameLogo, config, log)
 
 	// Generate HTML
 	cardTempl := "resources/www/templates/refcard.html"
@@ -147,7 +147,8 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 		s := fmt.Sprintf("Error parsing card template - %s", err)
 		log.Err(s)
 		if c != nil {
-			c.Data(http.StatusInternalServerError, "text/html; charset=utf-8", []byte(s))
+			c.Data(http.StatusInternalServerError, "text/html; charset=utf-8",
+				[]byte(s))
 		}
 		return
 	}
@@ -181,46 +182,6 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 		}
 		c.Data(http.StatusOK, "text/html; charset=utf-8", tpl.Bytes())
 	}
-}
-
-// Returns a sorted list of profile names, a map containing sorted image names by profile and a count of files
-func prepareGeneratorData(overlaysByProfile common.OverlaysByProfile) ([]string, map[string][]string, int) {
-	profiles := make([]string, 0, len(overlaysByProfile))
-	imageNamesByProfile := make(map[string][]string)
-	numFiles := 0
-	for profile, overlaysByImage := range overlaysByProfile {
-		profiles = append(profiles, profile)
-		// Generate sorted list of image names
-		imageNames := make([]string, 0, len(overlaysByImage))
-		for name := range overlaysByImage {
-			imageNames = append(imageNames, name)
-			numFiles++
-		}
-		sort.Strings(imageNames)
-		imageNamesByProfile[profile] = imageNames
-	}
-	sort.Strings(profiles)
-	return profiles, imageNamesByProfile, numFiles
-}
-
-func generateImages(overlaysByProfile common.OverlaysByProfile, categories map[string]string,
-	gameLabel string, log *common.Logger) ([]bytes.Buffer, int) {
-
-	profiles, imageNamesByProfile, numFiles := prepareGeneratorData(overlaysByProfile)
-	files := make([]bytes.Buffer, 0, numFiles)
-	var numBytes int
-	for _, profile := range profiles {
-		imagesNames := imageNamesByProfile[profile]
-		for _, imageName := range imagesNames {
-			// Load the image
-			imgBytes := common.GenerateImage(imageName, imageName, profile,
-				overlaysByProfile[profile][imageName], categories, config, log,
-				gameLabel)
-			files = append(files, imgBytes)
-			numBytes += imgBytes.Len()
-		}
-	}
-	return files, numBytes
 }
 
 // CliGameArgs are the per-game arguments specified on the command line
