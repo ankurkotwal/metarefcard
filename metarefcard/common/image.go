@@ -46,7 +46,7 @@ func GenerateImages(overlaysByProfile OverlaysByProfile,
 			dc.DrawImage(logo, 0, 0)
 			xOffset := float64(logo.Bounds().Max.X)
 			addImageHeader(dc, &config.ImageHeader, profile,
-				config.Devices.DeviceLabelsByImage[imageFilename],
+				config.Devices.DeviceLabelsByImage[imageName],
 				xOffset, pixelMultiplier, config.FontsDir,
 				config.InputMinFontSize)
 			addMRCLogo(dc, &config.Watermark, config.Version,
