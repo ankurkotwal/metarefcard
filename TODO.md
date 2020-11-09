@@ -31,10 +31,11 @@ A list of the tasks to be done.
 29. ~~Inkscape 1.0 CLI changes~~
 30. ~~FS2020 - multiprofile support~~
 31. ~~Add FS2020 Profile support~~
-32. Add Google Analytics on the server side to see which devices are most used (possibly https://github.com/mjpitz/go-ga )
-33. Add FS2020 default controller support
-34. Drag and drop target for files
-35. SWS key bindings
-36. Add Input labels to images
-37. Confirm if FS2020 can structure inputs appropriately in loadInputFiles.
-38. Extend to Elite Dangerous
+32. Remove Google Analytics in debug mode and from source code.
+33. Add Google Analytics on the server side to see which devices are most used (possibly https://github.com/mjpitz/go-ga )
+34. Add FS2020 default controller support
+35. Drag and drop target for files
+36. SWS key bindings
+37. Add Input labels to images
+38. Confirm if FS2020 can structure inputs appropriately in loadInputFiles.
+39. Extend to Elite Dangerous
