@@ -4,15 +4,26 @@ import os
 import re
 import subprocess
 from subprocess import STDOUT
+import sys
 import yaml
 
 DEBUG_OUTPUT = False
+
+dir_script = sys.path[0] + "/"
+dir_mrc_root = dir_script + "../"
+dir_hotas_images = dir_script + "hotas-images"
+dir_logos = dir_script + "game-logos"
+dir_config = dir_script + "../config"
+dir_resources = dir_script + "../resources"
+
+file_config = dir_config + "/config.yaml"
+file_devices = dir_config + "/devices.yaml"
 
 
 def initialise():
     # Load configuration
     config = {}
-    with open("config/config.yaml", "r") as stream:
+    with open(file_config, "r") as stream:
         try:
             config = yaml.safe_load(stream)
         except yaml.YAMLError as exc:
@@ -20,7 +31,7 @@ def initialise():
     if DEBUG_OUTPUT:
         print("Config loaded: {c}\n".format(c=config))
     devices = {}
-    with open("config/devices.yaml", "r") as stream:
+    with open(file_devices, "r") as stream:
         try:
             devices = yaml.safe_load(stream)
         except yaml.YAMLError as exc:
@@ -58,15 +69,13 @@ def initialise():
     if DEBUG_OUTPUT:
         print("Found convert at {i}".format(i=inkscape))
 
-    dir_hotas_images = "resources-source/hotas-images"
     checkDirExists(dir_hotas_images)
     # Confirm destination directory
-    dir_hotas_out = config["HotasImagesDir"]
+    dir_hotas_out = dir_mrc_root + config["HotasImagesDir"]
     ensureDirExists(dir_hotas_out)
-    dir_logos = "resources-source/game-logos"
     checkDirExists(dir_logos)
     # Confirm destination directory
-    dir_logos_out = config["LogoImagesDir"]
+    dir_logos_out = dir_mrc_root + config["LogoImagesDir"]
     ensureDirExists(dir_logos_out)
 
     return dir_hotas_images, dir_hotas_out, inkscape, inkscapeVer, dir_logos, dir_logos_out, convert, config
