@@ -11,11 +11,11 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// MockSet is a map masquerading as a set
-type MockSet map[string]string
+// Set is a map masquerading as a set
+type Set map[string]bool
 
 // Keys returns a MockSet as an array
-func (m MockSet) Keys() []string {
+func (m Set) Keys() []string {
 	array := make([]string, 0, len(m))
 	for k := range m {
 		array = append(array, k)

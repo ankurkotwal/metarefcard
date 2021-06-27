@@ -96,3 +96,15 @@ func GameBindsAsString(gameBindsByProfile GameBindsByProfile) string {
 	}
 	return strings.Join(info, "")
 }
+
+// ContextToColours is a mapping of game contexts to colours that are used for visual grouping
+type ContextToColours map[string]string
+
+// Keys returns a MockSet as an array
+func (m ContextToColours) Keys() []string {
+	array := make([]string, 0, len(m))
+	for k := range m {
+		array = append(array, k)
+	}
+	return array
+}

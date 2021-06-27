@@ -3,17 +3,18 @@ package sws
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
 	"sync"
 
-	"github.com/ankurkotwal/MetaRefCard/metarefcard/common"
+	mrc "github.com/ankurkotwal/MetaRefCard/metarefcard/common"
 )
 
 var firstInit sync.Once
 var sharedRegexes swsRegexes
-var sharedGameData common.GameData
+var sharedGameData mrc.GameData
 
 const (
 	label = "sws"
@@ -26,66 +27,65 @@ const (
 //   * User friendly command line description
 //   * Func handler for incoming request
 //   * Func that matches the game input format to MRC's model
-func GetGameInfo() (string, string, common.FuncRequestHandler, common.FuncMatchGameInputToModel) {
+func GetGameInfo() (string, string, mrc.FuncRequestHandler, mrc.FuncMatchGameInputToModel) {
 	return label, desc, handleRequest, matchGameInputToModel
 }
 
 // handleRequest services the request to load files
-func handleRequest(files [][]byte, config *common.Config, log *common.Logger) (common.GameData,
-	common.GameBindsByProfile, common.MockSet, common.MockSet, string) {
+func handleRequest(files [][]byte, cfg *mrc.Config, log *mrc.Logger) (mrc.GameData,
+	mrc.GameBindsByProfile, mrc.Set, mrc.ContextToColours, string) {
 	firstInit.Do(func() {
-		sharedGameData = common.LoadGameModel("config/sws.yaml",
-			"StarWarsSquadrons Data", config.DebugOutput, log)
+		sharedGameData = mrc.LoadGameModel("config/sws.yaml", "StarWarsSquadrons Data",
+			cfg.DebugOutput, log)
 		sharedRegexes.Bind = regexp.MustCompile(sharedGameData.Regexes["Bind"])
 		sharedRegexes.Joystick = regexp.MustCompile(sharedGameData.Regexes["Joystick"])
 	})
 
-	gameBinds, gameDevices, gameContexts := loadInputFiles(files, config.Devices.DeviceToShortNameMap,
-		log, config.DebugOutput, config.VerboseOutput)
-	common.GenerateContextColours(gameContexts, config)
+	gameBinds, gameDevices, gameContexts := loadInputFiles(files, cfg.Devices.DeviceToShortNameMap,
+		log, cfg.DebugOutput, cfg.VerboseOutput)
+	mrc.GenerateContextColours(gameContexts, cfg)
 	return sharedGameData, gameBinds, gameDevices, gameContexts, sharedGameData.Logo
 }
 
 // Load the game config files (provided by user)
-func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
-	log *common.Logger, bool, verboseOutput bool) (common.GameBindsByProfile,
-	common.MockSet, common.MockSet) {
-	gameBindsByProfile := make(common.GameBindsByProfile)
-	gameBinds := make(common.GameDeviceContextActions)
-	gameBindsByProfile[common.ProfileDefault] = gameBinds
-	deviceNames := make(common.MockSet)
-	contexts := make(common.MockSet)
+func loadInputFiles(files [][]byte, deviceNameMap mrc.DeviceNameFullToShort, log *mrc.Logger, bool,
+	verboseOutput bool) (mrc.GameBindsByProfile, mrc.Set, mrc.ContextToColours) {
+	gameBindsByProfile := make(mrc.GameBindsByProfile)
+	gameBinds := make(mrc.GameDeviceContextActions)
+	gameBindsByProfile[mrc.ProfileDefault] = gameBinds
+	deviceNames := make(mrc.Set)
+	contexts := make(mrc.ContextToColours)
 
 	// deviceIndex: deviceId -> full name
 	deviceIndex := make(map[string]string)
 	contextActionIndex := make(swsContextActionIndex)
 
 	// Load all the device and inputs
-	var matches [][]string
 	for idx, file := range files {
 		scanner := bufio.NewScanner(bytes.NewReader(file))
 		for scanner.Scan() {
 			line := scanner.Text()
 
-			matches = sharedRegexes.Bind.FindAllStringSubmatch(line, -1)
+			matches := sharedRegexes.Bind.FindAllStringSubmatch(line, -1)
 			if matches != nil {
-				addAction(contextActionIndex, matches[0][1], contexts, matches[0][2],
-					matches[0][3], matches[0][4], matches[0][5])
+				addAction(contextActionIndex, matches[0][1], contexts, matches[0][2], matches[0][3],
+					matches[0][4], matches[0][5])
+				continue
 			}
-			matches = sharedRegexes.Joystick.FindAllStringSubmatch(line, -1)
-			if matches != nil && len(matches[0][2]) > 0 {
-				if shortName, found := deviceNameMap[matches[0][2]]; !found {
-					log.Err("SWS Unknown device found %s", matches[0][2])
+			matches2 := sharedRegexes.Joystick.FindAllStringSubmatch(line, -1)
+			if matches2 != nil && len(matches2[0][2]) > 0 {
+				if shortName, found := deviceNameMap[matches2[0][2]]; !found {
+					log.Err("SWS Unknown device found %s", matches2[0][2])
 					continue
 				} else {
-					num, err := strconv.Atoi(matches[0][1])
+					num, err := strconv.Atoi(matches2[0][1])
 					// Subtract 1 from the Joystick index to match deviceIds in the file
 					num--
 					if err == nil && num >= 0 {
 						deviceIndex[strconv.Itoa(num)] = shortName
-						deviceNames[shortName] = ""
+						deviceNames[shortName] = true
 					} else {
-						log.Err("SWS unexpected device number %s", matches[0][1])
+						log.Err("SWS unexpected device number %s", matches2[0][1])
 					}
 				}
 			}
@@ -114,23 +114,22 @@ func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
 			// Add this button to index
 			contextActions, found := gameBinds[shortName]
 			if !found {
-				contextActions = make(common.GameContextActions)
+				contextActions = make(mrc.GameContextActions)
 				gameBinds[shortName] = contextActions
 			}
 			actions, found := contextActions[context]
 			if !found {
-				actions = make(common.GameActions)
+				actions = make(mrc.GameActions)
 				contextActions[context] = actions
 			}
 
 			// Build the action details
 			actionDetails := swsActionDetails{}
 			for actionSub, value := range actionSubMap {
-				field := getInputTypeAsField(actionSub, &actionDetails)
-				if field == nil {
-					log.Err("SWS unknown inputType %s value %s",
-						actionSub, value)
-				} else {
+				field, err := getInputTypeAsField(actionSub, &actionDetails)
+				if err != nil {
+					log.Err(fmt.Sprintf("%s value %s", err, value))
+				} else if field != nil { // Ignore nil fields, this is unneded information
 					*field = value
 				}
 			}
@@ -140,10 +139,10 @@ func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
 			if len(input) > 0 {
 				gameAction, found := actions[action]
 				if !found {
-					gameAction = make(common.GameInput, common.NumInputs)
+					gameAction = make(mrc.GameInput, mrc.NumInputs)
 					actions[action] = gameAction
 				}
-				gameAction[common.InputPrimary] = input
+				gameAction[mrc.InputPrimary] = input
 			} else {
 				delete(actions, action)
 			}
@@ -153,8 +152,8 @@ func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
 	return gameBindsByProfile, deviceNames, contexts
 }
 
-func addAction(contextActionIndex swsContextActionIndex,
-	context string, contexts common.MockSet, action string, deviceNum string,
+func addAction(contextActionIndex swsContextActionIndex, context string,
+	contexts mrc.ContextToColours, action string, deviceNum string,
 	actionSub string, value string) {
 	contexts[context] = ""
 
@@ -174,31 +173,23 @@ func addAction(contextActionIndex swsContextActionIndex,
 	actionSubMap[actionSub] = value
 }
 
-func getInputTypeAsField(actionSub string, currAction *swsActionDetails) *string {
+func getInputTypeAsField(actionSub string, currAction *swsActionDetails) (*string, error) {
 	actionSub = strings.ToLower(actionSub)
 	switch actionSub {
-	case "altbutton":
-		return &currAction.AltButton
 	case "axis":
-		return &currAction.Axis
+		return &currAction.Axis, nil
 	case "button":
-		return &currAction.Button
-	case "deviceid":
-		return &currAction.DeviceID
-	case "identifier":
-		return &currAction.Identifier
-	case "modifier":
-		return &currAction.Modifier
-	case "negate":
-		return &currAction.Negate
-	case "type":
-		return &currAction.Type
+		return &currAction.Button, nil
+	case "altbutton", "deviceid", "identifier", "modifier", "negate", "type":
+		// Don't need to store these but they aren't an error
+		return nil, nil
 	}
-	return nil
+	// Unknown actionSub found
+	return nil, fmt.Errorf("SWS unknown inputType %s", actionSub)
 }
 
-func interpretInput(details *swsActionDetails, device string, context string,
-	action string, log *common.Logger) string {
+func interpretInput(details *swsActionDetails, device string, context string, action string,
+	log *mrc.Logger) string {
 	// TODO - Currently hardcoded for the X-55 based on reverse engineering.
 	switch details.Axis {
 	case "8":
@@ -264,11 +255,11 @@ func interpretInput(details *swsActionDetails, device string, context string,
 	return ""
 }
 
-// matchGameInputToModel - returns a common.GameInput of the inputs that can be displayed.
+// matchGameInputToModel - returns a mrc.GameInput of the inputs that can be displayed.
 // Also returns the label to use for error text
-func matchGameInputToModel(deviceName string, gameInput common.GameInput,
-	deviceInputs common.DeviceInputs, gameInputMap common.InputTypeMapping,
-	log *common.Logger) (common.GameInput, string) {
+func matchGameInputToModel(deviceName string, gameInput mrc.GameInput,
+	deviceInputs mrc.DeviceInputs, gameInputMap mrc.InputTypeMapping,
+	log *mrc.Logger) (mrc.GameInput, string) {
 	// For SWS, we've already got the structure right
 	return gameInput, sharedGameData.Logo
 }
@@ -283,12 +274,12 @@ type swsRegexes struct {
 
 // Parsed fields from sws config
 type swsActionDetails struct {
-	AltButton  string
-	Axis       string
-	Button     string
-	DeviceID   string
-	Identifier string
-	Modifier   string
-	Negate     string
-	Type       string
+	// Unused field AltButton  string
+	Axis   string
+	Button string
+	// Unused field DeviceID   string
+	// Unused field Identifier string
+	// Unused field Modifier   string
+	// Unused field Negate     string
+	// Unused field Type       string
 }

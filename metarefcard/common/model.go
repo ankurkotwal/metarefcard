@@ -14,7 +14,7 @@ func LoadGameModel(filename string, label string, debugOutput bool, log *Logger)
 }
 
 // FilterDevices - Returns only the devices that the caller is asking for
-func FilterDevices(neededDevices MockSet, config *Config, log *Logger) DeviceMap {
+func FilterDevices(neededDevices Set, config *Config, log *Logger) DeviceMap {
 	filteredDevices := make(DeviceMap)
 	// Filter for only the device groups we're interested in
 	for shortName := range neededDevices {
@@ -22,7 +22,7 @@ func FilterDevices(neededDevices MockSet, config *Config, log *Logger) DeviceMap
 			log.Err("device not found in config %s", shortName)
 			continue
 		}
-		neededDevices[shortName] = ""
+		neededDevices[shortName] = true
 	}
 	for shortName, inputs := range config.Devices.Index {
 		if _, found := neededDevices[shortName]; found {
@@ -37,7 +37,7 @@ func FilterDevices(neededDevices MockSet, config *Config, log *Logger) DeviceMap
 }
 
 // GenerateContextColours - basic utility function to generate colours
-func GenerateContextColours(contexts MockSet, config *Config) {
+func GenerateContextColours(contexts ContextToColours, config *Config) {
 	contextKeys := contexts.Keys()
 	sort.Strings(contextKeys)
 	i := 0
@@ -55,7 +55,7 @@ func GenerateContextColours(contexts MockSet, config *Config) {
 // FuncRequestHandler - handles incoming requests and returns game data, game binds,
 // neededDevices and a context to colour mapping
 type FuncRequestHandler func(files [][]byte, config *Config, log *Logger) (GameData,
-	GameBindsByProfile, MockSet, MockSet, string)
+	GameBindsByProfile, Set, ContextToColours, string)
 
 // FuncMatchGameInputToModel takes the game provided bindings with the device map to
 // build a list of image overlays.
@@ -63,7 +63,7 @@ type FuncMatchGameInputToModel func(deviceName string, actionData GameInput,
 	deviceInputs DeviceInputs, gameInputMap InputTypeMapping, log *Logger) (GameInput, string)
 
 // PopulateImageOverlays returns a list of image overlays to put on device images
-func PopulateImageOverlays(neededDevices MockSet, config *Config, log *Logger,
+func PopulateImageOverlays(neededDevices Set, config *Config, log *Logger,
 	gameBindsByProfile GameBindsByProfile, gameData GameData, matchFunc FuncMatchGameInputToModel) OverlaysByProfile {
 
 	deviceMap := FilterDevices(neededDevices, config, log)
