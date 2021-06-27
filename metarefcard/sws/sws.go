@@ -68,8 +68,13 @@ func loadInputFiles(files [][]byte, deviceNameMap mrc.DeviceNameFullToShort, log
 
 			matches := sharedRegexes.Bind.FindAllStringSubmatch(line, -1)
 			if matches != nil {
-				addAction(contextActionIndex, matches[0][1], contexts, matches[0][2], matches[0][3],
-					matches[0][4], matches[0][5])
+				override, err := strconv.Atoi(matches[0][3])
+				if err != nil {
+					log.Err("SWS Device num not an integer %s", matches[0][3])
+					continue
+				}
+				addAction(contextActionIndex, matches[0][1], contexts, matches[0][2],
+					override, matches[0][4], matches[0][5])
 				continue
 			}
 			matches2 := sharedRegexes.Joystick.FindAllStringSubmatch(line, -1)
@@ -100,51 +105,62 @@ func loadInputFiles(files [][]byte, deviceNameMap mrc.DeviceNameFullToShort, log
 	// We do it in multiple passes to avoid having to make assumptions around
 	// the order of fields in the game's config files.
 	for context, actionMap := range contextActionIndex {
-		for action, actionSubMap := range actionMap {
-			// Get the device first
-			deviceID, found := actionSubMap["deviceid"]
-			if !found {
-				log.Err("SWS couldn't find deviceId in %s->%s->%v", context, action, actionSubMap)
-				continue
-			}
-			shortName, found := deviceIndex[deviceID]
-			if !found {
-				continue // We only care about devices in deviceIndex
-			}
-			// Add this button to index
-			contextActions, found := gameBinds[shortName]
-			if !found {
-				contextActions = make(mrc.GameContextActions)
-				gameBinds[shortName] = contextActions
-			}
-			actions, found := contextActions[context]
-			if !found {
-				actions = make(mrc.GameActions)
-				contextActions[context] = actions
-			}
-
-			// Build the action details
-			actionDetails := swsActionDetails{}
-			for actionSub, value := range actionSubMap {
-				field, err := getInputTypeAsField(actionSub, &actionDetails)
-				if err != nil {
-					log.Err(fmt.Sprintf("%s value %s", err, value))
-				} else if field != nil { // Ignore nil fields, this is unneded information
-					*field = value
+		for action, overrideActionSubMap := range actionMap {
+			// Don't need to use the override index
+			for _, actionSubMap := range overrideActionSubMap {
+				if actionSubMap["deviceid"] == "-1" {
+					// Ignore deviceid -1
+					continue
 				}
-			}
+				// Build the action details
+				actionDetails := swsActionDetails{}
+				for actionSub, value := range actionSubMap {
+					field, err := getInputTypeAsField(actionSub, &actionDetails)
+					if err != nil {
+						log.Err(fmt.Sprintf("%s value %s", err, value))
+					} else if field != nil { // Ignore nil fields, this info isn't needed
+						*field = value
+					}
+				}
 
-			// Assign action details accordingly
-			input := interpretInput(&actionDetails, shortName, context, action, log)
-			if len(input) > 0 {
-				gameAction, found := actions[action]
+				shortName, found := deviceIndex[actionDetails.DeviceID]
 				if !found {
-					gameAction = make(mrc.GameInput, mrc.NumInputs)
-					actions[action] = gameAction
+					continue // We only care about devices in deviceIndex
 				}
-				gameAction[mrc.InputPrimary] = input
-			} else {
-				delete(actions, action)
+				// Add this button to index
+				contextActions, found := gameBinds[shortName]
+				if !found {
+					contextActions = make(mrc.GameContextActions)
+					gameBinds[shortName] = contextActions
+				}
+				actions, found := contextActions[context]
+				if !found {
+					actions = make(mrc.GameActions)
+					contextActions[context] = actions
+				}
+
+				// Assign action details accordingly
+				input, err := interpretInput(&actionDetails, shortName, context, action, log)
+				if err != nil {
+					log.Err("%s", err)
+					continue
+				}
+				if len(input) > 0 {
+					gameAction, found := actions[action]
+					if !found {
+						gameAction = make(mrc.GameInput, mrc.NumInputs)
+						actions[action] = gameAction
+						gameAction[mrc.InputPrimary] = input
+					} else if gameAction[mrc.InputPrimary] != input {
+						// Only add as secondary if its a different input.
+						// You get duplication on Axis as there are separate Up/Down inputs
+						// but the game config lists the same axis twice.
+						gameAction[mrc.InputSecondary] = input
+					}
+				} else {
+					// TODO - what's this for?
+					delete(actions, action)
+				}
 			}
 		}
 	}
@@ -153,22 +169,27 @@ func loadInputFiles(files [][]byte, deviceNameMap mrc.DeviceNameFullToShort, log
 }
 
 func addAction(contextActionIndex swsContextActionIndex, context string,
-	contexts mrc.ContextToColours, action string, deviceNum string,
+	contexts mrc.ContextToColours, action string, override int,
 	actionSub string, value string) {
 	contexts[context] = ""
 
 	var found bool
-	var actionMap map[string]map[string]string
+	var actionMap map[string]map[int]map[string]string
 	if actionMap, found = contextActionIndex[context]; !found {
 		// First time for this context
-		actionMap = make(map[string]map[string]string)
+		actionMap = make(map[string]map[int]map[string]string)
 		contextActionIndex[context] = actionMap
 	}
+	var overrideActionSubMap map[int]map[string]string
+	if overrideActionSubMap, found = actionMap[action]; !found {
+		// First time for this device action sub map
+		overrideActionSubMap = make(map[int]map[string]string)
+		actionMap[action] = overrideActionSubMap
+	}
 	var actionSubMap map[string]string
-	if actionSubMap, found = actionMap[action]; !found {
-		// First time for this device number
+	if actionSubMap, found = overrideActionSubMap[override]; !found {
 		actionSubMap = make(map[string]string)
-		actionMap[action] = actionSubMap
+		overrideActionSubMap[override] = actionSubMap
 	}
 	actionSubMap[actionSub] = value
 }
@@ -180,7 +201,9 @@ func getInputTypeAsField(actionSub string, currAction *swsActionDetails) (*strin
 		return &currAction.Axis, nil
 	case "button":
 		return &currAction.Button, nil
-	case "altbutton", "deviceid", "identifier", "modifier", "negate", "type":
+	case "deviceid":
+		return &currAction.DeviceID, nil
+	case "altbutton", "identifier", "modifier", "negate", "type":
 		// Don't need to store these but they aren't an error
 		return nil, nil
 	}
@@ -188,71 +211,80 @@ func getInputTypeAsField(actionSub string, currAction *swsActionDetails) (*strin
 	return nil, fmt.Errorf("SWS unknown inputType %s", actionSub)
 }
 
+// interpretInput maps the game input to MRC's understanding of inputs.
+// Returns a string that has the mapped value or an error.
+// A mapped value of empty string with a nil error means ignore this
 func interpretInput(details *swsActionDetails, device string, context string, action string,
-	log *mrc.Logger) string {
+	log *mrc.Logger) (string, error) {
+	if details.DeviceID == "-1" {
+		// Ignore inputs for deviceid -1. This is not an error
+		return "", nil
+	}
 	// TODO - Currently hardcoded for the X-55 based on reverse engineering.
 	switch details.Axis {
 	case "8":
-		return "XAxis" // Throttle
+		return "XAxis", nil // Throttle
 	case "9":
-		return "YAxis" // Stick
+		return "YAxis", nil // Stick
 	case "10":
-		return "XAxis" // Stick
+		return "XAxis", nil // Stick
 	case "11":
-		return "YAxis" // Stick
+		return "YAxis", nil // Stick
 	case "26":
 		button, err := strconv.Atoi(details.Button)
-		if err == nil {
-			if button > 21 && button < 40 {
-				button -= 21 // Seems like a hardcoded number?
-				return strconv.Itoa(button)
-			} else if button >= 64 && button < 86 {
-				button -= 45 // Another hardcoded number
-				return strconv.Itoa(button)
-			} else if button == 86 {
-				return ""
+		if err != nil {
+			return "", fmt.Errorf("SWS button not number - device %s context %s action %s data %v",
+				device, context, action, details)
+		}
+		if button > 21 && button < 40 {
+			button -= 21 // Seems like a hardcoded number?
+			return strconv.Itoa(button), nil
+		} else if button >= 64 && button < 86 {
+			button -= 45 // Another hardcoded number
+			return strconv.Itoa(button), nil
+		} else if button == 86 {
+			return "", nil
+		}
+		switch device {
+		case "SaitekX55Joystick":
+			switch button {
+			case 46:
+				return "RZAxis", nil
+			case 47:
+				return "RZAxis", nil
+			case 48:
+				return "POV1Up", nil
+			case 49:
+				return "POV1Down", nil
+			case 50:
+				return "POV1Left", nil
+			case 51:
+				return "POV1Right", nil
 			}
-			switch device {
-			case "SaitekX55Joystick":
-				switch button {
-				case 46:
-					return "RZAxis"
-				case 47:
-					return "RZAxis"
-				case 48:
-					return "POV1Up"
-				case 49:
-					return "POV1Down"
-				case 50:
-					return "POV1Left"
-				case 51:
-					return "POV1Right"
-				}
-			case "SaitekX55Throttle":
-				switch button {
-				case 40:
-					return "ZAxis"
-				case 41:
-					return "ZAxis"
-				case 42:
-					return "RXAxis"
-				case 43:
-					return "RXAxis"
-				case 44:
-					return "RYAxis"
-				case 45:
-					return "RYAxis"
-				case 46:
-					return "RZAxis"
-				case 47:
-					return "RZAxis"
-				}
+		case "SaitekX55Throttle":
+			switch button {
+			case 40:
+				return "ZAxis", nil
+			case 41:
+				return "ZAxis", nil
+			case 42:
+				return "RXAxis", nil
+			case 43:
+				return "RXAxis", nil
+			case 44:
+				return "RYAxis", nil
+			case 45:
+				return "RYAxis", nil
+			case 46:
+				return "RZAxis", nil
+			case 47:
+				return "RZAxis", nil
 			}
 		}
 	}
-	log.Err("SWS Unknown input - device %s context %s action %s data %v",
+	return "", fmt.Errorf("SWS Unknown input - device %s context %s action %s data %v",
 		device, context, action, details)
-	return ""
+
 }
 
 // matchGameInputToModel - returns a mrc.GameInput of the inputs that can be displayed.
@@ -264,8 +296,8 @@ func matchGameInputToModel(deviceName string, gameInput mrc.GameInput,
 	return gameInput, sharedGameData.Logo
 }
 
-// swsContextActionIndex: context -> action name -> action sub -> value
-type swsContextActionIndex map[string]map[string]map[string]string
+// swsContextActionIndex: context -> action name -> override -> action sub -> value
+type swsContextActionIndex map[string]map[string]map[int]map[string]string
 
 type swsRegexes struct {
 	Bind     *regexp.Regexp
@@ -274,12 +306,12 @@ type swsRegexes struct {
 
 // Parsed fields from sws config
 type swsActionDetails struct {
-	// Unused field AltButton  string
-	Axis   string
-	Button string
-	// Unused field DeviceID   string
-	// Unused field Identifier string
-	// Unused field Modifier   string
-	// Unused field Negate     string
-	// Unused field Type       string
+	// Unused  AltButton  string
+	Axis     string
+	Button   string
+	DeviceID string
+	// Unused  Identifier string
+	// Unused  Modifier   string
+	// Unused  Negate     string
+	// Unused  Type       string
 }

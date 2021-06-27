@@ -19,6 +19,7 @@ InputMapping2: # Device -> Axis -> Button
       64: 19, 65: 20, 69: 24, 70: 25, 71: 26, 72: 27, 73: 28, 74: 29, 75: 30, 76: 31, 80: 35}}
 InputOverrides:
 InputLabels:
+  Activate: Activate
   Afterburner: Boost
   ButtonSelect: Select
   ButtonStart: Menu
@@ -26,7 +27,10 @@ InputLabels:
   CameraYaw: Yaw
   CommMenu: Comms Menu
   CommMenuSelect: Comms Select
+  CommMenuX: Comms
+  CommMenuY: Comms
   Communication: Comms
+  ContextualInteraction: Interact
   ControlBalancePower: Power Balance
   ControlEnginePower: Power Engine Increase
   ControlShieldPower: Power Shield Increase
@@ -35,38 +39,51 @@ InputLabels:
   Deactivate: Deactivate
   Drift: Drift
   Edit: Edit Control
-  EmergencyPowerTransferBalance: Transfer Power->Balance
-  EmergencyPowerTransferEngine: Transfer Power->Engine
-  EmergencyPowerTransferWeapon: Transfer Power->Weapon
-  EmoteWheel: Emote Wheel
+  EmergencyPowerTransferBalance: Power->Balance
+  EmergencyPowerTransferEngine: Power->Engine
+  EmergencyPowerTransferWeapon: Power->Weapon
+  EmoteWheel: Emote
   Fire: Fire
+  FireAuxiliaryWeaponOneMain: Auxiliary One
+  FireAuxiliaryWeaponTwoMain: Auxiliary Two
+  FireCountermeasure: Countermeasure
+  FreeLook: Free Look
   FreeLookCameraDown: Quick Look Down
   FreeLookCameraLeft: Quick Look Left
   FreeLookCameraRight: Quick Look Right
   FreeLookCameraUp: Quick Look Up
+  Interact: Interact
   Legend: Legend
   MenuExit: Exit
+  MoveBackward: Move Backward
+  MoveForward: Move Forward 
+  MoveLeft: Move Left
+  MoveRight: Move Right
   PageLeft: Page Left
   ParentNavigateLeft: Tab Left 
   ParentNavigateRight: Tab Right
   PingSelf: Ping Accept
   Pitch: Pitch
+  PowerTransfer: Transfer Power
   PushTalk: Push-To-Talk
   Ready: Ready
   Roll: Roll
   Scoreboard: Show Loadout
   ScrollDown: Scroll Down
   ScrollUp: Scroll Up
-  ShieldBack: Shields To Back
+  ShieldBack: Shields Aft
   ShieldBalance: Shields Balance
-  ShieldFront: Shields To Front
+  ShieldFront: Shields Forward
   SpectatorCameraSwapPlayerMode: Spectator Camera Swap
   SpectatorChangeRestriction: Spectator Change Restriction
   StatusBar: Status Bar
   TargetCycle: Target Cycle
   TargetCycleNext: Target Next
   TargetHighestThreat: Target Attacker
-  TargetingMenu: Targetting Menu
+  TargetingMenu: Target Menu
+  TargetingMenuSelectTargetingMethod: Target Method
+  TargetingMenuX: Targeting
+  TargetingMenuY: Targeting
   TargetPing: Target Ping
   TargetSelect: Target Select
   Throttle: Throttle
