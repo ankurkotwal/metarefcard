@@ -2,7 +2,7 @@
 A tool to generate reference cards for HOTAS (hands on throttle and stick) and game controllers. MetaRefCard is
 designed to be flexible across many different controllers and many different
 games.  
-![example workflow](https://github.com/ankurkotwal/MetaRefCard/actions/workflows/main.yml/badge.svg)
+![Build Status](https://github.com/ankurkotwal/MetaRefCard/actions/workflows/main.yml/badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/ankurkotwal/MetaRefCard)](https://goreportcard.com/report/github.com/ankurkotwal/MetaRefCard)
 ## Hosted at [metarefcard.com](https://metarefcard.com)
 
