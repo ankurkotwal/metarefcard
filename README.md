@@ -13,14 +13,14 @@ Here are some example images:
 ![Star Wars Squadrons - Saitek X-55](.github/images/sws_x55.jpg)
 # Running MetaRefCard yourself
 ### Debug mode
-If you start MetaRefCard with a `-d` flag, it will run in debug mode. In this mode, you will get extra debugging messages and Go's pprof tool will be enabled. This will also enable `/test/$GAME` endpoints that pre-generate images for supported controllers. These endpoints are useful for testing, performance benchmarking and more.
+If you start MetaRefCard with a `-d` flag, it will run in debug mode. In this mode, you will get extra debugging messages and Go's pprof tool will be enabled. You can also pass the `-t` flag followed by a dir name to read test game input files from. This will also enable `/test/$GAME` endpoints that pre-generate images for supported controllers. These endpoints are useful for testing, performance benchmarking and more.
 ### Production mode
 MetaRefCard will default to running on port 8080 but this value can be overriden with the PORT variable.
 
 # MetaRefCard code
 MetaRefCard is written in Go and is a web application.
 ## Dependencies
-Install libjpeg-turbo-dev - `sudo apt install libjpeg-turbo8-dev` on Ubuntu. This library is used for fast jpg decoding/encoding.
+The libjpeg-turbo C library is used for fast jpg decoding/encoding. On Ubuntu/Debian, install libjpeg-turbo-dev - `sudo apt install libjpeg-turbo8-dev`. On Arch/Manjaro, this package is part of the minimal install.
 ## Building
 Since this is a Go application, running `go build .` will compile the application. However, MetaRefCard also can be built to a container image with the `Dockerfile` provided simply with `docker build .`
 ## Directories

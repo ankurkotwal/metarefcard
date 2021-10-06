@@ -19,26 +19,25 @@ func main() {
 	}
 }
 
-func parseCliArgs() (bool, metarefcard.CliGameArgs) {
-	gameFiles := make(metarefcard.CliGameArgs)
-	var debugMode bool
+func parseCliArgs() (bool, metarefcard.GameToInputFiles) {
+	gameFiles := make(metarefcard.GameToInputFiles)
 	flag.Usage = func() {
 		fmt.Printf("Usage: %s file...\n\n", filepath.Base(os.Args[0]))
 		fmt.Printf("file\tSupported game input configration.\n")
 		flag.PrintDefaults()
 	}
-	flag.BoolVar(&debugMode, "d", false, "Debug mode & deploy GET handlers.")
-	for _, getGameInfo := range metarefcard.GamesInfo {
-		label, desc, _, _ := getGameInfo()
-		args, found := gameFiles[label]
-		if !found {
-			arrayFlags := make(metarefcard.ArrayFlags, 0)
-			args = &arrayFlags
-			gameFiles[label] = args
-		}
-		flag.Var(args, label, desc)
-	}
+	var debugMode bool
+	flag.BoolVar(&debugMode, "d", false, "Enable debug mode & deploy GET handlers.")
+	var testDataDir string
+	flag.StringVar(&testDataDir, "t", "", "Directory to load test data from. Only used if debug mode is enabled.")
 	flag.Parse()
+	// If in debug mode and a test data dir was provided, read files by game label dir
+	if debugMode && len(testDataDir) > 0 {
+		for _, getGameInfo := range metarefcard.GamesInfo {
+			label, _, _, _ := getGameInfo()
+			gameFiles[label] = metarefcard.GetFilesFromDir(fmt.Sprintf("%s/%s", testDataDir, label))
+		}
+	}
 
 	return debugMode, gameFiles
 }

@@ -1,9 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"io/ioutil"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"sync"
@@ -61,26 +58,9 @@ func runTestConc(t *testing.T, url string, N int) {
 	// exit unconditionnaly after the requests
 }
 
-type filesByGame map[string][]string
-
-func getTestGameArgs() metarefcard.CliGameArgs {
-	cliGameArgs := make(metarefcard.CliGameArgs)
-	cliGameArgs["fs2020"] = getFilesFromDir("testdata/fs2020")
-	cliGameArgs["sws"] = getFilesFromDir("testdata/sws")
+func getTestGameArgs() metarefcard.GameToInputFiles {
+	cliGameArgs := make(metarefcard.GameToInputFiles)
+	cliGameArgs["fs2020"] = metarefcard.GetFilesFromDir("testdata/fs2020")
+	cliGameArgs["sws"] = metarefcard.GetFilesFromDir("testdata/sws")
 	return cliGameArgs
-}
-
-func getFilesFromDir(path string) *metarefcard.ArrayFlags {
-	files, err := ioutil.ReadDir(path)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	testFiles := make(metarefcard.ArrayFlags, 0, len(files))
-	for _, f := range files {
-		if !f.IsDir() {
-			testFiles = append(testFiles, fmt.Sprintf("%s/%s", path, f.Name()))
-		}
-	}
-	return &testFiles
 }

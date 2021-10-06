@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"html/template"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"path"
@@ -32,7 +33,7 @@ type GameInfo func() (string, string, mrc.FuncRequestHandler,
 var GamesInfo []GameInfo = []GameInfo{fs2020.GetGameInfo, sws.GetGameInfo}
 
 // GetServer will run the server
-func GetServer(debugMode bool, gameArgs CliGameArgs) (*gin.Engine, string) {
+func GetServer(debugMode bool, gameArgs GameToInputFiles) (*gin.Engine, string) {
 	log := mrc.NewLog()
 	// Load the configuration
 	mrc.LoadYaml("config/config.yaml", &config, "Config", log)
@@ -184,18 +185,34 @@ func sendResponse(loadedFiles [][]byte, handler mrc.FuncRequestHandler,
 	}
 }
 
-// CliGameArgs are the per-game arguments specified on the command line
-type CliGameArgs map[string]*ArrayFlags
+// GameToInputFiles are the per-game arguments specified on the command line
+type GameToInputFiles map[string]*Filenames
 
-// ArrayFlags are used for storing a list of CLI values
-type ArrayFlags []string
+// Filenames are used for storing a list of CLI values
+type Filenames []string
 
-func (i *ArrayFlags) String() string {
+func (i *Filenames) String() string {
 	return ""
 }
 
 // Set adds to the ArrayFlag
-func (i *ArrayFlags) Set(value string) error {
+func (i *Filenames) Set(value string) error {
 	*i = append(*i, value)
 	return nil
+}
+
+// GetFilesFromDir returns a list of file names from a directory
+func GetFilesFromDir(path string) *Filenames {
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	testFiles := make(Filenames, 0, len(files))
+	for _, f := range files {
+		if !f.IsDir() {
+			testFiles = append(testFiles, fmt.Sprintf("%s/%s", path, f.Name()))
+		}
+	}
+	return &testFiles
 }
