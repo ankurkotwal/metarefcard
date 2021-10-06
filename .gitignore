@@ -47,3 +47,6 @@ __pycache__/
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+# Python
+.venv/
