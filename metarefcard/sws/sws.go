@@ -9,7 +9,7 @@ import (
 	"strings"
 	"sync"
 
-	mrc "github.com/ankurkotwal/MetaRefCard/metarefcard/common"
+	mrc "github.com/ankurkotwal/metarefcard/metarefcard/common"
 )
 
 var firstInit sync.Once

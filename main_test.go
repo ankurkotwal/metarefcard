@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ankurkotwal/MetaRefCard/metarefcard"
+	"github.com/ankurkotwal/metarefcard/metarefcard"
 )
 
 func TestSwsSerial(t *testing.T) {

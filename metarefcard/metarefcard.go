@@ -11,9 +11,9 @@ import (
 	"os"
 	"path"
 
-	mrc "github.com/ankurkotwal/MetaRefCard/metarefcard/common"
-	"github.com/ankurkotwal/MetaRefCard/metarefcard/fs2020"
-	"github.com/ankurkotwal/MetaRefCard/metarefcard/sws"
+	mrc "github.com/ankurkotwal/metarefcard/metarefcard/common"
+	"github.com/ankurkotwal/metarefcard/metarefcard/fs2020"
+	"github.com/ankurkotwal/metarefcard/metarefcard/sws"
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 )

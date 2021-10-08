@@ -16,7 +16,7 @@
    id="svg8"
    inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
    sodipodi:docname="logo_metarefcard.svg"
-   inkscape:export-filename="/home/ankur/devel/MetaRefCard/resources/www/static/logo_metarefcard.png"
+   inkscape:export-filename="/home/ankur/devel/metarefcard/resources/www/static/logo_metarefcard.png"
    inkscape:export-xdpi="24"
    inkscape:export-ydpi="24">
   <defs
@@ -64,7 +64,7 @@
        height="86.518753"
        x="0"
        y="210.4812"
-       inkscape:export-filename="/home/ankur/devel/MetaRefCard/resources/www/static/favicon.ico.png"
+       inkscape:export-filename="/home/ankur/devel/metarefcard/resources/www/static/favicon.ico.png"
        inkscape:export-xdpi="24.000002"
        inkscape:export-ydpi="24.000002"
        ry="11.408143" />

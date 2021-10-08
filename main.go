@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ankurkotwal/MetaRefCard/metarefcard"
+	"github.com/ankurkotwal/metarefcard/metarefcard"
 )
 
 func main() {
