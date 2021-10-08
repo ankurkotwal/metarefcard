@@ -1,4 +1,4 @@
-module github.com/ankurkotwal/MetaRefCard
+module github.com/ankurkotwal/metarefcard
 
 go 1.16
 

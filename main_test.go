@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ankurkotwal/MetaRefCard/metarefcard"
+	"github.com/ankurkotwal/metarefcard/mrc"
 )
 
 func TestSwsSerial(t *testing.T) {
@@ -27,7 +27,7 @@ func TestFs2020Conc(t *testing.T) {
 }
 
 func runTestSerial(t *testing.T, url string, N int) {
-	router, _ := metarefcard.GetServer(true, getTestGameArgs())
+	router, _ := mrc.GetServer(true, getTestGameArgs())
 	time.Sleep(2 * time.Second) // a bit of time to properly init...
 
 	for n := 0; n < N; n++ {
@@ -39,7 +39,7 @@ func runTestSerial(t *testing.T, url string, N int) {
 }
 
 func runTestConc(t *testing.T, url string, N int) {
-	router, _ := metarefcard.GetServer(true, getTestGameArgs())
+	router, _ := mrc.GetServer(true, getTestGameArgs())
 	time.Sleep(2 * time.Second) // a bit of time to properly init...
 
 	var wg sync.WaitGroup
@@ -58,9 +58,9 @@ func runTestConc(t *testing.T, url string, N int) {
 	// exit unconditionnaly after the requests
 }
 
-func getTestGameArgs() metarefcard.GameToInputFiles {
-	cliGameArgs := make(metarefcard.GameToInputFiles)
-	cliGameArgs["fs2020"] = metarefcard.GetFilesFromDir("testdata/fs2020")
-	cliGameArgs["sws"] = metarefcard.GetFilesFromDir("testdata/sws")
+func getTestGameArgs() mrc.GameToInputFiles {
+	cliGameArgs := make(mrc.GameToInputFiles)
+	cliGameArgs["fs2020"] = mrc.GetFilesFromDir("testdata/fs2020")
+	cliGameArgs["sws"] = mrc.GetFilesFromDir("testdata/sws")
 	return cliGameArgs
 }

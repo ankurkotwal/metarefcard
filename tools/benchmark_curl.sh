@@ -6,15 +6,8 @@ then
     exit 1
 fi
 
-# Get game files
-GAME_ARGS=""
-for f in `find testdata/$GAME -maxdepth 1 -type f`
-do
-    GAME_ARGS="$GAME_ARGS -$GAME $f"
-done
-
 # Run MRC
-CMD="go run . -d $GAME_ARGS"
+CMD="go run . -d -t testdata"
 echo "Running: $CMD"
 $CMD &
 if [ $? -ne 0 ]
@@ -25,7 +18,7 @@ fi
 sleep 5
 
 # Get MRC pid
-PID=`ps f | grep MetaRefCard | grep -v grep | awk {'print $1'}`
+PID=`ps f | grep metarefcard | grep -v grep | awk {'print $1'}`
 echo "PID $PID"
 
 # Report memory

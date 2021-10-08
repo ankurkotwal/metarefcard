@@ -11,12 +11,12 @@ import (
 	"strings"
 	"sync"
 
-	mrc "github.com/ankurkotwal/MetaRefCard/metarefcard/common"
+	"github.com/ankurkotwal/metarefcard/mrc/common"
 )
 
 var firstInit sync.Once
 var sharedRegexes fs2020Regexes
-var sharedGameData mrc.GameData
+var sharedGameData common.GameData
 
 const (
 	label = "fs2020"
@@ -29,15 +29,15 @@ const (
 //   * User friendly command line description
 //   * Func handler for incoming request
 //   * Func that matches the game input format to MRC's model
-func GetGameInfo() (string, string, mrc.FuncRequestHandler, mrc.FuncMatchGameInputToModel) {
+func GetGameInfo() (string, string, common.FuncRequestHandler, common.FuncMatchGameInputToModel) {
 	return label, desc, handleRequest, matchGameInputToModel
 }
 
 // handleRequest services the request to load files
-func handleRequest(files [][]byte, config *mrc.Config, log *mrc.Logger) (mrc.GameData,
-	mrc.GameBindsByProfile, mrc.Set, mrc.ContextToColours, string) {
+func handleRequest(files [][]byte, config *common.Config, log *common.Logger) (common.GameData,
+	common.GameBindsByProfile, common.Set, common.ContextToColours, string) {
 	firstInit.Do(func() {
-		sharedGameData = mrc.LoadGameModel("config/fs2020.yaml",
+		sharedGameData = common.LoadGameModel("config/fs2020.yaml",
 			"FS2020 Data", config.DebugOutput, log)
 		sharedRegexes.Button = regexp.MustCompile(sharedGameData.Regexes["Button"])
 		sharedRegexes.Axis = regexp.MustCompile(sharedGameData.Regexes["Axis"])
@@ -47,25 +47,25 @@ func handleRequest(files [][]byte, config *mrc.Config, log *mrc.Logger) (mrc.Gam
 	})
 	gameBinds, gameDevices, gameContextsToColours := loadInputFiles(files, config.Devices.DeviceToShortNameMap,
 		log, config.DebugOutput, config.VerboseOutput)
-	mrc.GenerateContextColours(gameContextsToColours, config)
+	common.GenerateContextColours(gameContextsToColours, config)
 	return sharedGameData, gameBinds, gameDevices, gameContextsToColours, sharedGameData.Logo
 }
 
 // Load the game config files (provided by user)
-func loadInputFiles(files [][]byte, deviceShortNameMap mrc.DeviceNameFullToShort,
-	log *mrc.Logger, debugOutput bool, verboseOutput bool) (mrc.GameBindsByProfile,
-	mrc.Set, mrc.ContextToColours) {
+func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToShort,
+	log *common.Logger, debugOutput bool, verboseOutput bool) (common.GameBindsByProfile,
+	common.Set, common.ContextToColours) {
 
-	gameBinds := make(mrc.GameBindsByProfile)
-	defaultProfile := mrc.ProfileDefault
-	gameBinds[defaultProfile] = make(mrc.GameDeviceContextActions)
-	neededDevices := make(mrc.Set)
-	contextsToColours := make(mrc.ContextToColours)
+	gameBinds := make(common.GameBindsByProfile)
+	defaultProfile := common.ProfileDefault
+	gameBinds[defaultProfile] = make(common.GameDeviceContextActions)
+	neededDevices := make(common.Set)
+	contextsToColours := make(common.ContextToColours)
 
 	// XML state variables
-	var currentContext mrc.GameActions
-	var contextActions mrc.GameContextActions
-	currentAction := make(mrc.GameInput, mrc.NumInputs)
+	var currentContext common.GameActions
+	var contextActions common.GameContextActions
+	currentAction := make(common.GameInput, common.NumInputs)
 	currentKeyType := keyUnknown
 	var currentKey *int
 	var currentProfile *string
@@ -121,10 +121,10 @@ func loadInputFiles(files [][]byte, deviceShortNameMap mrc.DeviceNameFullToShort
 							out, _ := json.Marshal(aDevice)
 							log.Dbg("Info: FS2020 new device: %s", out)
 						}
-						contextActions = make(mrc.GameContextActions)
+						contextActions = make(common.GameContextActions)
 						neededDevices[shortName] = true // Add to set
 						gameBinds[*currentProfile][shortName] = contextActions
-						if shortName == mrc.DeviceMissingInfo {
+						if shortName == common.DeviceMissingInfo {
 							log.Err("FS2020 missing info for device '%s'",
 								shortName)
 						}
@@ -147,14 +147,14 @@ func loadInputFiles(files [][]byte, deviceShortNameMap mrc.DeviceNameFullToShort
 						if debugOutput {
 							log.Dbg("FS2020 new context: %s", contextName)
 						}
-						currentContext = make(mrc.GameActions)
+						currentContext = make(common.GameActions)
 						contextActions[contextName] = currentContext
 					}
 				case "Action":
 					// Found new action
 					currentKeyType = keyUnknown
 					var actionName string
-					action := make(mrc.GameInput, mrc.NumInputs)
+					action := make(common.GameInput, common.NumInputs)
 					for _, attr := range ty.Attr {
 						if attr.Name.Local == "ActionName" {
 							actionName = attr.Value
@@ -180,9 +180,9 @@ func loadInputFiles(files [][]byte, deviceShortNameMap mrc.DeviceNameFullToShort
 						if attr.Name.Local == "Information" {
 							switch currentKeyType {
 							case keyPrimary:
-								currentAction[mrc.InputPrimary] = attr.Value
+								currentAction[common.InputPrimary] = attr.Value
 							case keySecondary:
-								currentAction[mrc.InputSecondary] = attr.Value
+								currentAction[common.InputSecondary] = attr.Value
 							}
 						}
 						break
@@ -207,7 +207,7 @@ func loadInputFiles(files [][]byte, deviceShortNameMap mrc.DeviceNameFullToShort
 						currentProfile = &defaultProfile
 					}
 					if gameBinds[*currentProfile] == nil {
-						gameBinds[*currentProfile] = make(mrc.GameDeviceContextActions)
+						gameBinds[*currentProfile] = make(common.GameDeviceContextActions)
 					}
 				case "Device":
 				case "Context":
@@ -226,7 +226,7 @@ func loadInputFiles(files [][]byte, deviceShortNameMap mrc.DeviceNameFullToShort
 	}
 
 	if verboseOutput {
-		log.Dbg(mrc.GameBindsAsString(gameBinds))
+		log.Dbg(common.GameBindsAsString(gameBinds))
 	}
 
 	return gameBinds, neededDevices, contextsToColours
@@ -234,28 +234,28 @@ func loadInputFiles(files [][]byte, deviceShortNameMap mrc.DeviceNameFullToShort
 
 // matchGameInputToModel takes the game provided bindings with the device map to
 // build a list of image overlays.
-func matchGameInputToModel(deviceName string, actionData mrc.GameInput,
-	deviceInputs mrc.DeviceInputs, gameInputMap mrc.InputTypeMapping,
-	log *mrc.Logger) (mrc.GameInput, string) {
+func matchGameInputToModel(deviceName string, actionData common.GameInput,
+	deviceInputs common.DeviceInputs, gameInputMap common.InputTypeMapping,
+	log *common.Logger) (common.GameInput, string) {
 	inputLookups := make([]string, 0, 2)
 
 	// First the primary input for this action
-	input := matchGameInputToModelByRegex(deviceName, actionData[mrc.InputPrimary],
+	input := matchGameInputToModelByRegex(deviceName, actionData[common.InputPrimary],
 		deviceInputs, gameInputMap, log)
 	if input != "" {
 		inputLookups = append(inputLookups, input)
 	} else {
-		log.Err("FS2020 did not find primary input for %s", actionData[mrc.InputPrimary])
+		log.Err("FS2020 did not find primary input for %s", actionData[common.InputPrimary])
 	}
 	// Now the secondary input
-	if len(actionData[mrc.InputSecondary]) > 0 {
-		input := matchGameInputToModelByRegex(deviceName, actionData[mrc.InputSecondary],
+	if len(actionData[common.InputSecondary]) > 0 {
+		input := matchGameInputToModelByRegex(deviceName, actionData[common.InputSecondary],
 			deviceInputs, gameInputMap, log)
 		if input != "" {
 			inputLookups = append(inputLookups, input)
 		} else {
 			log.Err("FS2020 did not find secondary input for %s",
-				actionData[mrc.InputSecondary])
+				actionData[common.InputSecondary])
 		}
 	}
 	return inputLookups, sharedGameData.Logo
@@ -263,8 +263,8 @@ func matchGameInputToModel(deviceName string, actionData mrc.GameInput,
 
 // Matches an action to a device's inputs using regexes. Returns string to lookup input
 func matchGameInputToModelByRegex(deviceName string, action string,
-	inputs mrc.DeviceInputs, gameInputMap mrc.InputTypeMapping,
-	log *mrc.Logger) string {
+	inputs common.DeviceInputs, gameInputMap common.InputTypeMapping,
+	log *common.Logger) string {
 	var matches [][]string
 
 	matches = sharedRegexes.Button.FindAllStringSubmatch(action, -1)

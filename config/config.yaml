@@ -1,6 +1,6 @@
 ---
 AppName: MetaRefCard
-Version: 0.3.4
+Version: 0.3.5
 DebugOutput: false
 VerboseOutput: false
 DevicesFile: config/devices.yaml
