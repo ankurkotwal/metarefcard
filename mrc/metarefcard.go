@@ -1,4 +1,4 @@
-package metarefcard
+package mrc
 
 import (
 	"bytes"
@@ -11,14 +11,14 @@ import (
 	"os"
 	"path"
 
-	mrc "github.com/ankurkotwal/metarefcard/metarefcard/common"
-	"github.com/ankurkotwal/metarefcard/metarefcard/fs2020"
-	"github.com/ankurkotwal/metarefcard/metarefcard/sws"
+	"github.com/ankurkotwal/metarefcard/mrc/common"
+	"github.com/ankurkotwal/metarefcard/mrc/fs2020"
+	"github.com/ankurkotwal/metarefcard/mrc/sws"
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 )
 
-var config *mrc.Config
+var config *common.Config
 
 // GameInfo is the info needed to fit into MetaRefCard
 // Returns:
@@ -26,19 +26,19 @@ var config *mrc.Config
 //   * User friendly command line description
 //   * Func handler for incoming request
 //   * Func that matches the game input format to MRC's model
-type GameInfo func() (string, string, mrc.FuncRequestHandler,
-	mrc.FuncMatchGameInputToModel)
+type GameInfo func() (string, string, common.FuncRequestHandler,
+	common.FuncMatchGameInputToModel)
 
 // GamesInfo returns GameInfo
 var GamesInfo []GameInfo = []GameInfo{fs2020.GetGameInfo, sws.GetGameInfo}
 
 // GetServer will run the server
 func GetServer(debugMode bool, gameArgs GameToInputFiles) (*gin.Engine, string) {
-	log := mrc.NewLog()
+	log := common.NewLog()
 	// Load the configuration
-	mrc.LoadYaml("config/config.yaml", &config, "Config", log)
+	common.LoadYaml("config/config.yaml", &config, "Config", log)
 	// Load the device information
-	mrc.LoadDevicesInfo(config.DevicesFile, &config.Devices, log)
+	common.LoadDevicesInfo(config.DevicesFile, &config.Devices, log)
 
 	if !debugMode {
 		gin.SetMode(gin.ReleaseMode)
@@ -90,7 +90,7 @@ func GetServer(debugMode bool, gameArgs GameToInputFiles) (*gin.Engine, string) 
 	return router, fmt.Sprintf(":%s", port)
 }
 
-func loadLocalFiles(files []string, log *mrc.Logger) [][]byte {
+func loadLocalFiles(files []string, log *common.Logger) [][]byte {
 	var inputFiles [][]byte
 	for _, filename := range files {
 		file, err := ioutil.ReadFile(filename)
@@ -102,7 +102,7 @@ func loadLocalFiles(files []string, log *mrc.Logger) [][]byte {
 	return inputFiles
 }
 
-func loadFormFiles(c *gin.Context, log *mrc.Logger) [][]byte {
+func loadFormFiles(c *gin.Context, log *common.Logger) [][]byte {
 	form, err := c.MultipartForm()
 	if err != nil {
 		log.Err("Error getting MultipartForm - %s", err)
@@ -127,18 +127,18 @@ func loadFormFiles(c *gin.Context, log *mrc.Logger) [][]byte {
 	return files
 }
 
-func sendResponse(loadedFiles [][]byte, handler mrc.FuncRequestHandler,
-	matchFunc mrc.FuncMatchGameInputToModel, c *gin.Context) {
-	log := mrc.NewLog()
+func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
+	matchFunc common.FuncMatchGameInputToModel, c *gin.Context) {
+	log := common.NewLog()
 
 	// Call game handler to generate image overlayes
 	gameData, gameBinds, gameDevices, gameContexts, gameLogo :=
 		handler(loadedFiles, config, log)
-	overlaysByImage := mrc.PopulateImageOverlays(gameDevices, config, log,
+	overlaysByImage := common.PopulateImageOverlays(gameDevices, config, log,
 		gameBinds, gameData, matchFunc)
 
 	// Now generate images from the overlays
-	generatedFiles, _ := mrc.GenerateImages(overlaysByImage, gameContexts,
+	generatedFiles, _ := common.GenerateImages(overlaysByImage, gameContexts,
 		gameLogo, config, log)
 
 	// Generate HTML
@@ -177,7 +177,7 @@ func sendResponse(loadedFiles [][]byte, handler mrc.FuncRequestHandler,
 		c.Data(http.StatusInternalServerError, "text/html; charset=utf-8", []byte(s))
 	} else {
 		var tpl bytes.Buffer
-		err = l.Execute(&tpl, struct{ Logs []*mrc.LogEntry }{Logs: *log})
+		err = l.Execute(&tpl, struct{ Logs []*common.LogEntry }{Logs: *log})
 		if err != nil {
 			log.Err("Error executing logging template - %s", err)
 		}

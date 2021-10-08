@@ -9,12 +9,12 @@ import (
 	"strings"
 	"sync"
 
-	mrc "github.com/ankurkotwal/metarefcard/metarefcard/common"
+	"github.com/ankurkotwal/metarefcard/mrc/common"
 )
 
 var firstInit sync.Once
 var sharedRegexes swsRegexes
-var sharedGameData mrc.GameData
+var sharedGameData common.GameData
 
 const (
 	label = "sws"
@@ -27,15 +27,15 @@ const (
 //   * User friendly command line description
 //   * Func handler for incoming request
 //   * Func that matches the game input format to MRC's model
-func GetGameInfo() (string, string, mrc.FuncRequestHandler, mrc.FuncMatchGameInputToModel) {
+func GetGameInfo() (string, string, common.FuncRequestHandler, common.FuncMatchGameInputToModel) {
 	return label, desc, handleRequest, matchGameInputToModel
 }
 
 // handleRequest services the request to load files
-func handleRequest(files [][]byte, cfg *mrc.Config, log *mrc.Logger) (mrc.GameData,
-	mrc.GameBindsByProfile, mrc.Set, mrc.ContextToColours, string) {
+func handleRequest(files [][]byte, cfg *common.Config, log *common.Logger) (common.GameData,
+	common.GameBindsByProfile, common.Set, common.ContextToColours, string) {
 	firstInit.Do(func() {
-		sharedGameData = mrc.LoadGameModel("config/sws.yaml", "StarWarsSquadrons Data",
+		sharedGameData = common.LoadGameModel("config/sws.yaml", "StarWarsSquadrons Data",
 			cfg.DebugOutput, log)
 		sharedRegexes.Bind = regexp.MustCompile(sharedGameData.Regexes["Bind"])
 		sharedRegexes.Joystick = regexp.MustCompile(sharedGameData.Regexes["Joystick"])
@@ -43,18 +43,19 @@ func handleRequest(files [][]byte, cfg *mrc.Config, log *mrc.Logger) (mrc.GameDa
 
 	gameBinds, gameDevices, gameContexts := loadInputFiles(files, cfg.Devices.DeviceToShortNameMap,
 		log, cfg.DebugOutput, cfg.VerboseOutput)
-	mrc.GenerateContextColours(gameContexts, cfg)
+	common.GenerateContextColours(gameContexts, cfg)
 	return sharedGameData, gameBinds, gameDevices, gameContexts, sharedGameData.Logo
 }
 
 // Load the game config files (provided by user)
-func loadInputFiles(files [][]byte, deviceNameMap mrc.DeviceNameFullToShort, log *mrc.Logger, bool,
-	verboseOutput bool) (mrc.GameBindsByProfile, mrc.Set, mrc.ContextToColours) {
-	gameBindsByProfile := make(mrc.GameBindsByProfile)
-	gameBinds := make(mrc.GameDeviceContextActions)
-	gameBindsByProfile[mrc.ProfileDefault] = gameBinds
-	deviceNames := make(mrc.Set)
-	contexts := make(mrc.ContextToColours)
+func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
+	log *common.Logger, bool, verboseOutput bool) (common.GameBindsByProfile, common.Set,
+	common.ContextToColours) {
+	gameBindsByProfile := make(common.GameBindsByProfile)
+	gameBinds := make(common.GameDeviceContextActions)
+	gameBindsByProfile[common.ProfileDefault] = gameBinds
+	deviceNames := make(common.Set)
+	contexts := make(common.ContextToColours)
 
 	// deviceIndex: deviceId -> full name
 	deviceIndex := make(map[string]string)
@@ -130,12 +131,12 @@ func loadInputFiles(files [][]byte, deviceNameMap mrc.DeviceNameFullToShort, log
 				// Add this button to index
 				contextActions, found := gameBinds[shortName]
 				if !found {
-					contextActions = make(mrc.GameContextActions)
+					contextActions = make(common.GameContextActions)
 					gameBinds[shortName] = contextActions
 				}
 				actions, found := contextActions[context]
 				if !found {
-					actions = make(mrc.GameActions)
+					actions = make(common.GameActions)
 					contextActions[context] = actions
 				}
 
@@ -148,14 +149,14 @@ func loadInputFiles(files [][]byte, deviceNameMap mrc.DeviceNameFullToShort, log
 				if len(input) > 0 {
 					gameAction, found := actions[action]
 					if !found {
-						gameAction = make(mrc.GameInput, mrc.NumInputs)
+						gameAction = make(common.GameInput, common.NumInputs)
 						actions[action] = gameAction
-						gameAction[mrc.InputPrimary] = input
-					} else if gameAction[mrc.InputPrimary] != input {
+						gameAction[common.InputPrimary] = input
+					} else if gameAction[common.InputPrimary] != input {
 						// Only add as secondary if its a different input.
 						// You get duplication on Axis as there are separate Up/Down inputs
 						// but the game config lists the same axis twice.
-						gameAction[mrc.InputSecondary] = input
+						gameAction[common.InputSecondary] = input
 					}
 				} else {
 					// TODO - what's this for?
@@ -169,7 +170,7 @@ func loadInputFiles(files [][]byte, deviceNameMap mrc.DeviceNameFullToShort, log
 }
 
 func addAction(contextActionIndex swsContextActionIndex, context string,
-	contexts mrc.ContextToColours, action string, override int,
+	contexts common.ContextToColours, action string, override int,
 	actionSub string, value string) {
 	contexts[context] = ""
 
@@ -215,7 +216,7 @@ func getInputTypeAsField(actionSub string, currAction *swsActionDetails) (*strin
 // Returns a string that has the mapped value or an error.
 // A mapped value of empty string with a nil error means ignore this
 func interpretInput(details *swsActionDetails, device string, context string, action string,
-	log *mrc.Logger) (string, error) {
+	log *common.Logger) (string, error) {
 	if details.DeviceID == "-1" {
 		// Ignore inputs for deviceid -1. This is not an error
 		return "", nil
@@ -287,11 +288,11 @@ func interpretInput(details *swsActionDetails, device string, context string, ac
 
 }
 
-// matchGameInputToModel - returns a mrc.GameInput of the inputs that can be displayed.
+// matchGameInputToModel - returns a common.GameInput of the inputs that can be displayed.
 // Also returns the label to use for error text
-func matchGameInputToModel(deviceName string, gameInput mrc.GameInput,
-	deviceInputs mrc.DeviceInputs, gameInputMap mrc.InputTypeMapping,
-	log *mrc.Logger) (mrc.GameInput, string) {
+func matchGameInputToModel(deviceName string, gameInput common.GameInput,
+	deviceInputs common.DeviceInputs, gameInputMap common.InputTypeMapping,
+	log *common.Logger) (common.GameInput, string) {
 	// For SWS, we've already got the structure right
 	return gameInput, sharedGameData.Logo
 }
