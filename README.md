@@ -40,7 +40,7 @@ Convert and resize high resolution source resources into *configured* sizes for 
 * Imagemagick - `sudo apt install imagemagick`
 #### Running the script
 Command: `generateHotasImages.py`
-### Generate device model
+### Generate devices model
 Generates a yaml file based on `resources-source/edrefcard/bindingsData.py` that MetaRefCard can read. These bindings are thanks to [EDRefCard](https://github.com/richardbuckle/EDRefCard)! MetaRefCard uses these bindings to generate configs for some controllers but also has its own device configs in `config/devices.yaml`
 #### Dependencies
 Install modules - `pip3 install pyyaml`
