@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ `uname` == "Darwin" ]; then
-    brew_path=`which brew`
+    brew_path=`which brew 2>/dev/null`
     if [ $? -eq 0 ]; then
         jpeg_turbo_path=`brew --prefix jpeg-turbo 2>/dev/null`
         jpeg_turbo_version=`brew list --versions jpeg-turbo 2>/dev/null | sed -E 's/^jpeg-turbo[[:space:]]+//'`
