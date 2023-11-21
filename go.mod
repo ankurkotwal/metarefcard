@@ -1,6 +1,6 @@
 module github.com/ankurkotwal/metarefcard
 
-go 1.21
+go 1.18
 
 require (
 	github.com/fogleman/gg v1.3.0
