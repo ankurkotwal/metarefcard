@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // GameData holds the game's parsed data
@@ -30,6 +33,13 @@ const (
 	// ProfileDefault - the name of the default profile
 	ProfileDefault = "default_metarefcard"
 )
+
+// Caser that returns Title case for a string.
+var titleCaser = cases.Title(language.AmericanEnglish)
+
+func TitleCaser(text string) string {
+	return titleCaser.String(text)
+}
 
 // RegexByName - map of named regex strings
 type RegexByName map[string]*regexp.Regexp

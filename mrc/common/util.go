@@ -2,8 +2,8 @@ package common
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
 	"sync"
 
 	"github.com/golang/freetype/truetype"
@@ -25,7 +25,7 @@ func (m Set) Keys() []string {
 
 // LoadYaml loads Yaml file and prints any errors
 func LoadYaml(filename string, out interface{}, label string, log *Logger) {
-	yamlData, err := ioutil.ReadFile(filename)
+	yamlData, err := os.ReadFile(filename)
 	if err != nil {
 		log.Fatal("yaml ioutil.ReadFile %v ", err)
 	}
@@ -58,7 +58,7 @@ func loadFont(dir string, name string, size int) font.Face {
 		font = v.(*truetype.Font)
 	} else {
 		fontPath := fmt.Sprintf("%s/%s", dir, name)
-		fontBytes, err := ioutil.ReadFile(fontPath)
+		fontBytes, err := os.ReadFile(fontPath)
 		if err != nil {
 			panic(err)
 		}

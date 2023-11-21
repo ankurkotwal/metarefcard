@@ -1,6 +1,7 @@
 ---
 AppName: MetaRefCard
-Version: 0.3.10
+Version: 0.3.11
+Domain: mrc.metadawn.com
 DebugOutput: false
 VerboseOutput: false
 DevicesFile: config/devices.yaml
@@ -28,7 +29,7 @@ ImageHeader:
   BackgroundColour: "#2780e3ff"
 
 Watermark:
-  Text: MetaRefCard.com
+  Text: MetaRefCard
   TextColour: "#ffffffff"
   BackgroundColour: "#373a3cff"
   Font: Dirga.ttf

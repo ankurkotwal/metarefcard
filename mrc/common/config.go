@@ -1,9 +1,12 @@
 package common
 
+import "golang.org/x/text/cases"
+
 // Config contains all the configuration data for the app
 type Config struct {
 	AppName       string `yaml:"AppName"`
 	Version       string `yaml:"Version"`
+	Domain        string `yaml:"Domain"`
 	DebugOutput   bool   `yaml:"DebugOutput"`
 	VerboseOutput bool   `yaml:"VerboseOutput"`
 
@@ -31,6 +34,8 @@ type Config struct {
 	LightColour      string   `yaml:"LightColour"`
 	DarkColour       string   `yaml:"DarkColour"`
 	AlternateColours []string `yaml:"AlternateColours"`
+
+	LangTitleCase cases.Caser
 }
 
 // HeaderData contains necessary data to generate header

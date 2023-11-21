@@ -8,7 +8,6 @@ import (
 	"io"
 	"regexp"
 	"strconv"
-	"strings"
 	"sync"
 
 	"github.com/ankurkotwal/metarefcard/mrc/common"
@@ -25,10 +24,10 @@ const (
 
 // GetGameInfo returns the info needed to fit into MetaRefCard
 // Returns:
-//   * Game label / name
-//   * User friendly command line description
-//   * Func handler for incoming request
-//   * Func that matches the game input format to MRC's model
+//   - Game label / name
+//   - User friendly command line description
+//   - Func handler for incoming request
+//   - Func that matches the game input format to MRC's model
 func GetGameInfo() (string, string, common.FuncRequestHandler, common.FuncMatchGameInputToModel) {
 	return label, desc, handleRequest, matchGameInputToModel
 }
@@ -98,10 +97,8 @@ func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToSh
 					// Found new device
 					var aDevice string
 					for _, attr := range ty.Attr {
-						switch attr.Name.Local {
-						case "DeviceName":
+						if attr.Name.Local == "DeviceName" {
 							aDevice = attr.Value
-							break
 						}
 					}
 					var found bool
@@ -287,7 +284,7 @@ func matchGameInputToModelByRegex(deviceName string, action string,
 	}
 	matches = sharedRegexes.Pov.FindAllStringSubmatch(action, -1)
 	if matches != nil {
-		direction := strings.Title(strings.ToLower(matches[0][2]))
+		direction := common.TitleCaser(matches[0][2])
 		pov := fmt.Sprintf("POV%s%s", "1", direction)
 		if len(matches[0][1]) > 0 {
 			pov = fmt.Sprintf("POV%s%s", matches[0][1], direction)

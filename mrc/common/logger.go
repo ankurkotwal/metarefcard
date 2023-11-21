@@ -10,7 +10,7 @@ type Logger []*LogEntry
 
 // Dbg prints an informational message
 func (l *Logger) Dbg(format string, v ...interface{}) {
-	log.Println(fmt.Sprintf(format, v...))
+	log.Printf("%s\n", fmt.Sprintf(format, v...))
 }
 
 // Msg logs an informational message
@@ -23,7 +23,7 @@ func (l *Logger) Msg(format string, v ...interface{}) {
 // Err logs an error message
 func (l *Logger) Err(format string, v ...interface{}) {
 	msg := fmt.Sprintf(format, v...)
-	log.Println(fmt.Sprintf("Error: %s", msg))
+	log.Printf("%s\n", fmt.Sprintf("Error: %s", msg))
 	*l = append(*l, &LogEntry{true, msg})
 }
 
