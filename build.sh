@@ -13,4 +13,4 @@ if [ `uname` == "Darwin" ]; then
     fi
 fi
 
-go build
+go build -v ./...
