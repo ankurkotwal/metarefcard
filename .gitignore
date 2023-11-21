@@ -1,7 +1,7 @@
 ##### MetaRef files #####
 debug.xml
 debug.profile
-__debug_bin
+__debug_bin*
 scratch
 metarefcard
 

@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"html/template"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -22,10 +22,10 @@ var config *common.Config
 
 // GameInfo is the info needed to fit into MetaRefCard
 // Returns:
-//   * Game label / name
-//   * User friendly command line description
-//   * Func handler for incoming request
-//   * Func that matches the game input format to MRC's model
+//   - Game label / name
+//   - User friendly command line description
+//   - Func handler for incoming request
+//   - Func that matches the game input format to MRC's model
 type GameInfo func() (string, string, common.FuncRequestHandler,
 	common.FuncMatchGameInputToModel)
 
@@ -65,6 +65,7 @@ func GetServer(debugMode bool, gameArgs GameToInputFiles) (*gin.Engine, string) 
 			c.HTML(http.StatusOK, fmt.Sprintf("%s.html", label), gin.H{
 				"Title":   config.AppName,
 				"Version": config.Version,
+				"Domain":  config.Domain,
 			})
 		})
 		// Flight simulator endpoint
@@ -93,7 +94,7 @@ func GetServer(debugMode bool, gameArgs GameToInputFiles) (*gin.Engine, string) 
 func loadLocalFiles(files []string, log *common.Logger) [][]byte {
 	var inputFiles [][]byte
 	for _, filename := range files {
-		file, err := ioutil.ReadFile(filename)
+		file, err := os.ReadFile(filename)
 		if err != nil {
 			log.Err("Error reading file. %s", err)
 		}
@@ -117,7 +118,7 @@ func loadFormFiles(c *gin.Context, log *common.Logger) [][]byte {
 			log.Err("Error opening multipart file %s - %s", file.Filename, err)
 			continue
 		}
-		contents, err := ioutil.ReadAll(multipart)
+		contents, err := io.ReadAll(multipart)
 		if err != nil {
 			log.Err("Error reading multipart file %s - %s", file.Filename, err)
 			continue
@@ -203,7 +204,7 @@ func (i *Filenames) Set(value string) error {
 
 // GetFilesFromDir returns a list of file names from a directory
 func GetFilesFromDir(path string) *Filenames {
-	files, err := ioutil.ReadDir(path)
+	files, err := os.ReadDir(path)
 	if err != nil {
 		log.Fatal(err)
 	}

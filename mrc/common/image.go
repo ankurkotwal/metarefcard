@@ -49,7 +49,7 @@ func GenerateImages(overlaysByProfile OverlaysByProfile,
 				config.Devices.DeviceLabelsByImage[imageName],
 				xOffset, pixelMultiplier, config.FontsDir,
 				config.InputMinFontSize)
-			addMRCLogo(dc, &config.Watermark, config.Version,
+			addMRCLogo(dc, &config.Watermark, config.Version, config.Domain,
 				xOffset, float64(config.InputPixelXInset), pixelMultiplier,
 				config.FontsDir)
 
@@ -158,8 +158,10 @@ func populateImage(dc *gg.Context, imageFilename string, imgSize image.Point,
 	}
 
 	var imgBytes bytes.Buffer
-	jpeg.Encode(&imgBytes, dc.Image(),
-		&jpeg.EncoderOptions{Quality: config.JpgQuality})
+	err := jpeg.Encode(&imgBytes, dc.Image(), &jpeg.EncoderOptions{Quality: config.JpgQuality})
+	if err != nil {
+		log.Err("jpeg encode failed: %v", err)
+	}
 	return imgBytes
 }
 
@@ -301,11 +303,11 @@ func addImageHeader(dc *gg.Context, imageHeader *HeaderData, profile string,
 		imageHeader.Inset.Y*pixelMultiplier)
 }
 
-func addMRCLogo(dc *gg.Context, watermark *WatermarkData, version string,
+func addMRCLogo(dc *gg.Context, watermark *WatermarkData, version string, domain string,
 	xOffset float64, xInset float64, pixelMultiplier float64, fontsDir string) {
 	fontSize := int(math.Round(watermark.FontSize * pixelMultiplier))
 	// Generate watermark
-	text := fmt.Sprintf("%s v%s", watermark.Text, version)
+	text := fmt.Sprintf("%s v%s (%s)", watermark.Text, version, domain)
 	drawTextWithBackgroundRec(dc, text, xOffset, watermark.Location, 0, 0,
 		fontSize, pixelMultiplier,
 		loadFont(fontsDir, watermark.Font, fontSize),
