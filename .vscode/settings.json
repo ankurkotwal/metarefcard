@@ -12,5 +12,6 @@
             "comments": false,
             "strings": true
         }
-    }
+    },
+    "go.lintOnSave": "workspace"
 }
