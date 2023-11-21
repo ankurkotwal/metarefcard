@@ -4,7 +4,7 @@ designed to be flexible across many different controllers and many different
 games.  
 ![Build Status](https://github.com/ankurkotwal/metarefcard/actions/workflows/main.yml/badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/ankurkotwal/metarefcard)](https://goreportcard.com/report/github.com/ankurkotwal/metarefcard)
-## Hosted at [metarefcard.com](https://metarefcard.com)
+## Hosted at [mrc.metadawn.com](https://mrc.metadawn.com)
 
 Here are some example images:
 ## Flight Simulator 2020 - Alpha Flight Controls
