@@ -19,10 +19,10 @@ MetaRefCard will default to running on port 8080 but this value can be overriden
 
 # MetaRefCard code
 MetaRefCard is written in Go and is a web application.
-## Dependencies
-The libjpeg-turbo C library is used for fast jpg decoding/encoding. On Ubuntu/Debian, install libjpeg-turbo-dev - `sudo apt install libjpeg-turbo8-dev`. On Arch/Manjaro, this package is part of the minimal install.
 ## Building
-Since this is a Go application, running `go build .` will compile the application. However, MetaRefCard also can be built to a container image with the `Dockerfile` provided simply with `docker build .`
+Since this is a Go application, running `go build .` will compile the application but this relies on a dependency to libjpeg-turbo (details below). Therefore, a build script `build.sh` has been provided to setup the right paths. MetaRefCard also can be built to a container image with the `Dockerfile` provided simply with `docker build .`
+### Build Dependencies
+The libjpeg-turbo C library is used for fast jpg decoding/encoding. On Ubuntu/Debian, install libjpeg-turbo-dev - `sudo apt install libjpeg-turbo8-dev`. On Arch/Manjaro, this package is part of the minimal install.
 ## Directories
 `config` - runtime configuration. `config.yaml` is the main configuration file. Each package has their own config files too.
 `metarefcard` - almost all of the go code for MetaRefCard.
