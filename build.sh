@@ -1,16 +1,8 @@
 #!/bin/bash
 
-if [ `uname` == "Darwin" ]; then
-    brew_path=`which brew 2>/dev/null`
-    if [ $? -eq 0 ]; then
-        jpeg_turbo_path=`brew --prefix jpeg-turbo 2>/dev/null`
-        jpeg_turbo_version=`brew list --versions jpeg-turbo 2>/dev/null | sed -E 's/^jpeg-turbo[[:space:]]+//'`
-        if [ $? -eq 0 ]; then
-          jpeg_turbo_path="$jpeg_turbo_path/$jpeg_turb_version"
-          export CGO_CFLAGS="-I${jpeg_turbo_path}include"
-          export CGO_LDFLAGS="-L${jpeg_turbo_path}lib"
-        fi
-    fi
+if [ `uname` == "Darwin" ] && [ -n "$HOMEBREW_PREFIX" ]; then
+    export CGO_CFLAGS="-I ${HOMEBREW_PREFIX}/include"
+    export CGO_LDFLAGS="-L ${HOMEBREW_PREFIX}/lib"
 fi
 
 go build -v ./...
