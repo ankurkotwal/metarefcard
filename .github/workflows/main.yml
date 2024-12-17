@@ -9,7 +9,7 @@ on:
 jobs:
 
   build:
-    runs-on: golang:1.23.4
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
 
@@ -19,7 +19,7 @@ jobs:
         go-version-file: 'go.mod'
 
     - name: Install dependencies
-      run: sudo apt install libturbojpeg0-dev
+      run: sed -i '/deb-src.*main/s/^# //' /etc/apt/sources.list && sudo apt update && sudo apt install -y libturbojpeg0-dev
 
     - name: Build
       run: go build -v ./...
