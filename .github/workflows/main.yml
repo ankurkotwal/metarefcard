@@ -19,7 +19,7 @@ jobs:
         go-version-file: 'go.mod'
 
     - name: Install dependencies
-      run: sudo sed -i '/deb-src.*main/s/^# //' /etc/apt/sources.list && sudo apt update && sudo apt install -y libturbojpeg0-dev
+      run: sudo apt install -y libjpeg-turbo8-dev
 
     - name: Build
       run: go build -v ./...
