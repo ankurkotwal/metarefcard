@@ -13,5 +13,7 @@
             "strings": true
         }
     },
-    "go.lintOnSave": "workspace"
+    "go.lintOnSave": "workspace",
+    "IDX.aI.enableInlineCompletion": true,
+    "IDX.aI.enableCodebaseIndexing": true
 }
