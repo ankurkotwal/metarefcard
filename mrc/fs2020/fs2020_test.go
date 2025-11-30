@@ -118,8 +118,25 @@ func TestLoadInputFiles(t *testing.T) {
 	}
 }
 
-func TestMatchGameInputToModelByRegex(t *testing.T) {
-	// Load config to populate regexes
+func TestGetGameInfo(t *testing.T) {
+	label, description, handler, matcher := GetGameInfo()
+
+	if label != "fs2020" {
+		t.Errorf("Expected label 'fs2020', got '%s'", label)
+	}
+	if !strings.Contains(description, "Flight Simulator 2020") {
+		t.Errorf("Expected description to contain 'Flight Simulator 2020', got '%s'", description)
+	}
+	if handler == nil {
+		t.Error("Expected non-nil handler")
+	}
+	if matcher == nil {
+		t.Error("Expected non-nil matcher")
+	}
+}
+
+func TestMatchGameInputToModel(t *testing.T) {
+	// Load config to populate regexes (Setup from HEAD)
 	wd, _ := os.Getwd()
 	// config is at ../../config/fs2020.yaml relative to package
 	configPath := filepath.Join(wd, "../../config/fs2020.yaml")
@@ -138,43 +155,50 @@ func TestMatchGameInputToModelByRegex(t *testing.T) {
 		Rotation: regexp.MustCompile(sharedGameData.Regexes["Rotation"]),
 		Slider:   regexp.MustCompile(sharedGameData.Regexes["Slider"]),
 	}
-	
-	// Test cases
+
+	deviceInputs := make(common.DeviceInputs)
+	gameInputMap := make(common.InputTypeMapping)
+
+	// Test cases (Adapted from HEAD to match Incoming's structure)
 	tests := []struct {
-		name       string
-		action     string
-		deviceName string
-		want       string
+		name          string
+		actionData    common.GameInput
+		deviceName    string
+		expectedPrimary string
+		expectedCount int
 	}{
 		{
-			name:       "Standard Button",
-			action:     "Button 1",
-			deviceName: "TestDevice",
-			want:       "1", 
+			name:          "Standard Button",
+			actionData:    common.GameInput{"Button 1", ""},
+			deviceName:    "TestDevice",
+			expectedPrimary: "1",
+			expectedCount: 1,
 		},
 		{
-			name:       "Joystick Axis",
-			action:     "Axis X",
-			deviceName: "TestDevice",
-			want:       "XAxis", 
+			name:          "Joystick Axis",
+			actionData:    common.GameInput{"Axis X", ""}, // Adjusted input to match regex
+			deviceName:    "TestDevice",
+			expectedPrimary: "XAxis",
+			expectedCount: 1,
 		},
 		{
-			name:       "POV Hat Up",
-			action:     "POV1_UP",
-			deviceName: "TestDevice",
-			want:       "POV1Up",
+			name:          "POV Hat Up",
+			actionData:    common.GameInput{"POV1_UP", ""},
+			deviceName:    "TestDevice",
+			expectedPrimary: "POV1Up",
+			expectedCount: 1,
 		},
 	}
 
-	mockInputs := make(common.DeviceInputs)
-	// We need to verify what matchGameInputToModelByRegex expects in inputs. 
-	// required if looking for sliders?
-	
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := matchGameInputToModelByRegex(tt.deviceName, tt.action, mockInputs, nil, log)
-			if got != tt.want {
-				t.Errorf("matchGameInputToModelByRegex() = %v, want %v", got, tt.want)
+			result, _ := matchGameInputToModel(tt.deviceName, tt.actionData, deviceInputs, gameInputMap, log)
+			// matchGameInputToModel returns (common.GameInput, string). GameInput is []string
+			if len(result) != tt.expectedCount {
+				t.Errorf("Expected %d results, got %d", tt.expectedCount, len(result))
+			}
+			if len(result) > 0 && result[common.InputPrimary] != tt.expectedPrimary {
+				t.Errorf("Expected primary match %s, got %s", tt.expectedPrimary, result[common.InputPrimary])
 			}
 		})
 	}
