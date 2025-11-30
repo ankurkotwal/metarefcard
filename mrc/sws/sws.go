@@ -23,10 +23,10 @@ const (
 
 // GetGameInfo returns the info needed to fit into MetaRefCard
 // Returns:
-//   * Game label / name
-//   * User friendly command line description
-//   * Func handler for incoming request
-//   * Func that matches the game input format to MRC's model
+//   - Game label / name
+//   - User friendly command line description
+//   - Func handler for incoming request
+//   - Func that matches the game input format to MRC's model
 func GetGameInfo() (string, string, common.FuncRequestHandler, common.FuncMatchGameInputToModel) {
 	return label, desc, handleRequest, matchGameInputToModel
 }
@@ -118,7 +118,7 @@ func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
 				for actionSub, value := range actionSubMap {
 					field, err := getInputTypeAsField(actionSub, &actionDetails)
 					if err != nil {
-						log.Err(fmt.Sprintf("%s value %s", err, value))
+						log.Err("%s value %s", err, value)
 					} else if field != nil { // Ignore nil fields, this info isn't needed
 						*field = value
 					}

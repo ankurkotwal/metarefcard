@@ -31,7 +31,7 @@ func FilterDevices(neededDevices Set, config *Config, log *Logger) DeviceMap {
 	}
 
 	if config.DebugOutput {
-		log.Dbg(YamlObjectAsString(filteredDevices, "Targeted Device Map"))
+		log.Dbg("%s", YamlObjectAsString(filteredDevices, "Targeted Device Map"))
 	}
 	return filteredDevices
 }
