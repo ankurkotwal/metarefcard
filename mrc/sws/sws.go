@@ -118,7 +118,7 @@ func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
 				for actionSub, value := range actionSubMap {
 					field, err := getInputTypeAsField(actionSub, &actionDetails)
 					if err != nil {
-						log.Err(fmt.Sprintf("%s value %s", err, value))
+						log.Err("%s value %s", err, value)
 					} else if field != nil { // Ignore nil fields, this info isn't needed
 						*field = value
 					}
