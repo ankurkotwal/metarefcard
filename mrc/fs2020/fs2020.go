@@ -223,7 +223,7 @@ func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToSh
 	}
 
 	if verboseOutput {
-		log.Dbg(common.GameBindsAsString(gameBinds))
+		log.Dbg("%s", common.GameBindsAsString(gameBinds))
 	}
 
 	return gameBinds, neededDevices, contextsToColours

@@ -35,7 +35,7 @@ func LoadYaml(filename string, out interface{}, label string, log *Logger) {
 	}
 	debugOutput := false
 	if debugOutput {
-		log.Dbg(YamlObjectAsString(out, label))
+		log.Dbg("%s", YamlObjectAsString(out, label))
 	}
 }
 

@@ -147,7 +147,7 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 	t, err := template.New(path.Base(cardTempl)).ParseFiles(cardTempl)
 	if err != nil {
 		s := fmt.Sprintf("Error parsing card template - %s", err)
-		log.Err(s)
+		log.Err("%s", s)
 		if c != nil {
 			c.Data(http.StatusInternalServerError, "text/html; charset=utf-8",
 				[]byte(s))
@@ -164,7 +164,7 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 		}
 		var tpl bytes.Buffer
 		if err := t.Execute(&tpl, image); err != nil {
-			log.Err(fmt.Sprintf("Error executing image template - %s", err))
+			log.Err("Error executing image template - %s", err)
 			continue
 		}
 		c.Data(http.StatusOK, "text/html; charset=utf-8", tpl.Bytes())
@@ -174,7 +174,7 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 	l, err := template.New(path.Base(logTempl)).ParseFiles(logTempl)
 	if err != nil {
 		s := fmt.Sprintf("Error parsing logging template - %s", err)
-		log.Err(s)
+		log.Err("%s", s)
 		c.Data(http.StatusInternalServerError, "text/html; charset=utf-8", []byte(s))
 	} else {
 		var tpl bytes.Buffer
