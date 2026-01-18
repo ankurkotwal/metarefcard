@@ -95,7 +95,16 @@ func populateImage(dc *gg.Context, imageFilename string, imgSize image.Point,
 	width := float64(imgSize.X)
 	height := float64(imgSize.Y)
 	fontFaceCache := make(fontFaceCache)
-	for _, overlayData := range overlayDataRange {
+
+	// Sort keys for deterministic output
+	var keys []string
+	for k := range overlayDataRange {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		overlayData := overlayDataRange[key]
 		// Skip known bad locations
 		if overlayData.PosAndSize.X == -1 || overlayData.PosAndSize.Y == -1 {
 			continue

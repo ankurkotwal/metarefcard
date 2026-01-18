@@ -46,3 +46,33 @@ Generates a yaml file based on `resources-source/edrefcard/bindingsData.py` that
 Install modules - `pip3 install pyyaml`
 #### Running the script
 Command: `generateControllerInputs.py`
+
+## Testing and Performance
+MetaRefCard includes comprehensive unit tests and benchmarks to ensure correctness and performance.
+
+### Running Tests
+Run all unit tests:
+```bash
+go test ./...
+```
+
+### Reference (Golden) Files
+We use snapshot testing to verify the full HTML output of the application. The reference files are stored in `testdata/reference`.
+To run tests and verify against reference files:
+```bash
+go test -v ./mrc
+```
+
+To update the reference files (e.g. after a legitimate change in output):
+```bash
+UPDATE_REFERENCE=true go test -v ./mrc
+```
+
+### Benchmarks
+Performance benchmarks are available for key components like input file parsing:
+```bash
+go test -bench=. ./...
+```
+
+### Recent Optimizations
+- **SWS Parsing**: Optimized identifying and parsing bindings in Star Wars: Squadrons files using prefix checks and efficient regex handling (~22% speedup).
