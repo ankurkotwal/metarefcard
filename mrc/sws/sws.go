@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -107,8 +108,16 @@ func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
 	// the order of fields in the game's config files.
 	for context, actionMap := range contextActionIndex {
 		for action, overrideActionSubMap := range actionMap {
+			// Sort the override keys to ensure deterministic Primary/Secondary assignment
+			var overrides []int
+			for override := range overrideActionSubMap {
+				overrides = append(overrides, override)
+			}
+			sort.Ints(overrides)
+
 			// Don't need to use the override index
-			for _, actionSubMap := range overrideActionSubMap {
+			for _, override := range overrides {
+				actionSubMap := overrideActionSubMap[override]
 				if actionSubMap["deviceid"] == "-1" {
 					// Ignore deviceid -1
 					continue
