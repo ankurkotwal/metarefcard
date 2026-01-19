@@ -10,77 +10,37 @@ import (
 	"github.com/ankurkotwal/metarefcard/mrc/common"
 )
 
-func TestGetGameInfo(t *testing.T) {
-	label, description, handler, matcher := GetGameInfo()
-
-	if label != "fs2020" {
-		t.Errorf("Expected label 'fs2020', got '%s'", label)
+func TestHandleRequest(t *testing.T) {
+	configPath = "../../config/fs2020.yaml"
+	config := &common.Config{
+		AlternateColours: []string{"#FFFFFF"},
+		Devices: common.Devices{
+			DeviceToShortNameMap: map[string]string{
+				"Alpha Flight Controls": "AlphaFlightControls",
+			},
+		},
+		DebugOutput:   true,
+		VerboseOutput: true,
 	}
-	if !strings.Contains(description, "Flight Simulator 2020") {
-		t.Errorf("Expected description to contain 'Flight Simulator 2020', got '%s'", description)
-	}
-	if handler == nil {
-		t.Error("Expected non-nil handler")
-	}
-	if matcher == nil {
-		t.Error("Expected non-nil matcher")
-	}
-}
-
-func TestMatchGameInputToModel(t *testing.T) {
-	// Initialize sharedRegexes
-	// In the real code this is done in handleRequest via sync.Once, but for unit testing matchGameInputToModel
-	// we need to set it up manually or call handleRequest once.
-	// Since handleRequest needs config files, we might just manually initialize the regexes for testing.
-
-	// From config/fs2020.yaml (we should ideally read it but for unit test we can mock)
-	// Regexes:
-	//   Button: "Joystick Button ([0-9]+)"
-	//   Axis: "Joystick ([L,R])-Axis ([X,Y,Z])"
-	//   Pov: "Joystick POV( [0-9])* ([a-zA-Z]+)"
-	//   Rotation: "Joystick R-Axis ([X,Y,Z])"
-	//   Slider: "Joystick Slider ([0-9]+)"
-
-	sharedRegexes.Button = regexp.MustCompile(`Joystick Button ([0-9]+)`)
-	sharedRegexes.Axis = regexp.MustCompile(`Joystick ([L,R])-Axis ([X,Y,Z])`)
-	sharedRegexes.Pov = regexp.MustCompile(`Joystick POV( [0-9])* ([a-zA-Z]+)`)
-	sharedRegexes.Rotation = regexp.MustCompile(`Joystick R-Axis ([X,Y,Z])`)
-	sharedRegexes.Slider = regexp.MustCompile(`Joystick Slider ([0-9]+)`)
-
 	log := common.NewLog()
-	deviceInputs := make(common.DeviceInputs)
-	gameInputMap := make(common.InputTypeMapping)
 
-	tests := []struct {
-		name          string
-		actionData    common.GameInput
-		expectedPrimary string
-		expectedCount int
-	}{
-		{
-			name:          "Button Match",
-			actionData:    common.GameInput{"Joystick Button 1", ""},
-			expectedPrimary: "1",
-			expectedCount: 1,
-		},
-		{
-			name:          "Axis Match",
-			actionData:    common.GameInput{"Joystick L-Axis X", ""},
-			expectedPrimary: "LXAxis",
-			expectedCount: 1,
-		},
+	// Generic valid XML
+	validXML := []byte(`<Device DeviceName="Alpha Flight Controls"><Context ContextName="PLANE"><Action ActionName="KEY_AP_MASTER"><Primary><KEY Information="Button 4"/></Primary></Action></Context></Device>`)
+	files := [][]byte{validXML}
+
+	_, gameBinds, neededDevices, contextColours, logo := handleRequest(files, config, log)
+
+	if len(gameBinds) == 0 {
+		t.Error("Expected game binds")
 	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result, _ := matchGameInputToModel("TestDevice", tt.actionData, deviceInputs, gameInputMap, log)
-			if len(result) != tt.expectedCount {
-				t.Errorf("Expected %d results, got %d", tt.expectedCount, len(result))
-			}
-			if len(result) > 0 && result[0] != tt.expectedPrimary {
-				t.Errorf("Expected primary match %s, got %s", tt.expectedPrimary, result[0])
-			}
-		})
+	if !neededDevices["AlphaFlightControls"] {
+		t.Error("Expected AlphaFlightControls in neededDevices")
+	}
+	if contextColours == nil {
+		t.Error("Expected contextColours")
+	}
+	if logo != "fs2020" {
+		t.Errorf("Expected logo 'fs2020', got '%s'", logo)
 	}
 }
 
@@ -144,7 +104,7 @@ func TestMatchGameInputToModel(t *testing.T) {
 	log := common.NewLog()
 	
 	// Load game data to get regex strings
-	gameData := common.LoadGameModel(configPath, "FS2020 Data", false, log)
+	gameData, _ := common.LoadGameModel(configPath, "FS2020 Data", false, log)
 	sharedGameData = gameData
 	
 	// Compile regexes manually as they are in fs2020.go
@@ -188,11 +148,52 @@ func TestMatchGameInputToModel(t *testing.T) {
 			expectedPrimary: "POV1Up",
 			expectedCount: 1,
 		},
+		{
+			name:            "Rotation Z",
+			actionData:      common.GameInput{"Rotation Z", ""},
+			deviceName:      "TestDevice",
+			expectedPrimary: "RZAxis",
+			expectedCount:   1,
+		},
+		{
+			name:            "Slider X (Unmapped)",
+			actionData:      common.GameInput{"Slider X", ""},
+			deviceName:      "TestDevice",
+			expectedPrimary: "", // Error logged, empty return
+			expectedCount:   0,
+		},
+		{
+			name:            "Slider X (Mapped)",
+			actionData:      common.GameInput{"Slider X", ""},
+			deviceName:      "MappedDevice",
+			expectedPrimary: "UAxis",
+			expectedCount:   1,
+		},
+		{
+			name:            "Axis X (Mapped)",
+			actionData:      common.GameInput{"Axis X", ""},
+			deviceName:      "MappedDevice",
+			expectedPrimary: "UAxis",
+			expectedCount:   1,
+		},
 	}
+	
+	// Mock input map for mapped device
+	gameInputMap["Slider"] = map[string]string{"X": "U"}
+	gameInputMap["Axis"] = map[string]string{"X": "U"} // Map X to U
+
+	// Mock valid inputs on the device
+	deviceInputs["UAxis"] = common.InputData{}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, _ := matchGameInputToModel(tt.deviceName, tt.actionData, deviceInputs, gameInputMap, log)
+			// Select input map based on device name for testing purposes
+			var currentInputMap common.InputTypeMapping
+			if tt.deviceName == "MappedDevice" {
+				currentInputMap = gameInputMap
+			}
+
+			result, _ := matchGameInputToModel(tt.deviceName, tt.actionData, deviceInputs, currentInputMap, log)
 			// matchGameInputToModel returns (common.GameInput, string). GameInput is []string
 			if len(result) != tt.expectedCount {
 				t.Errorf("Expected %d results, got %d", tt.expectedCount, len(result))
@@ -276,7 +277,7 @@ func BenchmarkLoadInputFiles(b *testing.B) {
 	
 	// Ensure regexes are inited
 	configPath := filepath.Join(wd, "../../config/fs2020.yaml")
-	gameData := common.LoadGameModel(configPath, "FS2020 Data", false, log)
+	gameData, _ := common.LoadGameModel(configPath, "FS2020 Data", false, log)
 	sharedGameData = gameData
 	sharedRegexes = fs2020Regexes{
 		Button:   regexp.MustCompile(sharedGameData.Regexes["Button"]),

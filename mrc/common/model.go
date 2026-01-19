@@ -7,10 +7,12 @@ import (
 
 // LoadGameModel - load game specific data from our model. Update the device names
 // (map game device name to our model names)
-func LoadGameModel(filename string, label string, debugOutput bool, log *Logger) GameData {
+func LoadGameModel(filename string, label string, debugOutput bool, log *Logger) (GameData, error) {
 	data := GameData{}
-	LoadYaml(filename, &data, label, log)
-	return data
+	if err := LoadYaml(filename, &data); err != nil {
+		return data, fmt.Errorf("LoadGameModel LoadYaml %v", err)
+	}
+	return data, nil
 }
 
 // FilterDevices - Returns only the devices that the caller is asking for

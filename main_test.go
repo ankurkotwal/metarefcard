@@ -1,8 +1,10 @@
 package main
 
 import (
+	"flag"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"sync"
 	"testing"
@@ -10,6 +12,36 @@ import (
 
 	"github.com/ankurkotwal/metarefcard/mrc"
 )
+
+func TestParseCliArgs(t *testing.T) {
+	// Save original args
+	origArgs := os.Args
+	defer func() { os.Args = origArgs }()
+
+	// Test case 1: Debug mode
+	os.Args = []string{"cmd", "-d", "-t", "testdata"}
+	debug, _ := parseCliArgs() // gameArgs might differ based on testdata existence
+	if !debug {
+		t.Error("Expected debug mode true")
+	}
+
+	// Test case 2: Default
+	os.Args = []string{"cmd"}
+	// Reset flags because they stick around in global state
+	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	
+	debug, _ = parseCliArgs()
+	if debug {
+		t.Error("Expected debug mode false")
+	}
+	
+	// Cover usage function
+	// We need to ensure flag.Usage is set first, which parseCliArgs does.
+	// Calling parseCliArgs sets flag.Usage.
+	if flag.Usage != nil {
+		flag.Usage()
+	}
+}
 
 func TestSwsSerial(t *testing.T) {
 	runTestSerial(t, "/test/sws", 50)

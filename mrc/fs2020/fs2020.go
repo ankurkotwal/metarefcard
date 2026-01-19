@@ -22,6 +22,8 @@ const (
 	desc  = "Flight Simulator 2020 input configs"
 )
 
+var configPath = "config/fs2020.yaml"
+
 // GetGameInfo returns the info needed to fit into MetaRefCard
 // Returns:
 //   - Game label / name
@@ -36,8 +38,12 @@ func GetGameInfo() (string, string, common.FuncRequestHandler, common.FuncMatchG
 func handleRequest(files [][]byte, config *common.Config, log *common.Logger) (common.GameData,
 	common.GameBindsByProfile, common.Set, common.ContextToColours, string) {
 	firstInit.Do(func() {
-		sharedGameData = common.LoadGameModel("config/fs2020.yaml",
+		var err error
+		sharedGameData, err = common.LoadGameModel(configPath,
 			"FS2020 Data", config.DebugOutput, log)
+		if err != nil {
+			log.Fatal("FS2020 Init LoadGameModel %v", err)
+		}
 		sharedRegexes.Button = regexp.MustCompile(sharedGameData.Regexes["Button"])
 		sharedRegexes.Axis = regexp.MustCompile(sharedGameData.Regexes["Axis"])
 		sharedRegexes.Pov = regexp.MustCompile(sharedGameData.Regexes["Pov"])

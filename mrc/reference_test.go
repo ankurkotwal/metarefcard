@@ -33,9 +33,10 @@ func TestReferenceFiles(t *testing.T) {
 	// Load Config with fixed values for consistency (except Version)
 	log := common.NewLog()
 	var cfg *common.Config
+	configPath := "config/config.yaml"
 	
 	// Load config relative to new CWD (project root)
-	common.LoadYaml("config/config.yaml", &cfg, "Config", log)
+	common.LoadYaml(configPath, &cfg)
 	
 	// Use actual version as requested, but fix Domain for consistency
 	// cfg.Version is loaded from config.yaml

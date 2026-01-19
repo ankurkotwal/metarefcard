@@ -24,7 +24,7 @@ func BenchmarkGenerateImages(b *testing.B) {
 	var cfg *common.Config
 
 	// Load config relative to new CWD (project root)
-	common.LoadYaml("config/config.yaml", &cfg, "Config", log)
+	common.LoadYaml("config/config.yaml", &cfg)
 	common.LoadDevicesInfo(cfg.DevicesFile, &cfg.Devices, log)
 
 	// Pick the first game (FS2020)

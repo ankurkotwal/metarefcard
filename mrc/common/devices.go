@@ -2,10 +2,14 @@ package common
 
 // LoadDevicesInfo loads all the device information (across files) into "devices"
 func LoadDevicesInfo(file string, devices *Devices, log *Logger) {
-	LoadYaml(file, devices, "Devices", log)
+	if err := LoadYaml(file, devices); err != nil {
+		log.Fatal("LoadDevicesInfo LoadYaml %v", err)
+	}
 
 	var generatedDevices GeneratedDevices
-	LoadYaml(devices.GeneratedFile, &generatedDevices, "Generated Devices", log)
+	if err := LoadYaml(devices.GeneratedFile, &generatedDevices); err != nil {
+		log.Fatal("LoadDevicesInfo GeneratedFile LoadYaml %v", err)
+	}
 
 	// Add device additions to the main device index
 	for shortName, inputs := range devices.Index {

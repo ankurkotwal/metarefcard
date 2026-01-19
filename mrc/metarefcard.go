@@ -20,6 +20,9 @@ import (
 
 var config *common.Config
 
+var configPath = "config/config.yaml"
+
+
 // GameInfo is the info needed to fit into MetaRefCard
 // Returns:
 //   - Game label / name
@@ -36,7 +39,11 @@ var GamesInfo []GameInfo = []GameInfo{fs2020.GetGameInfo, sws.GetGameInfo}
 func GetServer(debugMode bool, gameArgs GameToInputFiles) (*gin.Engine, string) {
 	log := common.NewLog()
 	// Load the configuration
-	common.LoadYaml("config/config.yaml", &config, "Config", log)
+	// Load the configuration
+	// Load the configuration
+	if err := common.LoadYaml(configPath, &config); err != nil {
+		log.Fatal("GetServer LoadYaml %v", err)
+	}
 	// Load the device information
 	common.LoadDevicesInfo(config.DevicesFile, &config.Devices, log)
 

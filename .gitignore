@@ -4,6 +4,8 @@ debug.profile
 __debug_bin*
 scratch
 metarefcard
+coverage_report.txt
+coverage_report_final.txt
 
 ##### Output files #####
 out/

@@ -24,19 +24,17 @@ func (m Set) Keys() []string {
 }
 
 // LoadYaml loads Yaml file and prints any errors
-func LoadYaml(filename string, out interface{}, label string, log *Logger) {
+// LoadYaml loads Yaml file and returns any errors
+func LoadYaml(filename string, out interface{}) error {
 	yamlData, err := os.ReadFile(filename)
 	if err != nil {
-		log.Fatal("yaml ioutil.ReadFile %v ", err)
+		return fmt.Errorf("yaml ioutil.ReadFile %v", err)
 	}
 	err = yaml.Unmarshal([]byte(yamlData), out)
 	if err != nil {
-		log.Fatal("yaml.Unmarshal %v", err)
+		return fmt.Errorf("yaml.Unmarshal %v", err)
 	}
-	debugOutput := false
-	if debugOutput {
-		log.Dbg("%s", YamlObjectAsString(out, label))
-	}
+	return nil
 }
 
 // YamlObjectAsString outputs contents of yaml object with a label

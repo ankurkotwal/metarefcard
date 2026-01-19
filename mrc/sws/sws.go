@@ -22,6 +22,8 @@ const (
 	desc  = "Star Wars Squadrons input configs"
 )
 
+var configPath = "config/sws.yaml"
+
 // GetGameInfo returns the info needed to fit into MetaRefCard
 // Returns:
 //   * Game label / name
@@ -36,8 +38,12 @@ func GetGameInfo() (string, string, common.FuncRequestHandler, common.FuncMatchG
 func handleRequest(files [][]byte, cfg *common.Config, log *common.Logger) (common.GameData,
 	common.GameBindsByProfile, common.Set, common.ContextToColours, string) {
 	firstInit.Do(func() {
-		sharedGameData = common.LoadGameModel("config/sws.yaml", "StarWarsSquadrons Data",
+		var err error
+		sharedGameData, err = common.LoadGameModel(configPath, "StarWarsSquadrons Data",
 			cfg.DebugOutput, log)
+		if err != nil {
+			log.Fatal("SWS Init LoadGameModel %v", err)
+		}
 		sharedRegexes.Bind = regexp.MustCompile(sharedGameData.Regexes["Bind"])
 		sharedRegexes.Joystick = regexp.MustCompile(sharedGameData.Regexes["Joystick"])
 	})
