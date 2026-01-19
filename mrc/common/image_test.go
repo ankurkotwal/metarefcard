@@ -254,6 +254,46 @@ func TestCalcFontSize(t *testing.T) {
 			wantMax:      20,
 			wantMin:      10,
 		},
+		{
+			name:         "Text hits minimum font size",
+			text:         "Extremely long text that cannot possibly fit in the small width",
+			targetWidth:  50,
+			targetHeight: 30,
+			minFontSize:  15,
+			startSize:    30,
+			wantMax:      15,
+			wantMin:      15,
+		},
+		{
+			name:         "Single character fits max size",
+			text:         "A",
+			targetWidth:  200,
+			targetHeight: 100,
+			minFontSize:  10,
+			startSize:    100,
+			wantMax:      100,
+			wantMin:      80,
+		},
+		{
+			name:         "Medium text moderate reduction",
+			text:         "Medium length text",
+			targetWidth:  150,
+			targetHeight: 40,
+			minFontSize:  8,
+			startSize:    40,
+			wantMax:      40,
+			wantMin:      15,
+		},
+		{
+			name:         "Binary search convergence",
+			text:         "Fit",
+			targetWidth:  30,
+			targetHeight: 20,
+			minFontSize:  5,
+			startSize:    20,
+			wantMax:      20,
+			wantMin:      10,
+		},
 	}
 
 	for _, tt := range tests {
@@ -266,4 +306,34 @@ func TestCalcFontSize(t *testing.T) {
 	}
 }
 
+func TestCalcFontSize_WithFontCache(t *testing.T) {
+	fontsDir := "../../resources/fonts"
+	fontName := "YanoneKaffeesatz-Regular.ttf"
+	absFontsDir, _ := filepath.Abs(fontsDir)
+
+	fontCache := NewFontFaceCache()
+
+	// Test with font cache
+	size := calcFontSize("Test", fontCache, 50, 100, 50, absFontsDir, fontName, 10)
+	if size < 10 || size > 50 {
+		t.Errorf("calcFontSize with cache = %v, want between 10 and 50", size)
+	}
+}
+
+func TestMeasureString(t *testing.T) {
+	fontsDir := "../../resources/fonts"
+	fontName := "Orbitron-Regular.ttf"
+	absFontsDir, _ := filepath.Abs(fontsDir)
+
+	fontCache := NewFontFaceCache()
+	face := fontCache.LoadFont(absFontsDir, fontName, 20)
+
+	x, y := measureString(face, "Test")
+	if x <= 0 {
+		t.Errorf("Expected positive x, got %d", x)
+	}
+	if y <= 0 {
+		t.Errorf("Expected positive y, got %d", y)
+	}
+}
 

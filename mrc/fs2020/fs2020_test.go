@@ -292,3 +292,297 @@ func BenchmarkLoadInputFiles(b *testing.B) {
 		loadInputFiles(files, deviceMap, log, false, false)
 	}
 }
+
+func TestLoadInputFiles_WithProfile(t *testing.T) {
+	log := common.NewLog()
+	deviceMap := common.DeviceNameFullToShort{
+		"Alpha Flight Controls": "AlphaFlightControls",
+	}
+
+	// XML with FriendlyName (profile)
+	xmlWithProfile := []byte(`
+		<FriendlyName>Custom Profile</FriendlyName>
+		<Device DeviceName="Alpha Flight Controls">
+			<Context ContextName="PLANE">
+				<Action ActionName="KEY_AP_MASTER">
+					<Primary>
+						<KEY Information="Button 1"/>
+					</Primary>
+				</Action>
+			</Context>
+		</Device>
+	`)
+
+	files := [][]byte{xmlWithProfile}
+	gameBinds, neededDevices, _ := loadInputFiles(files, deviceMap, log, true, false)
+
+	if !neededDevices["AlphaFlightControls"] {
+		t.Error("Expected AlphaFlightControls in neededDevices")
+	}
+
+	// Check that Custom Profile exists
+	if _, found := gameBinds["Custom Profile"]; !found {
+		t.Error("Expected 'Custom Profile' in gameBinds")
+	}
+}
+
+func TestLoadInputFiles_DuplicateContext(t *testing.T) {
+	log := common.NewLog()
+	deviceMap := common.DeviceNameFullToShort{
+		"Alpha Flight Controls": "AlphaFlightControls",
+	}
+
+	// XML with duplicate context names
+	xmlDupContext := []byte(`
+		<Device DeviceName="Alpha Flight Controls">
+			<Context ContextName="PLANE">
+				<Action ActionName="ACTION_1">
+					<Primary><KEY Information="Button 1"/></Primary>
+				</Action>
+			</Context>
+			<Context ContextName="PLANE">
+				<Action ActionName="ACTION_2">
+					<Primary><KEY Information="Button 2"/></Primary>
+				</Action>
+			</Context>
+		</Device>
+	`)
+
+	files := [][]byte{xmlDupContext}
+	gameBinds, _, _ := loadInputFiles(files, deviceMap, log, true, false)
+
+	// Should have logged an error for duplicate context but still processed
+	if len(gameBinds) == 0 {
+		t.Error("Expected gameBinds to be populated")
+	}
+}
+
+func TestLoadInputFiles_DuplicateAction(t *testing.T) {
+	log := common.NewLog()
+	deviceMap := common.DeviceNameFullToShort{
+		"Alpha Flight Controls": "AlphaFlightControls",
+	}
+
+	// XML with duplicate action names
+	xmlDupAction := []byte(`
+		<Device DeviceName="Alpha Flight Controls">
+			<Context ContextName="PLANE">
+				<Action ActionName="ACTION_1">
+					<Primary><KEY Information="Button 1"/></Primary>
+				</Action>
+				<Action ActionName="ACTION_1">
+					<Primary><KEY Information="Button 2"/></Primary>
+				</Action>
+			</Context>
+		</Device>
+	`)
+
+	files := [][]byte{xmlDupAction}
+	gameBinds, _, _ := loadInputFiles(files, deviceMap, log, true, false)
+
+	// Should have logged an error for duplicate action but still processed
+	if len(gameBinds) == 0 {
+		t.Error("Expected gameBinds to be populated")
+	}
+}
+
+func TestLoadInputFiles_WithSecondaryKey(t *testing.T) {
+	log := common.NewLog()
+	deviceMap := common.DeviceNameFullToShort{
+		"Alpha Flight Controls": "AlphaFlightControls",
+	}
+
+	// XML with secondary key
+	xmlWithSecondary := []byte(`
+		<Device DeviceName="Alpha Flight Controls">
+			<Context ContextName="PLANE">
+				<Action ActionName="ACTION_WITH_SECONDARY">
+					<Primary><KEY Information="Button 1"/></Primary>
+					<Secondary><KEY Information="Button 2"/></Secondary>
+				</Action>
+			</Context>
+		</Device>
+	`)
+
+	files := [][]byte{xmlWithSecondary}
+	gameBinds, _, _ := loadInputFiles(files, deviceMap, log, true, false)
+
+	// Verify secondary key was captured
+	if actions, ok := gameBinds[common.ProfileDefault]["AlphaFlightControls"]["PLANE"]; ok {
+		if action, ok := actions["ACTION_WITH_SECONDARY"]; ok {
+			if action[common.InputSecondary] != "Button 2" {
+				t.Errorf("Expected secondary 'Button 2', got '%s'", action[common.InputSecondary])
+			}
+		} else {
+			t.Error("Expected ACTION_WITH_SECONDARY in actions")
+		}
+	} else {
+		t.Error("Expected PLANE context in gameBinds")
+	}
+}
+
+func TestMatchGameInputToModel_WithSecondary(t *testing.T) {
+	wd, _ := os.Getwd()
+	configPath := filepath.Join(wd, "../../config/fs2020.yaml")
+	log := common.NewLog()
+
+	gameData, _ := common.LoadGameModel(configPath, "FS2020 Data", false, log)
+	sharedGameData = gameData
+	sharedRegexes = fs2020Regexes{
+		Button:   regexp.MustCompile(sharedGameData.Regexes["Button"]),
+		Axis:     regexp.MustCompile(sharedGameData.Regexes["Axis"]),
+		Pov:      regexp.MustCompile(sharedGameData.Regexes["Pov"]),
+		Rotation: regexp.MustCompile(sharedGameData.Regexes["Rotation"]),
+		Slider:   regexp.MustCompile(sharedGameData.Regexes["Slider"]),
+	}
+
+	deviceInputs := make(common.DeviceInputs)
+
+	// Test with both primary and secondary
+	actionData := common.GameInput{"Button 1", "Button 2"}
+	result, _ := matchGameInputToModel("TestDevice", actionData, deviceInputs, nil, log)
+
+	if len(result) != 2 {
+		t.Errorf("Expected 2 results for primary+secondary, got %d", len(result))
+	}
+	if len(result) >= 2 {
+		if result[0] != "1" {
+			t.Errorf("Expected primary '1', got '%s'", result[0])
+		}
+		if result[1] != "2" {
+			t.Errorf("Expected secondary '2', got '%s'", result[1])
+		}
+	}
+}
+
+func TestMatchGameInputToModel_SecondaryNotMatched(t *testing.T) {
+	wd, _ := os.Getwd()
+	configPath := filepath.Join(wd, "../../config/fs2020.yaml")
+	log := common.NewLog()
+
+	gameData, _ := common.LoadGameModel(configPath, "FS2020 Data", false, log)
+	sharedGameData = gameData
+	sharedRegexes = fs2020Regexes{
+		Button:   regexp.MustCompile(sharedGameData.Regexes["Button"]),
+		Axis:     regexp.MustCompile(sharedGameData.Regexes["Axis"]),
+		Pov:      regexp.MustCompile(sharedGameData.Regexes["Pov"]),
+		Rotation: regexp.MustCompile(sharedGameData.Regexes["Rotation"]),
+		Slider:   regexp.MustCompile(sharedGameData.Regexes["Slider"]),
+	}
+
+	deviceInputs := make(common.DeviceInputs)
+
+	// Test with primary matching but secondary not matching regex
+	actionData := common.GameInput{"Button 1", "InvalidSecondary"}
+	result, _ := matchGameInputToModel("TestDevice", actionData, deviceInputs, nil, log)
+
+	// Should have only primary since secondary doesn't match
+	if len(result) != 1 {
+		t.Errorf("Expected 1 result (primary only), got %d", len(result))
+	}
+}
+
+func TestMatchGameInputToModel_PrimaryNotMatched(t *testing.T) {
+	wd, _ := os.Getwd()
+	configPath := filepath.Join(wd, "../../config/fs2020.yaml")
+	log := common.NewLog()
+
+	gameData, _ := common.LoadGameModel(configPath, "FS2020 Data", false, log)
+	sharedGameData = gameData
+	sharedRegexes = fs2020Regexes{
+		Button:   regexp.MustCompile(sharedGameData.Regexes["Button"]),
+		Axis:     regexp.MustCompile(sharedGameData.Regexes["Axis"]),
+		Pov:      regexp.MustCompile(sharedGameData.Regexes["Pov"]),
+		Rotation: regexp.MustCompile(sharedGameData.Regexes["Rotation"]),
+		Slider:   regexp.MustCompile(sharedGameData.Regexes["Slider"]),
+	}
+
+	deviceInputs := make(common.DeviceInputs)
+
+	// Test with primary not matching
+	actionData := common.GameInput{"InvalidPrimary", ""}
+	result, _ := matchGameInputToModel("TestDevice", actionData, deviceInputs, nil, log)
+
+	// Should be empty since primary doesn't match
+	if len(result) != 0 {
+		t.Errorf("Expected 0 results for unmatched primary, got %d", len(result))
+	}
+}
+
+func TestMatchGameInputToModelByRegex_POVWithNumber(t *testing.T) {
+	wd, _ := os.Getwd()
+	configPath := filepath.Join(wd, "../../config/fs2020.yaml")
+	log := common.NewLog()
+
+	gameData, _ := common.LoadGameModel(configPath, "FS2020 Data", false, log)
+	sharedGameData = gameData
+	sharedRegexes = fs2020Regexes{
+		Button:   regexp.MustCompile(sharedGameData.Regexes["Button"]),
+		Axis:     regexp.MustCompile(sharedGameData.Regexes["Axis"]),
+		Pov:      regexp.MustCompile(sharedGameData.Regexes["Pov"]),
+		Rotation: regexp.MustCompile(sharedGameData.Regexes["Rotation"]),
+		Slider:   regexp.MustCompile(sharedGameData.Regexes["Slider"]),
+	}
+
+	// Test POV with explicit number - regex is: (?i)Pov(\d?)[\s_]([[:alpha:]]+)
+	// Input format should be like "Pov2_Up" or "POV2 Up"
+	result := matchGameInputToModelByRegex("TestDevice", "POV2_Up", nil, nil, log)
+	if result != "POV2Up" {
+		t.Errorf("Expected POV2Up, got '%s'", result)
+	}
+}
+
+
+func TestMatchGameInputToModelByRegex_RotationWithOverride(t *testing.T) {
+	wd, _ := os.Getwd()
+	configPath := filepath.Join(wd, "../../config/fs2020.yaml")
+	log := common.NewLog()
+
+	gameData, _ := common.LoadGameModel(configPath, "FS2020 Data", false, log)
+	sharedGameData = gameData
+	sharedRegexes = fs2020Regexes{
+		Button:   regexp.MustCompile(sharedGameData.Regexes["Button"]),
+		Axis:     regexp.MustCompile(sharedGameData.Regexes["Axis"]),
+		Pov:      regexp.MustCompile(sharedGameData.Regexes["Pov"]),
+		Rotation: regexp.MustCompile(sharedGameData.Regexes["Rotation"]),
+		Slider:   regexp.MustCompile(sharedGameData.Regexes["Slider"]),
+	}
+
+	// Test Rotation with override
+	inputMap := common.InputTypeMapping{
+		"Rotation": map[string]string{"Z": "U"},
+	}
+	result := matchGameInputToModelByRegex("TestDevice", "Rotation Z", nil, inputMap, log)
+	if result != "UAxis" {
+		t.Errorf("Expected UAxis (mapped from Z), got '%s'", result)
+	}
+}
+
+func TestMatchGameInputToModelByRegex_SliderNotOnDevice(t *testing.T) {
+	wd, _ := os.Getwd()
+	configPath := filepath.Join(wd, "../../config/fs2020.yaml")
+	log := common.NewLog()
+
+	gameData, _ := common.LoadGameModel(configPath, "FS2020 Data", false, log)
+	sharedGameData = gameData
+	sharedRegexes = fs2020Regexes{
+		Button:   regexp.MustCompile(sharedGameData.Regexes["Button"]),
+		Axis:     regexp.MustCompile(sharedGameData.Regexes["Axis"]),
+		Pov:      regexp.MustCompile(sharedGameData.Regexes["Pov"]),
+		Rotation: regexp.MustCompile(sharedGameData.Regexes["Rotation"]),
+		Slider:   regexp.MustCompile(sharedGameData.Regexes["Slider"]),
+	}
+
+	// Test Slider mapped but not on device
+	inputMap := common.InputTypeMapping{
+		"Slider": map[string]string{"X": "U"},
+	}
+	deviceInputs := make(common.DeviceInputs)
+	// UAxis not in deviceInputs
+
+	result := matchGameInputToModelByRegex("TestDevice", "Slider X", deviceInputs, inputMap, log)
+	if result != "" {
+		t.Errorf("Expected empty result for slider not on device, got '%s'", result)
+	}
+}
+
