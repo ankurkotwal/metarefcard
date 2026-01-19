@@ -74,14 +74,31 @@ func loadFont(dir string, name string, size int) font.Face {
 	return face
 }
 
-type fontFaceCache map[int]font.Face
+type fontKey struct {
+	name string
+	size int
+}
 
-func (cache fontFaceCache) loadFont(dir string, name string, size int) font.Face {
-	if fontFace, found := cache[size]; found {
-		return fontFace
+// FontFaceCache is a thread-safe cache for font faces
+type FontFaceCache struct {
+	cache sync.Map
+}
+
+func NewFontFaceCache() *FontFaceCache {
+	return &FontFaceCache{}
+}
+
+func (c *FontFaceCache) LoadFont(dir string, name string, size int) font.Face {
+	key := fontKey{name: name, size: size}
+	if v, ok := c.cache.Load(key); ok {
+		return v.(font.Face)
 	}
 	fontFace := loadFont(dir, name, size)
-	cache[size] = fontFace
+	c.cache.Store(key, fontFace)
 	return fontFace
+}
 
+// Helper interface to allow passing nil in old code paths if needed, though we will update them.
+type FontLoader interface {
+	LoadFont(dir string, name string, size int) font.Face
 }
