@@ -518,7 +518,7 @@ func TestMatchGameInputToModelByRegex(t *testing.T) {
 	log := common.NewLog()
 	
 	// Load game data to get regex strings
-	gameData := common.LoadGameModel(configPath, "FS2020 Data", false, log)
+	gameData, _ := common.LoadGameModel(configPath, "FS2020 Data", false, log)
 	sharedGameData = gameData
 	
 	// Compile regexes manually as they are in fs2020.go
