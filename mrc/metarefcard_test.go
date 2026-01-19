@@ -494,7 +494,6 @@ func TestGetServer_ConfigError(t *testing.T) {
 	t.Fatalf("process ran with err %v, want exit status 1", err)
 }
 
-
 func TestSendResponse(t *testing.T) {
 	// Change to root dir to find resources
 	wd, _ := os.Getwd()
@@ -626,7 +625,6 @@ func TestSendResponse_NilContext(t *testing.T) {
 	// The "if c != nil" check only appears in one error path.
 	t.Skip("Nil context test skipped - would cause panic")
 }
-
 
 func TestSendResponse_Error(t *testing.T) {
 	// Change to root dir
