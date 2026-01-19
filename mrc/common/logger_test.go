@@ -6,28 +6,30 @@ import (
 	"testing"
 )
 
-func TestLogger_Msg(t *testing.T) {
-	log := NewLog()
-	log.Msg("Test message %s", "arg")
+func TestMsg(t *testing.T) {
+	l := NewLog()
+	msg := "test message"
+	l.Msg("%s", msg)
 
-	if len(*log) != 1 {
-		t.Errorf("Expected 1 log entry, got %d", len(*log))
+	if len(*l) != 1 {
+		t.Errorf("Expected 1 log entry, got %d", len(*l))
 	}
-	if (*log)[0].IsError {
-		t.Error("Expected IsError false")
+	if (*l)[0].Msg != msg {
+		t.Errorf("Expected message '%s', got '%s'", msg, (*l)[0].Msg)
 	}
-	if (*log)[0].Msg != "Test message arg" {
-		t.Errorf("Unexpected message: %s", (*log)[0].Msg)
+	if (*l)[0].IsError {
+		t.Errorf("Expected IsError false, got true")
 	}
 }
 
-func TestLogger_Fatal(t *testing.T) {
+func TestFatal(t *testing.T) {
+	// Re-run the test in a subprocess
 	if os.Getenv("BE_CRASHER") == "1" {
-		log := NewLog()
-		log.Fatal("Fatal error")
+		l := NewLog()
+		l.Fatal("fatal error")
 		return
 	}
-	cmd := exec.Command(os.Args[0], "-test.run=TestLogger_Fatal")
+	cmd := exec.Command(os.Args[0], "-test.run=TestFatal")
 	cmd.Env = append(os.Environ(), "BE_CRASHER=1")
 	err := cmd.Run()
 	if e, ok := err.(*exec.ExitError); ok && !e.Success() {

@@ -273,6 +273,68 @@ func TestLoadInputFiles_ErroneousData(t *testing.T) {
 	}
 }
 
+func TestGetInputTypeAsField(t *testing.T) {
+	tests := []struct {
+		inputType string
+		wantField string // "Axis", "Button", "DeviceID", names of fields to be set, or "nil" if nil
+		wantErr   bool
+	}{
+		{"axis", "Axis", false},
+		{"Axis", "Axis", false}, // Test case insensitivity
+		{"button", "Button", false},
+		{"deviceid", "DeviceID", false},
+		{"altbutton", "nil", false},
+		{"identifier", "nil", false},
+		{"modifier", "nil", false},
+		{"negate", "nil", false},
+		{"type", "nil", false},
+		{"unknown", "", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.inputType, func(t *testing.T) {
+			details := &swsActionDetails{}
+			// Pre-set fields to verify they get overwritten or not
+			details.Axis = "pre"
+			details.Button = "pre"
+			details.DeviceID = "pre"
+
+			field, err := getInputTypeAsField(tt.inputType, details)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("getInputTypeAsField(%q) error = %v, wantErr %v", tt.inputType, err, tt.wantErr)
+				return
+			}
+			
+			if field == nil {
+				if tt.wantField != "nil" && !tt.wantErr {
+					t.Errorf("getInputTypeAsField(%q) return nil field, want %s", tt.inputType, tt.wantField)
+				}
+				return
+			}
+
+			// Verify the pointer points to the right field by modifying it
+			*field = "modified"
+			
+			switch tt.wantField {
+			case "Axis":
+				if details.Axis != "modified" {
+					t.Errorf("Expected Axis to be modified")
+				}
+			case "Button":
+				if details.Button != "modified" {
+					t.Errorf("Expected Button to be modified")
+				}
+			case "DeviceID":
+				if details.DeviceID != "modified" {
+					t.Errorf("Expected DeviceID to be modified")
+				}
+			}
+		})
+	}
+}
+
+
+
 func BenchmarkLoadInputFiles(b *testing.B) {
 	// Initialize regexes
 	log := common.NewLog()
