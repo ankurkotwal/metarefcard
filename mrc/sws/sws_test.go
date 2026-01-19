@@ -333,8 +333,6 @@ func TestGetInputTypeAsField(t *testing.T) {
 	}
 }
 
-
-
 func BenchmarkLoadInputFiles(b *testing.B) {
 	// Initialize regexes
 	log := common.NewLog()

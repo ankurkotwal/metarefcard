@@ -509,6 +509,68 @@ func TestMatchGameInputToModel_PrimaryNotMatched(t *testing.T) {
 	}
 }
 
+func TestMatchGameInputToModelByRegex(t *testing.T) {
+	// Load config to populate regexes
+	wd, _ := os.Getwd()
+	// config is at ../../config/fs2020.yaml relative to package
+	configPath := filepath.Join(wd, "../../config/fs2020.yaml")
+	
+	log := common.NewLog()
+	
+	// Load game data to get regex strings
+	gameData := common.LoadGameModel(configPath, "FS2020 Data", false, log)
+	sharedGameData = gameData
+	
+	// Compile regexes manually as they are in fs2020.go
+	sharedRegexes = fs2020Regexes{
+		Button:   regexp.MustCompile(sharedGameData.Regexes["Button"]),
+		Axis:     regexp.MustCompile(sharedGameData.Regexes["Axis"]),
+		Pov:      regexp.MustCompile(sharedGameData.Regexes["Pov"]),
+		Rotation: regexp.MustCompile(sharedGameData.Regexes["Rotation"]),
+		Slider:   regexp.MustCompile(sharedGameData.Regexes["Slider"]),
+	}
+	
+	// Test cases
+	tests := []struct {
+		name       string
+		action     string
+		deviceName string
+		want       string
+	}{
+		{
+			name:       "Standard Button",
+			action:     "Button 1",
+			deviceName: "TestDevice",
+			want:       "1", 
+		},
+		{
+			name:       "Joystick Axis",
+			action:     "Axis X",
+			deviceName: "TestDevice",
+			want:       "XAxis", 
+		},
+		{
+			name:       "POV Hat Up",
+			action:     "POV1_UP",
+			deviceName: "TestDevice",
+			want:       "POV1Up",
+		},
+	}
+
+	mockInputs := make(common.DeviceInputs)
+	// We need to verify what matchGameInputToModelByRegex expects in inputs. 
+	// required if looking for sliders?
+	
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := matchGameInputToModelByRegex(tt.deviceName, tt.action, mockInputs, nil, log)
+			if got != tt.want {
+				t.Errorf("matchGameInputToModelByRegex() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestMatchGameInputToModelByRegex_POVWithNumber(t *testing.T) {
 	wd, _ := os.Getwd()
 	configPath := filepath.Join(wd, "../../config/fs2020.yaml")
@@ -531,7 +593,6 @@ func TestMatchGameInputToModelByRegex_POVWithNumber(t *testing.T) {
 		t.Errorf("Expected POV2Up, got '%s'", result)
 	}
 }
-
 
 func TestMatchGameInputToModelByRegex_RotationWithOverride(t *testing.T) {
 	wd, _ := os.Getwd()

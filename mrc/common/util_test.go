@@ -140,7 +140,6 @@ func TestLoadFont_Panic(t *testing.T) {
 	loadFont(".", "non_existent_font.ttf", 10)
 }
 
-
 func TestYamlObjectAsString(t *testing.T) {
 	data := map[string]string{"foo": "bar"}
 	str := YamlObjectAsString(data, "Test Label")
