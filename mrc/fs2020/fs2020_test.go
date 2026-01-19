@@ -231,3 +231,39 @@ func TestLoadInputFiles_ErroneousData(t *testing.T) {
 		t.Errorf("Expected gameBinds to be empty, got %v", gameBinds)
 	}
 }
+
+func BenchmarkLoadInputFiles(b *testing.B) {
+	// Setup generic config for testing
+	log := common.NewLog()
+	
+	deviceMap := common.DeviceNameFullToShort{
+		"Alpha Flight Controls": "AlphaFlightControls",
+	}
+
+	// Read a sample file from testdata
+	wd, _ := os.Getwd()
+	testDataPath := filepath.Join(wd, "../../testdata/fs2020/Alpha_Flight_Controls.xml")
+	fileContent, err := os.ReadFile(testDataPath)
+	if err != nil {
+		b.Fatalf("Failed to read test data file: %v", err)
+	}
+
+	files := [][]byte{fileContent}
+	
+	// Ensure regexes are inited
+	configPath := filepath.Join(wd, "../../config/fs2020.yaml")
+	gameData := common.LoadGameModel(configPath, "FS2020 Data", false, log)
+	sharedGameData = gameData
+	sharedRegexes = fs2020Regexes{
+		Button:   regexp.MustCompile(sharedGameData.Regexes["Button"]),
+		Axis:     regexp.MustCompile(sharedGameData.Regexes["Axis"]),
+		Pov:      regexp.MustCompile(sharedGameData.Regexes["Pov"]),
+		Rotation: regexp.MustCompile(sharedGameData.Regexes["Rotation"]),
+		Slider:   regexp.MustCompile(sharedGameData.Regexes["Slider"]),
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		loadInputFiles(files, deviceMap, log, false, false)
+	}
+}

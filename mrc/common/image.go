@@ -8,6 +8,9 @@ import (
 	"os"
 	"sort"
 
+	"sync"
+	"sync/atomic"
+
 	"github.com/fogleman/gg"
 	"github.com/pixiv/go-libjpeg/jpeg"
 	"golang.org/x/image/font"
@@ -30,38 +33,68 @@ func GenerateImages(overlaysByProfile OverlaysByProfile,
 		return files, numBytes
 	}
 
+	// Pre-calculate inputs to allow using index for deterministic output order
+	type workItem struct {
+		profile   string
+		imageName string
+		index     int
+	}
+	var workItems []workItem
+	idx := 0
 	for _, profile := range profiles {
-		imagesNames := imageNamesByProfile[profile]
-		for _, imageName := range imagesNames {
-			pixelMultiplier := getPixelMultiplier(imageName, config)
+		for _, imageName := range imageNamesByProfile[profile] {
+			workItems = append(workItems, workItem{
+				profile:   profile,
+				imageName: imageName,
+				index:     idx,
+			})
+			idx++
+		}
+	}
+
+	files = make([]bytes.Buffer, len(workItems))
+	var totalBytes int64
+
+	var wg sync.WaitGroup
+	for _, item := range workItems {
+		wg.Add(1)
+		go func(item workItem) {
+			defer wg.Done()
+			
+			// Create a local font cache for this image generation to ensure thread safety
+			// as font.Face is not thread safe
+			fontCache := NewFontFaceCache()
+			
+			pixelMultiplier := getPixelMultiplier(item.imageName, config)
 			imageFilename := fmt.Sprintf("%s/%s.jpg", config.HotasImagesDir,
-				imageName)
+				item.imageName)
 			image, err := decodeJpg(imageFilename, log)
 			if err != nil || image == nil {
-				log.Err("loadImage %s failed. %v", imageName, err)
-				continue
+				log.Err("loadImage %s failed. %v", item.imageName, err)
+				return
 			}
 			dc := gg.NewContextForRGBA(image)
 
 			dc.DrawImage(logo, 0, 0)
 			xOffset := float64(logo.Bounds().Max.X)
-			addImageHeader(dc, &config.ImageHeader, profile,
-				config.Devices.DeviceLabelsByImage[imageName],
+			addImageHeader(dc, &config.ImageHeader, item.profile,
+				config.Devices.DeviceLabelsByImage[item.imageName],
 				xOffset, pixelMultiplier, config.FontsDir,
-				config.InputMinFontSize)
+				config.InputMinFontSize, fontCache)
 			addMRCLogo(dc, &config.Watermark, config.Version, config.Domain,
 				xOffset, float64(config.InputPixelXInset), pixelMultiplier,
-				config.FontsDir)
+				config.FontsDir, fontCache)
 
 			// Load the image
 			imgBytes := populateImage(dc, imageFilename, image.Bounds().Size(),
-				pixelMultiplier, overlaysByProfile[profile][imageName],
-				categories, config, log)
-			files = append(files, imgBytes)
-			numBytes += imgBytes.Len()
-		}
+				pixelMultiplier, overlaysByProfile[item.profile][item.imageName],
+				categories, config, log, fontCache)
+			files[item.index] = imgBytes
+			atomic.AddInt64(&totalBytes, int64(imgBytes.Len()))
+		}(item)
 	}
-	return files, numBytes
+	wg.Wait()
+	return files, int(totalBytes)
 }
 
 // Returns a sorted list of profile names, a map containing sorted image names
@@ -90,11 +123,11 @@ func prepImgGenData(overlaysByProfile OverlaysByProfile) ([]string,
 // GenerateImage - generates an image with the provided overlays
 func populateImage(dc *gg.Context, imageFilename string, imgSize image.Point,
 	pixelMultiplier float64, overlayDataRange map[string]OverlayData,
-	categories map[string]string, config *Config, log *Logger) bytes.Buffer {
+	categories map[string]string, config *Config, log *Logger,
+	fontCache FontLoader) bytes.Buffer {
 
 	width := float64(imgSize.X)
 	height := float64(imgSize.Y)
-	fontFaceCache := make(fontFaceCache)
 
 	// Sort keys for deterministic output
 	var keys []string
@@ -141,7 +174,7 @@ func populateImage(dc *gg.Context, imageFilename string, imgSize image.Point,
 				incrementalTexts = append(incrementalTexts, fullText+padding)
 			}
 		}
-		fontSize = calcFontSize(fullText, fontFaceCache, fontSize, targetWidth,
+		fontSize = calcFontSize(fullText, fontCache, fontSize, targetWidth,
 			targetHeight, config.FontsDir, config.InputFont,
 			config.InputMinFontSize)
 		// Now create overlays for each text
@@ -150,9 +183,9 @@ func populateImage(dc *gg.Context, imageFilename string, imgSize image.Point,
 		for _, context := range prepareContexts(overlayData.ContextToTexts) {
 			texts := overlayData.ContextToTexts[context]
 			for _, text := range texts {
-				largeFont := fontFaceCache.loadFont(config.FontsDir,
+				largeFont := fontCache.LoadFont(config.FontsDir,
 					config.InputFont, fontSize)
-				smallFont := fontFaceCache.loadFont(config.FontsDir,
+				smallFont := fontCache.LoadFont(config.FontsDir,
 					config.InputFont, fontSize-1)
 				offset, _ := measureString(largeFont, incrementalTexts[idx])
 				idx++
@@ -198,7 +231,7 @@ func measureString(fontFace font.Face, text string) (int, int) {
 }
 
 // Resize font till it fits
-func calcFontSize(text string, fontFaceCache fontFaceCache,
+func calcFontSize(text string, fontLoader FontLoader,
 	fontSize int, targetWidth int, targetHeight int, fontsDir string,
 	fontName string, minFontSize int) int {
 	// Max height in pixels is targetHeight (fontSize = height)
@@ -206,10 +239,10 @@ func calcFontSize(text string, fontFaceCache fontFaceCache,
 	newFontSize := maxFontSize
 	for {
 		var fontFace font.Face
-		if fontFaceCache == nil {
+		if fontLoader == nil {
 			fontFace = loadFont(fontsDir, fontName, newFontSize)
 		} else {
-			fontFace = fontFaceCache.loadFont(fontsDir, fontName, newFontSize)
+			fontFace = fontLoader.LoadFont(fontsDir, fontName, newFontSize)
 		}
 		x, y := measureString(fontFace, text)
 		if y > targetHeight {
@@ -288,7 +321,7 @@ func drawTextWithBackgroundRec(dc *gg.Context, text string, xOffset float64,
 
 func addImageHeader(dc *gg.Context, imageHeader *HeaderData, profile string,
 	label string, xOffset float64, pixelMultiplier float64, fontsDir string,
-	minFontSize int) {
+	minFontSize int, fontCache FontLoader) {
 	fontSize := int(math.Round(imageHeader.FontSize * pixelMultiplier))
 	// Add profile name to header if its not the MRC default
 	if profile != ProfileDefault {
@@ -297,9 +330,14 @@ func addImageHeader(dc *gg.Context, imageHeader *HeaderData, profile string,
 	targetWidth := dc.Width() -
 		int(math.Round(xOffset+2*imageHeader.Inset.X*pixelMultiplier))
 	targetHeight := fontSize // Use fontSize as the targetHeight (max height)
-	fontSize = calcFontSize(label, nil, fontSize, targetWidth, targetHeight,
+	fontSize = calcFontSize(label, fontCache, fontSize, targetWidth, targetHeight,
 		fontsDir, imageHeader.Font, minFontSize)
-	headingFont := loadFont(fontsDir, imageHeader.Font, fontSize)
+	var headingFont font.Face
+	if fontCache != nil {
+		headingFont = fontCache.LoadFont(fontsDir, imageHeader.Font, fontSize)
+	} else {
+		headingFont = loadFont(fontsDir, imageHeader.Font, fontSize)
+	}
 
 	// Generate header
 	dc.SetHexColor(imageHeader.BackgroundColour)
@@ -313,13 +351,23 @@ func addImageHeader(dc *gg.Context, imageHeader *HeaderData, profile string,
 }
 
 func addMRCLogo(dc *gg.Context, watermark *WatermarkData, version string, domain string,
-	xOffset float64, xInset float64, pixelMultiplier float64, fontsDir string) {
+	xOffset float64, xInset float64, pixelMultiplier float64, fontsDir string,
+	fontCache FontLoader) {
 	fontSize := int(math.Round(watermark.FontSize * pixelMultiplier))
 	// Generate watermark
 	text := fmt.Sprintf("%s v%s (%s)", watermark.Text, version, domain)
+	var largeFont, smallFont font.Face
+	if fontCache != nil {
+		largeFont = fontCache.LoadFont(fontsDir, watermark.Font, fontSize)
+		smallFont = fontCache.LoadFont(fontsDir, watermark.Font, fontSize-1)
+	} else {
+		largeFont = loadFont(fontsDir, watermark.Font, fontSize)
+		smallFont = loadFont(fontsDir, watermark.Font, fontSize-1)
+	}
+
 	drawTextWithBackgroundRec(dc, text, xOffset, watermark.Location, 0, 0,
 		fontSize, pixelMultiplier,
-		loadFont(fontsDir, watermark.Font, fontSize),
-		loadFont(fontsDir, watermark.Font, fontSize-1),
+		largeFont,
+		smallFont,
 		watermark.BackgroundColour, watermark.TextColour)
 }

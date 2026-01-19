@@ -189,3 +189,36 @@ func TestLoadInputFiles_ErroneousData(t *testing.T) {
 		t.Errorf("Expected gameBinds to be empty for unknown device, got %v", gameBinds)
 	}
 }
+
+func BenchmarkLoadInputFiles(b *testing.B) {
+	// Initialize regexes
+	log := common.NewLog()
+	wd, _ := os.Getwd()
+	configPath := filepath.Join(wd, "../../config/sws.yaml")
+	gameData := common.LoadGameModel(configPath, "SWS Data", false, log)
+	sharedGameData = gameData
+	
+	sharedRegexes = swsRegexes{
+		Bind:     regexp.MustCompile(sharedGameData.Regexes["Bind"]),
+		Joystick: regexp.MustCompile(sharedGameData.Regexes["Joystick"]),
+	}
+
+	deviceMap := common.DeviceNameFullToShort{
+		"Saitek Pro Flight X-55 Rhino Stick":    "SaitekX55Joystick",
+		"Saitek Pro Flight X-55 Rhino Throttle": "SaitekX55Throttle",
+	}
+
+	// Read sample file
+	testDataPath := "../../testdata/sws/Saitek_Pro_Flight_X-55_Rhino.profile"
+	fileContent, err := os.ReadFile(testDataPath)
+	if err != nil {
+		b.Fatalf("Failed to read test data file: %v", err)
+	}
+
+	files := [][]byte{fileContent}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		loadInputFiles(files, deviceMap, log, false, false)
+	}
+}

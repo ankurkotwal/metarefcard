@@ -68,31 +68,34 @@ func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
 		for scanner.Scan() {
 			line := scanner.Text()
 
-			matches := sharedRegexes.Bind.FindAllStringSubmatch(line, -1)
-			if matches != nil {
-				override, err := strconv.Atoi(matches[0][3])
-				if err != nil {
-					log.Err("SWS Device num not an integer %s", matches[0][3])
+			if strings.HasPrefix(line, "GstKeyBinding.") {
+				matches := sharedRegexes.Bind.FindStringSubmatch(line)
+				if matches != nil {
+					override, err := strconv.Atoi(matches[3])
+					if err != nil {
+						log.Err("SWS Device num not an integer %s", matches[3])
+						continue
+					}
+					addAction(contextActionIndex, matches[1], contexts, matches[2],
+						override, matches[4], matches[5])
 					continue
 				}
-				addAction(contextActionIndex, matches[0][1], contexts, matches[0][2],
-					override, matches[0][4], matches[0][5])
-				continue
-			}
-			matches2 := sharedRegexes.Joystick.FindAllStringSubmatch(line, -1)
-			if matches2 != nil && len(matches2[0][2]) > 0 {
-				if shortName, found := deviceNameMap[matches2[0][2]]; !found {
-					log.Err("SWS Unknown device found %s", matches2[0][2])
-					continue
-				} else {
-					num, err := strconv.Atoi(matches2[0][1])
-					// Subtract 1 from the Joystick index to match deviceIds in the file
-					num--
-					if err == nil && num >= 0 {
-						deviceIndex[strconv.Itoa(num)] = shortName
-						deviceNames[shortName] = true
+			} else if strings.HasPrefix(line, "GstInput.JoystickDevice") {
+				matches2 := sharedRegexes.Joystick.FindStringSubmatch(line)
+				if matches2 != nil && len(matches2[2]) > 0 {
+					if shortName, found := deviceNameMap[matches2[2]]; !found {
+						log.Err("SWS Unknown device found %s", matches2[2])
+						continue
 					} else {
-						log.Err("SWS unexpected device number %s", matches2[0][1])
+						num, err := strconv.Atoi(matches2[1])
+						// Subtract 1 from the Joystick index to match deviceIds in the file
+						num--
+						if err == nil && num >= 0 {
+							deviceIndex[strconv.Itoa(num)] = shortName
+							deviceNames[shortName] = true
+						} else {
+							log.Err("SWS unexpected device number %s", matches2[1])
+						}
 					}
 				}
 			}
