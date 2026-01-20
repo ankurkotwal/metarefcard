@@ -35,7 +35,12 @@ func parseCliArgs() (bool, mrc.GameToInputFiles) {
 	if debugMode && len(testDataDir) > 0 {
 		for _, getGameInfo := range mrc.GamesInfo {
 			label, _, _, _ := getGameInfo()
-			gameFiles[label] = mrc.GetFilesFromDir(fmt.Sprintf("%s/%s", testDataDir, label))
+			files, err := mrc.GetFilesFromDir(fmt.Sprintf("%s/%s", testDataDir, label))
+			if err != nil {
+				log.Printf("Error loading files for %s: %v", label, err)
+				continue
+			}
+			gameFiles[label] = files
 		}
 	}
 

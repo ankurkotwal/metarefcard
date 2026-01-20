@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"log"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"path"
@@ -111,13 +111,23 @@ func loadFormFiles(c *gin.Context, log *common.Logger) [][]byte {
 	}
 
 	inputFiles := form.File["file"]
+	return processMultipartFiles(inputFiles, log, func(fh *multipart.FileHeader) (multipart.File, error) {
+		return fh.Open()
+	})
+}
+
+// processMultipartFiles processes the files using a provided opener function
+func processMultipartFiles(inputFiles []*multipart.FileHeader, log *common.Logger, 
+	opener func(*multipart.FileHeader) (multipart.File, error)) [][]byte {
+	
 	files := make([][]byte, len(inputFiles))
 	for idx, file := range inputFiles {
-		multipart, err := file.Open()
+		multipart, err := opener(file)
 		if err != nil {
 			log.Err("Error opening multipart file %s - %s", file.Filename, err)
 			continue
 		}
+		defer multipart.Close()
 		contents, err := io.ReadAll(multipart)
 		if err != nil {
 			log.Err("Error reading multipart file %s - %s", file.Filename, err)
@@ -178,7 +188,7 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 		c.Data(http.StatusInternalServerError, "text/html; charset=utf-8", []byte(s))
 	} else {
 		var tpl bytes.Buffer
-		err = l.Execute(&tpl, struct{ Logs []*common.LogEntry }{Logs: *log})
+		err = l.Execute(&tpl, struct{ Logs []*common.LogEntry }{Logs: log.Entries})
 		if err != nil {
 			log.Err("Error executing logging template - %s", err)
 		}
@@ -203,10 +213,10 @@ func (i *Filenames) Set(value string) error {
 }
 
 // GetFilesFromDir returns a list of file names from a directory
-func GetFilesFromDir(path string) *Filenames {
+func GetFilesFromDir(path string) (*Filenames, error) {
 	files, err := os.ReadDir(path)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	testFiles := make(Filenames, 0, len(files))
@@ -215,5 +225,5 @@ func GetFilesFromDir(path string) *Filenames {
 			testFiles = append(testFiles, fmt.Sprintf("%s/%s", path, f.Name()))
 		}
 	}
-	return &testFiles
+	return &testFiles, nil
 }

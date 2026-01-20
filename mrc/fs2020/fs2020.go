@@ -265,12 +265,12 @@ func matchGameInputToModelByRegex(deviceName string, action string,
 	var matches [][]string
 
 	matches = sharedRegexes.Button.FindAllStringSubmatch(action, -1)
-	if matches != nil {
+	if matches != nil && len(matches[0]) > 1 {
 		return matches[0][1]
 	}
 
 	matches = sharedRegexes.Axis.FindAllStringSubmatch(action, -1)
-	if matches != nil {
+	if matches != nil && len(matches[0]) > 2 {
 		axis := fmt.Sprintf("%s%s", matches[0][1], matches[0][2])
 		if gameInputMap != nil {
 			if subAxis, found := gameInputMap["Axis"]; found {
@@ -283,7 +283,7 @@ func matchGameInputToModelByRegex(deviceName string, action string,
 		return axis
 	}
 	matches = sharedRegexes.Pov.FindAllStringSubmatch(action, -1)
-	if matches != nil {
+	if matches != nil && len(matches[0]) > 2 {
 		direction := common.TitleCaser(matches[0][2])
 		pov := fmt.Sprintf("POV%s%s", "1", direction)
 		if len(matches[0][1]) > 0 {
@@ -293,7 +293,7 @@ func matchGameInputToModelByRegex(deviceName string, action string,
 	}
 
 	matches = sharedRegexes.Rotation.FindAllStringSubmatch(action, -1)
-	if matches != nil {
+	if matches != nil && len(matches[0]) > 1 {
 		rotation := fmt.Sprintf("R%sAxis", matches[0][1])
 		if input, ok := gameInputMap["Rotation"]; ok {
 			// Check override
@@ -303,7 +303,7 @@ func matchGameInputToModelByRegex(deviceName string, action string,
 	}
 
 	matches = sharedRegexes.Slider.FindAllStringSubmatch(action, -1)
-	if matches != nil {
+	if matches != nil && len(matches[0]) > 1 {
 		var slider string
 		if input, ok := gameInputMap["Slider"]; ok {
 			slider = fmt.Sprintf("%sAxis", input[matches[0][1]])

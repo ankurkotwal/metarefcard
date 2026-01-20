@@ -8,6 +8,9 @@ func LoadDevicesInfo(file string, devices *Devices, log *Logger) {
 	LoadYaml(devices.GeneratedFile, &generatedDevices, "Generated Devices", log)
 
 	// Add device additions to the main device index
+	if generatedDevices.Index == nil {
+		generatedDevices.Index = make(DeviceMap)
+	}
 	for shortName, inputs := range devices.Index {
 		generatedInputs, found := generatedDevices.Index[shortName]
 		if !found {
@@ -23,6 +26,9 @@ func LoadDevicesInfo(file string, devices *Devices, log *Logger) {
 	devices.Index = generatedDevices.Index
 
 	// Add image map additions
+	if generatedDevices.ImageMap == nil {
+		generatedDevices.ImageMap = make(ImageMap)
+	}
 	for shortName, image := range devices.ImageMap {
 		generatedDevices.ImageMap[shortName] = image
 	}

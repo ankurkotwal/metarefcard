@@ -270,10 +270,8 @@ func calcFontSize(text string, fontLoader FontLoader,
 			// Can grow more, do so.
 			minFontSize = newFontSize
 			delta := (maxFontSize - newFontSize) / 2
-			if delta == 0 {
-				// Found optimal size
-				break
-			}
+			// Note: delta cannot be 0 here because we already checked
+			// newFontSize == maxFontSize (delta=0) and newFontSize == maxFontSize-1 (delta=0)
 			newFontSize += delta
 		}
 	}

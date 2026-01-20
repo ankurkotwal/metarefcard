@@ -2,7 +2,7 @@ package common
 
 import (
 	"fmt"
-	"log"
+
 	"os"
 	"sync"
 
@@ -33,17 +33,13 @@ func LoadYaml(filename string, out interface{}, label string, log *Logger) {
 	if err != nil {
 		log.Fatal("yaml.Unmarshal %v", err)
 	}
-	debugOutput := false
-	if debugOutput {
-		log.Dbg("%s", YamlObjectAsString(out, label))
-	}
 }
 
 // YamlObjectAsString outputs contents of yaml object with a label
-func YamlObjectAsString(in interface{}, label string) string {
+func YamlObjectAsString(in interface{}, label string, log *Logger) string {
 	d, err := yaml.Marshal(in)
 	if err != nil {
-		log.Fatalf("error: yaml.Marshal %v", err)
+		log.Fatal("error: yaml.Marshal %v", err)
 	}
 	return fmt.Sprintf("=== %s ===\n%s\n\n", label, string(d))
 
