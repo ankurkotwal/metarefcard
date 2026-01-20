@@ -21,8 +21,8 @@ jobs:
     - name: Install dependencies
       run: sudo apt install -y libjpeg-turbo8-dev
 
+    - name: Test
+      run: go test -v ./...
+
     - name: Build
       run: go build -v ./...
-
-    #- name: Test
-    #  run: go test -v ./...

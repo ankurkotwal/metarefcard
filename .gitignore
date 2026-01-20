@@ -51,3 +51,6 @@ __pycache__/
 
 # Python
 .venv/
+coverage.txt
+mrc/fs2020.jpg
+coverage_report.txt

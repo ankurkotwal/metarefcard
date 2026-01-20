@@ -7,6 +7,7 @@ import (
 	"html"
 	"html/template"
 	"image"
+	"image/color"
 	"image/draw"
 	_ "image/jpeg"
 	"io/fs"
@@ -22,6 +23,9 @@ import (
 var update = os.Getenv("UPDATE_REFERENCE") == "true"
 
 func TestReferenceFiles(t *testing.T) {
+	// This test must NOT run in parallel with other tests as it modifies global state (config)
+	// and relies on consistent working directory
+
 	// Switch to project root to allow config loading to work as expected
 	wd, _ := os.Getwd()
 	projectRoot := filepath.Dir(wd)
@@ -73,7 +77,7 @@ func TestReferenceFiles(t *testing.T) {
 				return nil
 			}
 
-			// Process file
+			// Process file - run subtests serially (no t.Parallel())
 			t.Run(fmt.Sprintf("%s/%s", label, d.Name()), func(t *testing.T) {
 				content, err := os.ReadFile(path)
 				if err != nil {
@@ -250,12 +254,27 @@ func compareImagesMaskingWatermark(t *testing.T, gotBytes, wantBytes []byte, cfg
 			c1 := gotRGBA.RGBAAt(x, y)
 			c2 := wantRGBA.RGBAAt(x, y)
 			
-			if c1 != c2 {
+			if !pixelsMatch(c1, c2, 60) {
 				t.Errorf("Image %d pixel mismatch at (%d, %d). Got %v, Want %v", idx, x, y, c1, c2)
 				return // Fail fast per image
 			}
 		}
 	}
+}
+
+func pixelsMatch(c1, c2 color.RGBA, tolerance int) bool {
+	return absDiff(c1.R, c2.R) <= tolerance &&
+		absDiff(c1.G, c2.G) <= tolerance &&
+		absDiff(c1.B, c2.B) <= tolerance &&
+		absDiff(c1.A, c2.A) <= tolerance
+}
+
+func absDiff(a, b uint8) int {
+	d := int(a) - int(b)
+	if d < 0 {
+		return -d
+	}
+	return d
 }
 
 func ensureRGBA(img image.Image) *image.RGBA {

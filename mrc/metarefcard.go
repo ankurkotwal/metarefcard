@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"log"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"path"
@@ -111,13 +111,23 @@ func loadFormFiles(c *gin.Context, log *common.Logger) [][]byte {
 	}
 
 	inputFiles := form.File["file"]
+	return processMultipartFiles(inputFiles, log, func(fh *multipart.FileHeader) (multipart.File, error) {
+		return fh.Open()
+	})
+}
+
+// processMultipartFiles processes the files using a provided opener function
+func processMultipartFiles(inputFiles []*multipart.FileHeader, log *common.Logger, 
+	opener func(*multipart.FileHeader) (multipart.File, error)) [][]byte {
+	
 	files := make([][]byte, len(inputFiles))
 	for idx, file := range inputFiles {
-		multipart, err := file.Open()
+		multipart, err := opener(file)
 		if err != nil {
 			log.Err("Error opening multipart file %s - %s", file.Filename, err)
 			continue
 		}
+		defer multipart.Close()
 		contents, err := io.ReadAll(multipart)
 		if err != nil {
 			log.Err("Error reading multipart file %s - %s", file.Filename, err)
@@ -142,7 +152,7 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 	generatedFiles, _ := common.GenerateImages(overlaysByImage, gameContexts,
 		gameLogo, config, log)
 
-	// Generate HTML
+	// Generate HTML for images
 	cardTempl := "resources/www/templates/refcard.html"
 	t, err := template.New(path.Base(cardTempl)).ParseFiles(cardTempl)
 	if err != nil {
@@ -155,6 +165,29 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 		return
 	}
 
+	// Render images using the extracted function
+	renderImages(generatedFiles, t, c, log)
+
+	// Generate HTML for logs
+	logTempl := "resources/www/templates/log.html"
+	l, err := template.New(path.Base(logTempl)).ParseFiles(logTempl)
+	if err != nil {
+		s := fmt.Sprintf("Error parsing logging template - %s", err)
+		log.Err("%s", s)
+		c.Data(http.StatusInternalServerError, "text/html; charset=utf-8", []byte(s))
+	} else {
+		var tpl bytes.Buffer
+		err = l.Execute(&tpl, struct{ Logs []*common.LogEntry }{Logs: log.Entries})
+		if err != nil {
+			log.Err("Error executing logging template - %s", err)
+		}
+		c.Data(http.StatusOK, "text/html; charset=utf-8", tpl.Bytes())
+	}
+}
+
+// renderImages renders generated images using the template and sends them as HTTP responses.
+// Extracted from sendResponse for testability.
+func renderImages(generatedFiles []bytes.Buffer, t *template.Template, c *gin.Context, log *common.Logger) {
 	type base64Image struct {
 		Base64Contents string
 	}
@@ -169,22 +202,8 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 		}
 		c.Data(http.StatusOK, "text/html; charset=utf-8", tpl.Bytes())
 	}
-	// Generate HTML
-	logTempl := "resources/www/templates/log.html"
-	l, err := template.New(path.Base(logTempl)).ParseFiles(logTempl)
-	if err != nil {
-		s := fmt.Sprintf("Error parsing logging template - %s", err)
-		log.Err("%s", s)
-		c.Data(http.StatusInternalServerError, "text/html; charset=utf-8", []byte(s))
-	} else {
-		var tpl bytes.Buffer
-		err = l.Execute(&tpl, struct{ Logs []*common.LogEntry }{Logs: *log})
-		if err != nil {
-			log.Err("Error executing logging template - %s", err)
-		}
-		c.Data(http.StatusOK, "text/html; charset=utf-8", tpl.Bytes())
-	}
 }
+
 
 // GameToInputFiles are the per-game arguments specified on the command line
 type GameToInputFiles map[string]*Filenames
@@ -203,10 +222,10 @@ func (i *Filenames) Set(value string) error {
 }
 
 // GetFilesFromDir returns a list of file names from a directory
-func GetFilesFromDir(path string) *Filenames {
+func GetFilesFromDir(path string) (*Filenames, error) {
 	files, err := os.ReadDir(path)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	testFiles := make(Filenames, 0, len(files))
@@ -215,5 +234,5 @@ func GetFilesFromDir(path string) *Filenames {
 			testFiles = append(testFiles, fmt.Sprintf("%s/%s", path, f.Name()))
 		}
 	}
-	return &testFiles
+	return &testFiles, nil
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"image"
+	"io"
 	"math"
 	"os"
 	"sort"
@@ -15,6 +16,14 @@ import (
 	"github.com/pixiv/go-libjpeg/jpeg"
 	"golang.org/x/image/font"
 )
+
+// JpegEncoder is the function type for encoding images to JPEG.
+// It's a package-level variable to allow injection during testing.
+type JpegEncoder func(w io.Writer, m image.Image, o *jpeg.EncoderOptions) error
+
+// jpegEncoderFunc is the default JPEG encoder (can be replaced in tests)
+var jpegEncoderFunc JpegEncoder = jpeg.Encode
+
 
 // GenerateImages returns the generated images
 func GenerateImages(overlaysByProfile OverlaysByProfile,
@@ -200,7 +209,7 @@ func populateImage(dc *gg.Context, imageFilename string, imgSize image.Point,
 	}
 
 	var imgBytes bytes.Buffer
-	err := jpeg.Encode(&imgBytes, dc.Image(), &jpeg.EncoderOptions{Quality: config.JpgQuality})
+	err := jpegEncoderFunc(&imgBytes, dc.Image(), &jpeg.EncoderOptions{Quality: config.JpgQuality})
 	if err != nil {
 		log.Err("jpeg encode failed: %v", err)
 	}
@@ -270,10 +279,8 @@ func calcFontSize(text string, fontLoader FontLoader,
 			// Can grow more, do so.
 			minFontSize = newFontSize
 			delta := (maxFontSize - newFontSize) / 2
-			if delta == 0 {
-				// Found optimal size
-				break
-			}
+			// Note: delta cannot be 0 here because we already checked
+			// newFontSize == maxFontSize (delta=0) and newFontSize == maxFontSize-1 (delta=0)
 			newFontSize += delta
 		}
 	}
