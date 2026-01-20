@@ -208,3 +208,107 @@ func TestPopulateImageOverlays(t *testing.T) {
 		t.Errorf("Unexpected text order: %v", texts)
 	}
 }
+
+func TestPopulateImageOverlays_EmptySecondaryInput(t *testing.T) {
+	// Test that empty secondary input is skipped (line 87-90)
+	log := NewLog()
+	
+	config := &Config{
+		Devices: Devices{
+			Index: DeviceMap{
+				"d1": DeviceInputs{
+					"btn1": InputData{X: 10, Y: 10, W: 50, H: 30},
+				},
+			},
+			ImageMap: ImageMap{
+				"d1": "d1.jpg",
+			},
+		},
+	}
+	
+	needed := make(Set)
+	needed["d1"] = true
+	
+	binds := make(GameBindsByProfile)
+	profile := "Default"
+	binds[profile] = make(GameDeviceContextActions)
+	binds[profile]["d1"] = make(GameContextActions)
+	binds[profile]["d1"]["ctx1"] = make(GameActions)
+	binds[profile]["d1"]["ctx1"]["action1"] = []string{"input1", ""} // Primary and empty secondary
+	
+	gameData := GameData{
+		InputLabels: map[string]string{
+			"action1": "Action 1",
+		},
+		InputMap: make(DeviceInputTypeMapping),
+	}
+	
+	// MatchFunc returns both primary and empty secondary to trigger the skip
+	matchFunc := func(deviceName string, actionData GameInput,
+		deviceInputs DeviceInputs, gameInputMap InputTypeMapping, log *Logger) (GameInput, string) {
+		// Return both primary (btn1) and empty secondary
+		return []string{"btn1", ""}, "TestLabel"
+	}
+	
+	overlays := PopulateImageOverlays(needed, config, log, binds, gameData, matchFunc)
+	
+	// Should only have btn1, secondary empty input should be skipped
+	imgOverlays := overlays[profile]["d1.jpg"]
+	if imgOverlays == nil {
+		t.Fatal("Expected overlays for d1.jpg")
+	}
+	
+	if _, ok := imgOverlays["d1:btn1"]; !ok {
+		t.Error("Expected overlay for btn1")
+	}
+	
+	// Verify no error for empty secondary (it's expected, not an error)
+	for _, entry := range log.Entries {
+		if entry.IsError && entry.Msg == "TestLabel unknown input to lookup  for device d1" {
+			t.Error("Should not log error for empty secondary input")
+		}
+	}
+}
+
+func TestGenerateImageOverlays_NewOverlayForExistingImage(t *testing.T) {
+	// Test adding a new device:input to an existing image (line 143-145)
+	log := NewLog()
+	
+	gameData := GameData{
+		InputLabels: map[string]string{
+			"action1": "Action 1",
+			"action2": "Action 2",
+		},
+	}
+	
+	existing := make(OverlaysByImage)
+	inputData1 := InputData{X: 10, Y: 10, W: 50, H: 30}
+	inputData2 := InputData{X: 100, Y: 100, W: 50, H: 30}
+	
+	// First call - creates image entry
+	GenerateImageOverlays(existing, "btn1", inputData1, gameData, "action1", "ctx1", "dev1", "shared.jpg", "label", log)
+	
+	// Second call - same image, different device:input (triggers line 143-145)
+	GenerateImageOverlays(existing, "btn2", inputData2, gameData, "action2", "ctx1", "dev1", "shared.jpg", "label", log)
+	
+	// Verify both overlays exist on the same image
+	imgOverlays := existing["shared.jpg"]
+	if imgOverlays == nil {
+		t.Fatal("Expected overlays for shared.jpg")
+	}
+	
+	if _, ok := imgOverlays["dev1:btn1"]; !ok {
+		t.Error("Expected overlay for btn1")
+	}
+	if _, ok := imgOverlays["dev1:btn2"]; !ok {
+		t.Error("Expected overlay for btn2")
+	}
+	
+	// Verify they have correct texts
+	if imgOverlays["dev1:btn1"].ContextToTexts["ctx1"][0] != "Action 1" {
+		t.Errorf("Wrong text for btn1: %v", imgOverlays["dev1:btn1"].ContextToTexts)
+	}
+	if imgOverlays["dev1:btn2"].ContextToTexts["ctx1"][0] != "Action 2" {
+		t.Errorf("Wrong text for btn2: %v", imgOverlays["dev1:btn2"].ContextToTexts)
+	}
+}

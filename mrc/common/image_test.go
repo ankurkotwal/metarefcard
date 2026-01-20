@@ -1,13 +1,16 @@
 package common
 
 import (
+	"fmt"
 	"image"
 	"image/jpeg"
+	"io"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/fogleman/gg"
+	libjpeg "github.com/pixiv/go-libjpeg/jpeg"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 )
@@ -270,6 +273,80 @@ func TestPopulateImage(t *testing.T) {
 	// Check log entries
 	if len(log2.Entries) == 0 {
 		t.Error("Should have logged error for out of bounds")
+	}
+}
+
+func TestPopulateImage_SkipBadLocation(t *testing.T) {
+	// Test that overlays with X=-1 or Y=-1 are skipped
+	dc := gg.NewContext(100, 100)
+	
+	overlays := make(map[string]OverlayData)
+	// Overlay with X = -1 should be skipped
+	overlays["skip_x"] = OverlayData{
+		PosAndSize: InputData{X: -1, Y: 10, W: 50, H: 20},
+		ContextToTexts: map[string][]string{
+			"ctx": {"ShouldNotRender"},
+		},
+	}
+	// Overlay with Y = -1 should be skipped
+	overlays["skip_y"] = OverlayData{
+		PosAndSize: InputData{X: 10, Y: -1, W: 50, H: 20},
+		ContextToTexts: map[string][]string{
+			"ctx": {"ShouldNotRender"},
+		},
+	}
+	
+	categories := map[string]string{"ctx": "#FFFFFF"}
+	config := &Config{
+		InputPixelXInset: 1,
+		InputPixelYInset: 1,
+		JpgQuality:       80,
+		FontsDir:         "../../resources/fonts",
+		InputFont:        "Dirga.ttf",
+		InputMinFontSize: 5,
+		LightColour:      "#000000",
+	}
+	log, _ := mockLogger()
+	loader := NewFontFaceCache()
+	
+	// Should not panic and should return a valid buffer (empty image)
+	buf := populateImage(dc, "img.jpg", image.Point{X: 100, Y: 100}, 1.0, overlays, categories, config, log, loader)
+	
+	if buf.Len() == 0 {
+		t.Error("Buffer should not be empty")
+	}
+}
+
+func TestPopulateImage_MultipleTexts(t *testing.T) {
+	// Test with multiple texts in same context to trigger len(fullText) != 0 branch
+	dc := gg.NewContext(200, 200)
+	
+	overlays := make(map[string]OverlayData)
+	overlays["multi"] = OverlayData{
+		PosAndSize: InputData{X: 10, Y: 10, W: 150, H: 50},
+		ContextToTexts: map[string][]string{
+			"ctx": {"First", "Second", "Third"}, // Multiple texts
+		},
+	}
+	
+	categories := map[string]string{"ctx": "#FFFFFF"}
+	config := &Config{
+		InputPixelXInset: 1,
+		InputPixelYInset: 1,
+		JpgQuality:       80,
+		FontsDir:         "../../resources/fonts",
+		InputFont:        "Dirga.ttf",
+		InputMinFontSize: 5,
+		LightColour:      "#000000",
+		InputFontSize:    12,
+	}
+	log, _ := mockLogger()
+	loader := NewFontFaceCache()
+	
+	buf := populateImage(dc, "img.jpg", image.Point{X: 200, Y: 200}, 1.0, overlays, categories, config, log, loader)
+	
+	if buf.Len() == 0 {
+		t.Error("Buffer should not be empty")
 	}
 }
 
@@ -571,3 +648,56 @@ func TestAddImageHeader_CustomProfile(t *testing.T) {
 	// If no panic, success
 }
 
+func TestPopulateImage_JpegEncodeError(t *testing.T) {
+	// Save original encoder and restore after test
+	originalEncoder := jpegEncoderFunc
+	defer func() { jpegEncoderFunc = originalEncoder }()
+	
+	// Inject a failing encoder
+	jpegEncoderFunc = func(w io.Writer, m image.Image, o *libjpeg.EncoderOptions) error {
+		return fmt.Errorf("mock jpeg encode error")
+	}
+	
+	dc := gg.NewContext(100, 100)
+	overlays := map[string]OverlayData{
+		"key1": {
+			PosAndSize: InputData{X: 10, Y: 10, W: 50, H: 30},
+			ContextToTexts: map[string][]string{
+				"ctx1": {"text1"},
+			},
+		},
+	}
+	categories := map[string]string{"ctx1": "#FF0000"}
+	config := &Config{
+		InputPixelXInset: 1,
+		InputPixelYInset: 1,
+		JpgQuality:       80,
+		FontsDir:         "../../resources/fonts",
+		InputFont:        "Dirga.ttf",
+		InputMinFontSize: 5,
+		LightColour:      "#000000",
+		InputFontSize:    12,
+	}
+	log := NewLog()
+	loader := NewFontFaceCache()
+	
+	// This should trigger the error path
+	buf := populateImage(dc, "img.jpg", image.Point{X: 200, Y: 200}, 1.0, overlays, categories, config, log, loader)
+	
+	// Buffer should be empty since encode failed
+	if buf.Len() != 0 {
+		t.Error("Buffer should be empty when encode fails")
+	}
+	
+	// Check that error was logged
+	foundError := false
+	for _, entry := range log.Entries {
+		if entry.IsError && entry.Msg == "jpeg encode failed: mock jpeg encode error" {
+			foundError = true
+			break
+		}
+	}
+	if !foundError {
+		t.Error("Expected error to be logged for jpeg encode failure")
+	}
+}

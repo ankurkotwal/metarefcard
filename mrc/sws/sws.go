@@ -17,6 +17,18 @@ var firstInit sync.Once
 var sharedRegexes swsRegexes
 var sharedGameData common.GameData
 
+// ScannerReader interface for bufio.Scanner - allows injection for testing
+type ScannerReader interface {
+	Scan() bool
+	Text() string
+	Err() error
+}
+
+// scannerFactory creates a ScannerReader from bytes (can be replaced in tests)
+var scannerFactory = func(data []byte) ScannerReader {
+	return bufio.NewScanner(bytes.NewReader(data))
+}
+
 const (
 	label = "sws"
 	desc  = "Star Wars Squadrons input configs"
@@ -64,7 +76,7 @@ func loadInputFiles(files [][]byte, deviceNameMap common.DeviceNameFullToShort,
 
 	// Load all the device and inputs
 	for idx, file := range files {
-		scanner := bufio.NewScanner(bytes.NewReader(file))
+		scanner := scannerFactory(file)
 		for scanner.Scan() {
 			line := scanner.Text()
 

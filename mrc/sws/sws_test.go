@@ -1,10 +1,12 @@
 package sws
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/ankurkotwal/metarefcard/mrc/common"
@@ -466,3 +468,152 @@ func TestInterpretInput_ButtonOutOfRange(t *testing.T) {
 	}
 }
 
+func TestLoadInputFiles_JoystickDevice0(t *testing.T) {
+	// Test the case where JoystickDevice number is 0, which becomes -1 after decrement
+	// This should trigger the error path at line 96-97
+	log := common.NewLog()
+	
+	// Initialize regexes (required for loadInputFiles)
+	wd, _ := os.Getwd()
+	configPath := filepath.Join(wd, "../../config/sws.yaml")
+	gameData := common.LoadGameModel(configPath, "SWS Data", false, log)
+	sharedGameData = gameData
+	sharedRegexes = swsRegexes{
+		Bind:     regexp.MustCompile(sharedGameData.Regexes["Bind"]),
+		Joystick: regexp.MustCompile(sharedGameData.Regexes["Joystick"]),
+	}
+	
+	deviceMap := common.DeviceNameFullToShort{
+		"Known Device": "KnownDevice",
+	}
+	
+	// Use JoystickDevice0 (index 0) which after num-- becomes -1
+	data := []byte(`GstInput.JoystickDevice0 Known Device`)
+	files := [][]byte{data}
+	
+	loadInputFiles(files, deviceMap, log, false, false)
+	
+	// Check that error was logged for unexpected device number
+	foundError := false
+	for _, entry := range log.Entries {
+		if entry.IsError && strings.Contains(entry.Msg, "unexpected device number") {
+			foundError = true
+			break
+		}
+	}
+	if !foundError {
+		t.Error("Expected error for JoystickDevice0 (negative num after decrement)")
+	}
+}
+
+// MockScannerReader that returns an error on Err()
+type MockScannerReader struct {
+	lines []string
+	err   error
+	idx   int
+}
+
+func (m *MockScannerReader) Scan() bool {
+	if m.idx >= len(m.lines) {
+		return false
+	}
+	m.idx++
+	return true
+}
+
+func (m *MockScannerReader) Text() string {
+	return m.lines[m.idx-1]
+}
+
+func (m *MockScannerReader) Err() error {
+	return m.err
+}
+
+func TestLoadInputFiles_ScannerError(t *testing.T) {
+	// Save original factory and restore after test
+	originalFactory := scannerFactory
+	defer func() { scannerFactory = originalFactory }()
+	
+	// Initialize regexes (required for loadInputFiles)
+	log := common.NewLog()
+	wd, _ := os.Getwd()
+	configPath := filepath.Join(wd, "../../config/sws.yaml")
+	gameData := common.LoadGameModel(configPath, "SWS Data", false, log)
+	sharedGameData = gameData
+	sharedRegexes = swsRegexes{
+		Bind:     regexp.MustCompile(sharedGameData.Regexes["Bind"]),
+		Joystick: regexp.MustCompile(sharedGameData.Regexes["Joystick"]),
+	}
+	
+	// Create a mock scanner that returns an error
+	scannerFactory = func(data []byte) ScannerReader {
+		return &MockScannerReader{
+			lines: []string{"some line"},
+			err:   fmt.Errorf("mock scanner error"),
+		}
+	}
+	
+	deviceMap := common.DeviceNameFullToShort{}
+	files := [][]byte{[]byte("test")}
+	
+	loadInputFiles(files, deviceMap, log, false, false)
+	
+	// Check that error was logged for scanner error
+	foundError := false
+	for _, entry := range log.Entries {
+		if entry.IsError && strings.Contains(entry.Msg, "scan file") {
+			foundError = true
+			break
+		}
+	}
+	if !foundError {
+		t.Error("Expected error for scanner failure")
+	}
+}
+
+func TestLoadInputFiles_InterpretInputError(t *testing.T) {
+	// Test that loadInputFiles handles interpretInput errors correctly
+	// This covers lines 169-171 in sws.go
+	log := common.NewLog()
+	
+	// Initialize regexes
+	wd, _ := os.Getwd()
+	configPath := filepath.Join(wd, "../../config/sws.yaml")
+	gameData := common.LoadGameModel(configPath, "SWS Data", false, log)
+	sharedGameData = gameData
+	sharedRegexes = swsRegexes{
+		Bind:     regexp.MustCompile(sharedGameData.Regexes["Bind"]),
+		Joystick: regexp.MustCompile(sharedGameData.Regexes["Joystick"]),
+	}
+	
+	deviceMap := common.DeviceNameFullToShort{
+		"Test Device": "TestDevice",
+	}
+	
+	// Create input that:
+	// 1. Maps device 1 to "TestDevice" (becomes deviceid 0 after decrement)
+	// 2. Has a GstKeyBinding matching regex pattern that refers to deviceid 0
+	// 3. Has axis 26 with an invalid button value that causes interpretInput to return error
+	// Regex: ^GstKeyBinding\.Incom(Default|Soldier|Starship)InputConcepts\.Concept(.+)\.(\d+)\.(.+)\s+(.+)$
+	data := []byte(`GstInput.JoystickDevice1 Test Device
+GstKeyBinding.IncomDefaultInputConcepts.ConceptTest.0.axis 26
+GstKeyBinding.IncomDefaultInputConcepts.ConceptTest.0.button InvalidButton
+GstKeyBinding.IncomDefaultInputConcepts.ConceptTest.0.deviceid 0`)
+	
+	files := [][]byte{data}
+	
+	loadInputFiles(files, deviceMap, log, false, false)
+	
+	// Check that error was logged for interpretInput failure
+	foundError := false
+	for _, entry := range log.Entries {
+		if entry.IsError && (strings.Contains(entry.Msg, "SWS button not number") || 
+			strings.Contains(entry.Msg, "SWS Unknown input")) {
+			foundError = true
+			break
+		}
+	}
+	if !foundError {
+		t.Error("Expected error from interpretInput")
+	}
+}

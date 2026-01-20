@@ -7,16 +7,31 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/ankurkotwal/metarefcard/mrc"
 )
 
 func main() {
-	debugMode, gameArgs := parseCliArgs()
-	router, port := mrc.GetServer(debugMode, gameArgs)
-	err := router.Run(port)
-	if err != nil {
+	if err := runServer(defaultRunner); err != nil {
 		log.Fatal(err)
 	}
+}
+
+// ServerRunner is a function type that runs a gin.Engine on a port
+type ServerRunner func(*gin.Engine, string) error
+
+// defaultRunner is the default server runner that starts the HTTP server
+func defaultRunner(router *gin.Engine, port string) error {
+	return router.Run(port)
+}
+
+// runServer contains the main application logic and is extracted for testability.
+// The runner parameter allows injecting a mock for testing.
+func runServer(runner ServerRunner) error {
+	debugMode, gameArgs := parseCliArgs()
+	router, port := mrc.GetServer(debugMode, gameArgs)
+	return runner(router, port)
 }
 
 func parseCliArgs() (bool, mrc.GameToInputFiles) {

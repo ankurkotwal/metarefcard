@@ -3,6 +3,7 @@ package mrc
 import (
 	"bytes"
 	"fmt"
+	"html/template"
 	"image"
 	"image/jpeg"
 	"io"
@@ -183,22 +184,37 @@ InputFont: "test.ttf"
 InputFontSize: 12
 InputPixelXInset: 2
 InputPixelYInset: 2
+InputMinFontSize: 5
+LightColour: "#000000"
+JpgQuality: 80
+LogoImagesDir: "resources/images"
 `), 0644)
 	os.WriteFile("config/devices.yaml", []byte(`
 GeneratedFile: "config/generated.yaml"
 DeviceToShortNameMap:
   "Alpha Flight Controls": "AlphaFlightControls"
 ImageMap:
-  "AlphaFlightControls": "fs2020.jpg"
+  "AlphaFlightControls": "AlphaFlightControls.jpg"
 Index:
   "AlphaFlightControls":
-    "1": { X: 10, Y: 10, W: 20, H: 20 }
+    "Button1": { X: 10, Y: 10, W: 100, H: 50 }
 `), 0644)
-	os.WriteFile("config/generated.yaml", []byte("Generated Devices:\n  DummyDevice: {}\nInputImages: {}\n"), 0644)
+	os.WriteFile("config/generated.yaml", []byte(`
+Generated Devices:
+  AlphaFlightControls:
+    DeviceLabel: "Alpha Flight Controls"
+    ProfileLabels:
+      default_metarefcard: "Default"
+InputImages:
+  AlphaFlightControls: AlphaFlightControls.jpg
+`), 0644)
 	os.MkdirAll("resources/www/templates", 0755)
 	os.MkdirAll("resources/fonts", 0755)
+	os.MkdirAll("resources/images", 0755)
 	
 	createDummyFont(t, "resources/fonts/test.ttf")
+	createDummyJpg(t, "resources/images/AlphaFlightControls.jpg")
+	createDummyJpg(t, "resources/images/fs2020.jpg")
 	
 	defer os.RemoveAll("resources")
 	// Template must be valid html/template
@@ -211,7 +227,7 @@ Index:
 <Device DeviceName="Alpha Flight Controls">
   <Context ContextName="Ctx">
     <Action ActionName="Act">
-      <Primary Information="Button 1"/>
+      <Primary><KEY Information="Button 1"/></Primary>
     </Action>
   </Context>
 </Device>`)
@@ -232,8 +248,6 @@ Logo: fs2020
 Regexes:
   Button: Button\s*(\d+)
 `), 0644) 
-	
-	createDummyJpg(t, "fs2020.jpg")
 	
 	req, _ := http.NewRequest("GET", "/test/fs2020", nil)
 	w := httptest.NewRecorder()
@@ -261,6 +275,24 @@ Regexes:
 	
 	if wPost.Code != http.StatusOK {
 		t.Errorf("POST /api/fs2020 failed: %d", wPost.Code)
+	}
+	
+	// Test GET / (home page)
+	reqHome, _ := http.NewRequest("GET", "/", nil)
+	wHome := httptest.NewRecorder()
+	router.ServeHTTP(wHome, reqHome)
+	
+	if wHome.Code != http.StatusOK && wHome.Code != http.StatusFound {
+		t.Errorf("GET / failed: %d", wHome.Code)
+	}
+	
+	// Test GET /fs2020 (game page)
+	reqGame, _ := http.NewRequest("GET", "/fs2020", nil)
+	wGame := httptest.NewRecorder()
+	router.ServeHTTP(wGame, reqGame)
+	
+	if wGame.Code != http.StatusOK {
+		t.Errorf("GET /fs2020 failed: %d", wGame.Code)
 	}
 }
 
@@ -591,5 +623,201 @@ func (m *MockFile) Read(p []byte) (n int, err error) {
 func (m *MockFile) Close() error { return nil }
 func (m *MockFile) Seek(offset int64, whence int) (int64, error) { return 0, nil }
 func (m *MockFile) ReadAt(p []byte, off int64) (n int, err error) { return 0, nil }
+
+func TestSendResponse_WithImages(t *testing.T) {
+	// This test exercises the image generation loop by providing proper resources
+	// that result in GenerateImages returning actual images
+	
+	os.Mkdir("config", 0755)
+	defer os.RemoveAll("config")
+	os.WriteFile("config/config.yaml", []byte(`
+AppName: Test
+DevicesFile: config/devices.yaml
+FontsDir: resources/fonts
+InputFont: test.ttf
+LogoImagesDir: resources/images
+JpgQuality: 80
+InputFontSize: 12
+InputPixelXInset: 2
+InputPixelYInset: 2
+InputMinFontSize: 5
+LightColour: "#000000"
+`), 0644)
+	os.WriteFile("config/devices.yaml", []byte(`
+GeneratedFile: config/generated.yaml
+DeviceToShortNameMap:
+  "TestDevice": "TestDevice"
+ImageMap:
+  "TestDevice": "test_device.jpg"
+Index:
+  "TestDevice":
+    "Button1": { X: 10, Y: 10, W: 100, H: 50 }
+`), 0644)
+	os.WriteFile("config/generated.yaml", []byte(`
+Generated Devices:
+  TestDevice:
+    DeviceLabel: "Test Device"
+    ProfileLabels:
+      default_metarefcard: "Default"
+InputImages:
+  TestDevice: test_device.jpg
+`), 0644)
+	
+	os.MkdirAll("resources/www/templates", 0755)
+	os.MkdirAll("resources/fonts", 0755)
+	os.MkdirAll("resources/images", 0755)
+	defer os.RemoveAll("resources")
+	
+	createDummyFont(t, "resources/fonts/test.ttf")
+	createDummyJpg(t, "resources/images/TestDevice.jpg")
+	createDummyJpg(t, "resources/images/test_game.jpg")
+	
+	// Valid templates
+	os.WriteFile("resources/www/templates/refcard.html", []byte("{{.Base64Contents}}"), 0644)
+	os.WriteFile("resources/www/templates/log.html", []byte("{{range .Logs}}{{.Msg}}{{end}}"), 0644)
+	
+	// Load the config properly
+	log := common.NewLog()
+	common.LoadYaml("config/config.yaml", &config, "Config", log)
+	common.LoadDevicesInfo(config.DevicesFile, &config.Devices, log)
+	
+	// Create mock handler that returns data that will generate images
+	mockHandler := func(files [][]byte, cfg *common.Config, log *common.Logger) (
+		common.GameData, common.GameBindsByProfile, common.Set, common.ContextToColours, string) {
+		
+		gameData := common.GameData{
+			Logo: "test_game",
+		}
+		
+		gameBinds := common.GameBindsByProfile{
+			common.ProfileDefault: common.GameDeviceContextActions{
+				"TestDevice": common.GameContextActions{
+					"TestContext": common.GameActions{
+						"TestAction": common.GameInput{"Button1", ""},
+					},
+				},
+			},
+		}
+		
+		neededDevices := common.Set{"TestDevice": true}
+		contexts := common.ContextToColours{"TestContext": "#FF0000"}
+		
+		return gameData, gameBinds, neededDevices, contexts, "test_game"
+	}
+	
+	mockMatch := func(deviceName string, action common.GameInput, inputs common.DeviceInputs,
+		gameInputMap common.InputTypeMapping, log *common.Logger) (common.GameInput, string) {
+		return common.GameInput{"Button1", ""}, "test_game"
+	}
+	
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	
+	sendResponse(nil, mockHandler, mockMatch, c)
+	
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected 200, got %d", w.Code)
+	}
+}
+
+func TestRenderImages(t *testing.T) {
+	// Test renderImages with valid images
+	log := common.NewLog()
+	
+	// Create a valid template
+	tmpl, err := template.New("test").Parse("{{.Base64Contents}}")
+	if err != nil {
+		t.Fatal(err)
+	}
+	
+	// Create mock generated image
+	var img bytes.Buffer
+	img.WriteString("test image content")
+	generatedFiles := []bytes.Buffer{img}
+	
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	
+	renderImages(generatedFiles, tmpl, c, log)
+	
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected 200, got %d", w.Code)
+	}
+	
+	// Check that body contains base64 content
+	body := w.Body.String()
+	if len(body) == 0 {
+		t.Error("Expected non-empty response body")
+	}
+}
+
+func TestRenderImages_Empty(t *testing.T) {
+	// Test renderImages with no images
+	log := common.NewLog()
+	
+	tmpl, _ := template.New("test").Parse("{{.Base64Contents}}")
+	
+	generatedFiles := []bytes.Buffer{}
+	
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	
+	renderImages(generatedFiles, tmpl, c, log)
+	
+	// Should complete without error
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected 200 (default), got %d", w.Code)
+	}
+}
+
+func TestRenderImages_TemplateError(t *testing.T) {
+	// Test renderImages with template that fails to execute
+	log := common.NewLog()
+	
+	// Template that will fail on execution (calling non-function)
+	tmpl, _ := template.New("test").Parse("{{call .Base64Contents}}")
+	
+	var img bytes.Buffer
+	img.WriteString("test content")
+	generatedFiles := []bytes.Buffer{img}
+	
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	
+	renderImages(generatedFiles, tmpl, c, log)
+	
+	// Error should be logged, but function continues
+	foundError := false
+	for _, entry := range log.Entries {
+		if entry.IsError {
+			foundError = true
+		}
+	}
+	if !foundError {
+		t.Error("Expected error to be logged for template execution failure")
+	}
+}
+
+func TestRenderImages_MultipleImages(t *testing.T) {
+	// Test renderImages with multiple images
+	log := common.NewLog()
+	
+	tmpl, _ := template.New("test").Parse("{{.Base64Contents}}")
+	
+	var img1, img2, img3 bytes.Buffer
+	img1.WriteString("image1")
+	img2.WriteString("image2")  
+	img3.WriteString("image3")
+	generatedFiles := []bytes.Buffer{img1, img2, img3}
+	
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	
+	renderImages(generatedFiles, tmpl, c, log)
+	
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected 200, got %d", w.Code)
+	}
+}
 
 

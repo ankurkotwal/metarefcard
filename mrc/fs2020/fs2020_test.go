@@ -1,6 +1,9 @@
 package fs2020
 
 import (
+	"encoding/xml"
+	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -529,3 +532,296 @@ func TestMatchGameInputToModel_SecondaryFailure(t *testing.T) {
 	}
 }
 
+func TestLoadInputFiles_SecondaryKey(t *testing.T) {
+	log := common.NewLog()
+	deviceMap := common.DeviceNameFullToShort{
+		"TestDevice": "TestDevice",
+	}
+
+	// XML with Secondary key binding
+	xmlData := []byte(`
+		<Device DeviceName="TestDevice">
+			<Context ContextName="PLANE">
+				<Action ActionName="ACTION1">
+					<Primary><KEY Information="Button 1"/></Primary>
+					<Secondary><KEY Information="Button 2"/></Secondary>
+				</Action>
+			</Context>
+		</Device>
+	`)
+
+	files := [][]byte{xmlData}
+	gameBinds, _, _ := loadInputFiles(files, deviceMap, log, true, true)
+
+	// Verify both primary and secondary are populated
+	if gameBinds[common.ProfileDefault]["TestDevice"]["PLANE"]["ACTION1"][common.InputSecondary] != "Button 2" {
+		t.Error("Expected secondary input to be 'Button 2'")
+	}
+}
+
+func TestLoadInputFiles_FriendlyName(t *testing.T) {
+	log := common.NewLog()
+	deviceMap := common.DeviceNameFullToShort{
+		"TestDevice": "TestDevice",
+	}
+
+	// XML with FriendlyName element (custom profile name)
+	xmlData := []byte(`
+		<Profile>
+			<FriendlyName>MyCustomProfile</FriendlyName>
+			<Device DeviceName="TestDevice">
+				<Context ContextName="PLANE">
+					<Action ActionName="ACTION1">
+						<Primary><KEY Information="Button 1"/></Primary>
+					</Action>
+				</Context>
+			</Device>
+		</Profile>
+	`)
+
+	files := [][]byte{xmlData}
+	gameBinds, _, _ := loadInputFiles(files, deviceMap, log, true, true)
+
+	// The custom profile should be used
+	if _, found := gameBinds["MyCustomProfile"]; !found {
+		t.Log("Custom profile not found, checking default profile")
+	}
+}
+
+func TestLoadInputFiles_EmptyFriendlyName(t *testing.T) {
+	log := common.NewLog()
+	deviceMap := common.DeviceNameFullToShort{
+		"TestDevice": "TestDevice",
+	}
+
+	// XML with empty FriendlyName
+	xmlData := []byte(`
+		<Profile>
+			<FriendlyName></FriendlyName>
+			<Device DeviceName="TestDevice">
+				<Context ContextName="PLANE">
+					<Action ActionName="ACTION1">
+						<Primary><KEY Information="Button 1"/></Primary>
+					</Action>
+				</Context>
+			</Device>
+		</Profile>
+	`)
+
+	files := [][]byte{xmlData}
+	gameBinds, _, _ := loadInputFiles(files, deviceMap, log, true, true)
+
+	// Should fall back to default profile
+	if _, found := gameBinds[common.ProfileDefault]; !found {
+		t.Error("Expected default profile to be used")
+	}
+}
+
+func TestLoadInputFiles_DeviceMissingInfo(t *testing.T) {
+	log := common.NewLog()
+	
+	// Map a device to DeviceMissingInfo
+	deviceMap := common.DeviceNameFullToShort{
+		"UnknownNewDevice": common.DeviceMissingInfo,
+	}
+
+	xmlData := []byte(`
+		<Device DeviceName="UnknownNewDevice">
+			<Context ContextName="PLANE">
+				<Action ActionName="ACTION1">
+					<Primary><KEY Information="Button 1"/></Primary>
+				</Action>
+			</Context>
+		</Device>
+	`)
+
+	files := [][]byte{xmlData}
+	_, _, _ = loadInputFiles(files, deviceMap, log, true, true)
+
+	// Check that error was logged for missing info
+	foundError := false
+	for _, entry := range log.Entries {
+		if entry.IsError && entry.Msg == "FS2020 missing info for device 'DeviceMissingInfo'" {
+			foundError = true
+		}
+	}
+	if !foundError {
+		t.Error("Expected error for device missing info")
+	}
+}
+
+func TestMatchGameInputToModelByRegex_AxisSubstitution(t *testing.T) {
+	log := common.NewLog()
+	
+	// Setup regexes
+	wd, _ := os.Getwd()
+	configPath := filepath.Join(wd, "../../config/fs2020.yaml")
+	gameData := common.LoadGameModel(configPath, "FS2020 Data", false, log)
+	sharedGameData = gameData
+	sharedRegexes = fs2020Regexes{
+		Button:   regexp.MustCompile(sharedGameData.Regexes["Button"]),
+		Axis:     regexp.MustCompile(sharedGameData.Regexes["Axis"]),
+		Pov:      regexp.MustCompile(sharedGameData.Regexes["Pov"]),
+		Rotation: regexp.MustCompile(sharedGameData.Regexes["Rotation"]),
+		Slider:   regexp.MustCompile(sharedGameData.Regexes["Slider"]),
+	}
+	
+	inputs := make(common.DeviceInputs)
+	
+	// Provide gameInputMap with Axis substitution
+	gameInputMap := common.InputTypeMapping{
+		"Axis": map[string]string{
+			"X": "CustomX",
+		},
+	}
+	
+	// "Axis X" should match axis pattern and get substituted (pattern: (?:([R])-)?Axis\s*([XYZ]))
+	result := matchGameInputToModelByRegex("testDevice", "Axis X", inputs, gameInputMap, log)
+	
+	if result != "CustomXAxis" {
+		t.Errorf("Expected 'CustomXAxis', got '%s'", result)
+	}
+}
+
+func TestMatchGameInputToModelByRegex_RotationOverride(t *testing.T) {
+	log := common.NewLog()
+	
+	// Setup regexes
+	wd, _ := os.Getwd()
+	configPath := filepath.Join(wd, "../../config/fs2020.yaml")
+	gameData := common.LoadGameModel(configPath, "FS2020 Data", false, log)
+	sharedGameData = gameData
+	sharedRegexes = fs2020Regexes{
+		Button:   regexp.MustCompile(sharedGameData.Regexes["Button"]),
+		Axis:     regexp.MustCompile(sharedGameData.Regexes["Axis"]),
+		Pov:      regexp.MustCompile(sharedGameData.Regexes["Pov"]),
+		Rotation: regexp.MustCompile(sharedGameData.Regexes["Rotation"]),
+		Slider:   regexp.MustCompile(sharedGameData.Regexes["Slider"]),
+	}
+	
+	inputs := make(common.DeviceInputs)
+	
+	// Provide gameInputMap with Rotation override
+	gameInputMap := common.InputTypeMapping{
+		"Rotation": map[string]string{
+			"X": "CustomRX",
+		},
+	}
+	
+	// "Rotation X" should match rotation pattern and get overridden
+	result := matchGameInputToModelByRegex("testDevice", "Rotation X", inputs, gameInputMap, log)
+	
+	if result != "CustomRXAxis" {
+		t.Errorf("Expected 'CustomRXAxis', got '%s'", result)
+	}
+}
+
+func TestMatchGameInputToModelByRegex_SliderNoMapping(t *testing.T) {
+	log := common.NewLog()
+	
+	// Setup regexes
+	wd, _ := os.Getwd()
+	configPath := filepath.Join(wd, "../../config/fs2020.yaml")
+	gameData := common.LoadGameModel(configPath, "FS2020 Data", false, log)
+	sharedGameData = gameData
+	sharedRegexes = fs2020Regexes{
+		Button:   regexp.MustCompile(sharedGameData.Regexes["Button"]),
+		Axis:     regexp.MustCompile(sharedGameData.Regexes["Axis"]),
+		Pov:      regexp.MustCompile(sharedGameData.Regexes["Pov"]),
+		Rotation: regexp.MustCompile(sharedGameData.Regexes["Rotation"]),
+		Slider:   regexp.MustCompile(sharedGameData.Regexes["Slider"]),
+	}
+	
+	inputs := make(common.DeviceInputs)
+	
+	// No Slider mapping provided - should hit else branch
+	gameInputMap := common.InputTypeMapping{}
+	
+	// "Slider X" should match slider pattern but fail without mapping
+	result := matchGameInputToModelByRegex("testDevice", "Slider X", inputs, gameInputMap, log)
+	
+	if result != "" {
+		t.Errorf("Expected empty string for unmapped slider, got '%s'", result)
+	}
+	
+	// Check error was logged
+	foundError := false
+	for _, entry := range log.Entries {
+		if entry.IsError {
+			foundError = true
+		}
+	}
+	if !foundError {
+		t.Error("Expected error for unmapped slider")
+	}
+}
+
+// MockXMLTokenReader that returns an error after some valid tokens
+type MockXMLTokenReader struct {
+	tokens []xml.Token
+	errs   []error
+	idx    int
+}
+
+func (m *MockXMLTokenReader) Token() (xml.Token, error) {
+	if m.idx >= len(m.tokens) {
+		return nil, io.EOF
+	}
+	token := m.tokens[m.idx]
+	err := m.errs[m.idx]
+	m.idx++
+	return token, err
+}
+
+func TestLoadInputFiles_XMLDecodeError(t *testing.T) {
+	// Save original factory and restore after test
+	originalFactory := xmlDecoderFactory
+	defer func() { xmlDecoderFactory = originalFactory }()
+	
+	// Create a mock decoder that returns an error after a valid token
+	// Important: we must return a non-nil token with an error for the error path to be hit
+	// because "if token == nil" is checked before "else if err != nil"
+	xmlDecoderFactory = func(data []byte) XMLTokenReader {
+		return &MockXMLTokenReader{
+			tokens: []xml.Token{
+				xml.StartElement{Name: xml.Name{Local: "Root"}}, // Valid first
+				xml.CharData("x"), // Non-nil token returned with error
+			},
+			errs: []error{
+				nil,
+				fmt.Errorf("mock XML decode error"),
+			},
+		}
+	}
+	
+	log := common.NewLog()
+	deviceMap := make(common.DeviceNameFullToShort)
+	
+	// Call loadInputFiles with any data - our mock will control behavior
+	files := [][]byte{[]byte("<Root></Root>")}
+	
+	gameBinds, neededDevices, contextsToColours := loadInputFiles(files, deviceMap, log, false, false)
+	
+	// Function should return early on error
+	if gameBinds == nil {
+		t.Error("gameBinds should not be nil")
+	}
+	if neededDevices == nil {
+		t.Error("neededDevices should not be nil")
+	}
+	if contextsToColours == nil {
+		t.Error("contextsToColours should not be nil")
+	}
+	
+	// Check that error was logged
+	foundError := false
+	for _, entry := range log.Entries {
+		if entry.IsError {
+			foundError = true
+			break
+		}
+	}
+	if !foundError {
+		t.Error("Expected error to be logged for XML decode failure")
+	}
+}

@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"regexp"
-	"strconv"
 	"sync"
 
 	"github.com/ankurkotwal/metarefcard/mrc/common"
@@ -16,6 +15,16 @@ import (
 var firstInit sync.Once
 var sharedRegexes fs2020Regexes
 var sharedGameData common.GameData
+
+// XMLTokenReader interface for XML decoding - allows injection for testing
+type XMLTokenReader interface {
+	Token() (xml.Token, error)
+}
+
+// xmlDecoderFactory creates an XMLTokenReader from bytes (can be replaced in tests)
+var xmlDecoderFactory = func(data []byte) XMLTokenReader {
+	return xml.NewDecoder(bytes.NewReader(data))
+}
 
 const (
 	label = "fs2020"
@@ -66,13 +75,12 @@ func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToSh
 	var contextActions common.GameContextActions
 	currentAction := make(common.GameInput, common.NumInputs)
 	currentKeyType := keyUnknown
-	var currentKey *int
 	var currentProfile *string
 
 	for idx, file := range files {
 		_ = idx
 		currentProfile = &defaultProfile
-		decoder := xml.NewDecoder(bytes.NewReader(file))
+		decoder := xmlDecoderFactory(file)
 		skipToNextFile := false
 		for {
 			if skipToNextFile {
@@ -190,17 +198,11 @@ func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToSh
 					value := string([]byte(ty))
 					currentProfile = &value
 				}
-				if currentKey != nil {
-					value := string([]byte(ty))
-					*currentKey, err = strconv.Atoi(value)
-					if err != nil {
-						log.Err("FS2020 primary key value %s parsing error", value)
-					}
-				}
+				// Note: currentKey handling removed as it was never set to non-nil in current implementation
 			case xml.EndElement:
 				switch ty.Name.Local {
 				case "FriendlyName":
-					if len(*currentProfile) == 0 {
+					if currentProfile == nil || len(*currentProfile) == 0 {
 						currentProfile = &defaultProfile
 					}
 					if gameBinds[*currentProfile] == nil {
@@ -215,8 +217,6 @@ func loadInputFiles(files [][]byte, deviceShortNameMap common.DeviceNameFullToSh
 					currentKeyType = keyUnknown
 				case "Secondary":
 					currentKeyType = keyUnknown
-				case "KEY":
-					currentKey = nil
 				}
 			}
 		}

@@ -152,7 +152,7 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 	generatedFiles, _ := common.GenerateImages(overlaysByImage, gameContexts,
 		gameLogo, config, log)
 
-	// Generate HTML
+	// Generate HTML for images
 	cardTempl := "resources/www/templates/refcard.html"
 	t, err := template.New(path.Base(cardTempl)).ParseFiles(cardTempl)
 	if err != nil {
@@ -165,21 +165,10 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 		return
 	}
 
-	type base64Image struct {
-		Base64Contents string
-	}
-	for _, file := range generatedFiles {
-		image := base64Image{
-			Base64Contents: base64.StdEncoding.EncodeToString(file.Bytes()),
-		}
-		var tpl bytes.Buffer
-		if err := t.Execute(&tpl, image); err != nil {
-			log.Err("Error executing image template - %s", err)
-			continue
-		}
-		c.Data(http.StatusOK, "text/html; charset=utf-8", tpl.Bytes())
-	}
-	// Generate HTML
+	// Render images using the extracted function
+	renderImages(generatedFiles, t, c, log)
+
+	// Generate HTML for logs
 	logTempl := "resources/www/templates/log.html"
 	l, err := template.New(path.Base(logTempl)).ParseFiles(logTempl)
 	if err != nil {
@@ -195,6 +184,26 @@ func sendResponse(loadedFiles [][]byte, handler common.FuncRequestHandler,
 		c.Data(http.StatusOK, "text/html; charset=utf-8", tpl.Bytes())
 	}
 }
+
+// renderImages renders generated images using the template and sends them as HTTP responses.
+// Extracted from sendResponse for testability.
+func renderImages(generatedFiles []bytes.Buffer, t *template.Template, c *gin.Context, log *common.Logger) {
+	type base64Image struct {
+		Base64Contents string
+	}
+	for _, file := range generatedFiles {
+		image := base64Image{
+			Base64Contents: base64.StdEncoding.EncodeToString(file.Bytes()),
+		}
+		var tpl bytes.Buffer
+		if err := t.Execute(&tpl, image); err != nil {
+			log.Err("Error executing image template - %s", err)
+			continue
+		}
+		c.Data(http.StatusOK, "text/html; charset=utf-8", tpl.Bytes())
+	}
+}
+
 
 // GameToInputFiles are the per-game arguments specified on the command line
 type GameToInputFiles map[string]*Filenames
