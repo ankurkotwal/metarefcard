@@ -8,8 +8,8 @@ require (
 	github.com/gin-gonic/gin v1.11.0
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/pixiv/go-libjpeg v0.0.0-20190822045933-3da21a74767d
-	golang.org/x/image v0.35.0
-	golang.org/x/text v0.33.0
+	golang.org/x/image v0.38.0
+	golang.org/x/text v0.35.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
