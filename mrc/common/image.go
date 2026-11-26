@@ -297,13 +297,12 @@ func prepareContexts(contextToTexts map[string][]string) []string {
 	return contexts
 }
 
-// Return the multiplier/scale of image based on actual width vs default width
-func getPixelMultiplier(name string, config *Config) float64 {
-	multiplier := config.PixelMultiplier
-	if dimensions, found := config.Devices.ImageSizeOverride[name]; found {
-		multiplier = float64(dimensions.W) / float64(config.DefaultImage.W)
-	}
-	return multiplier
+// Return the multiplier/scale of image based on configured PixelMultiplier.
+// Images with an ImageSizeOverride are exported by generateImages.py using the
+// same PixelMultiplier (override dimensions * PixelMultiplier), and their
+// DeviceMap coordinates are already expressed in the override coordinate space.
+func getPixelMultiplier(_ string, config *Config) float64 {
+	return config.PixelMultiplier
 }
 
 func drawTextWithBackgroundRec(dc *gg.Context, text string, xOffset float64,
