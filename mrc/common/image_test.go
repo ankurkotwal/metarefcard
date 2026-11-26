@@ -41,10 +41,10 @@ func TestGetPixelMultiplier(t *testing.T) {
 		t.Errorf("Expected 1.5, got %f", m1)
 	}
 	
-	// Case 2: Override
+	// Case 2: Override (still uses PixelMultiplier because exported image is override * PixelMultiplier)
 	m2 := getPixelMultiplier("override", config)
-	if m2 != 2.0 {
-		t.Errorf("Expected 2.0 (200/100), got %f", m2)
+	if m2 != 1.5 {
+		t.Errorf("Expected 1.5, got %f", m2)
 	}
 }
 

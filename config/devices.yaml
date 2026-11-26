@@ -79,9 +79,77 @@ DeviceMap: # Extends generatedDevices.yaml
   ThrustMasterTFlightHOTASX:
     14: { x: -1, y: -1, w: 592, h: 54 } # Does not exist
     15: { x: -1, y: -1, w: 592, h: 108 } # Does not exist
+  SteamController:
+    Pad_Back: { x: 1330, y: 234, w: 544, h: 72 } # View button
+    Pad_Start: { x: 2070, y: 234, w: 544, h: 72 } # Menu button
+    Pad_Guide: { x: 1330, y: 1214, w: 544, h: 72 } # Steam button
+    Pad_QAM: { x: 2070, y: 1214, w: 544, h: 72 } # Quick Access button
+    Pad_LTrigger: { x: 170, y: 244, w: 844, h: 72 } # Left trigger
+    Pad_LBumper: { x: 170, y: 344, w: 844, h: 72 } # Left bumper
+    Pad_DPadUp: { x: 170, y: 454, w: 844, h: 74 } # D-pad up
+    Pad_DPadRight: { x: 170, y: 536, w: 844, h: 74 } # D-pad right
+    Pad_DPadDown: { x: 170, y: 618, w: 844, h: 74 } # D-pad down
+    Pad_DPadLeft: { x: 170, y: 700, w: 844, h: 74 } # D-pad left
+    Pad_LStickY: { x: 170, y: 814, w: 844, h: 74 } # Left stick vertical
+    Pad_LStickX: { x: 170, y: 896, w: 844, h: 74 } # Left stick horizontal
+    Pad_LThumb: { x: 170, y: 978, w: 844, h: 74 } # Left stick click
+    Pad_LPadY: { x: 170, y: 1094, w: 844, h: 74 } # Left trackpad vertical
+    Pad_LPadX: { x: 170, y: 1176, w: 844, h: 74 } # Left trackpad horizontal
+    Pad_LPadClick: { x: 170, y: 1258, w: 844, h: 74 } # Left trackpad click
+    Pad_R4: { x: 170, y: 1604, w: 844, h: 78 } # Right upper rear grip
+    Pad_R5: { x: 170, y: 1744, w: 844, h: 78 } # Right lower rear grip
+    Pad_RTrigger: { x: 2930, y: 244, w: 844, h: 72 } # Right trigger
+    Pad_RBumper: { x: 2930, y: 344, w: 844, h: 72 } # Right bumper
+    Pad_Y: { x: 2930, y: 454, w: 844, h: 66 } # Y button
+    Pad_B: { x: 2930, y: 540, w: 844, h: 66 } # B button
+    Pad_A: { x: 2930, y: 626, w: 844, h: 66 } # A button
+    Pad_X: { x: 2930, y: 712, w: 844, h: 66 } # X button
+    Pad_RStickY: { x: 2930, y: 814, w: 844, h: 74 } # Right stick vertical
+    Pad_RStickX: { x: 2930, y: 896, w: 844, h: 74 } # Right stick horizontal
+    Pad_RThumb: { x: 2930, y: 978, w: 844, h: 74 } # Right stick click
+    Pad_RPadY: { x: 2930, y: 1094, w: 844, h: 74 } # Right trackpad vertical
+    Pad_RPadX: { x: 2930, y: 1176, w: 844, h: 74 } # Right trackpad horizontal
+    Pad_RPadClick: { x: 2930, y: 1258, w: 844, h: 74 } # Right trackpad click
+    Pad_L4: { x: 2930, y: 1604, w: 844, h: 78 } # Left upper rear grip
+    Pad_L5: { x: 2930, y: 1744, w: 844, h: 78 } # Left lower rear grip
+  SteamDeck:
+    Pad_Back: { x: 1190, y: 234, w: 664, h: 72 } # View button
+    Pad_Start: { x: 2090, y: 234, w: 664, h: 72 } # Menu button
+    Pad_Guide: { x: 1190, y: 1179, w: 664, h: 72 } # STEAM button
+    Pad_QAM: { x: 2090, y: 1179, w: 664, h: 72 } # Quick Access button
+    Pad_LTrigger: { x: 170, y: 234, w: 824, h: 72 } # Left trigger
+    Pad_LBumper: { x: 170, y: 329, w: 824, h: 72 } # Left bumper
+    Pad_DPadUp: { x: 170, y: 434, w: 824, h: 70 } # D-pad up
+    Pad_DPadRight: { x: 170, y: 512, w: 824, h: 70 } # D-pad right
+    Pad_DPadDown: { x: 170, y: 590, w: 824, h: 70 } # D-pad down
+    Pad_DPadLeft: { x: 170, y: 668, w: 824, h: 70 } # D-pad left
+    Pad_LStickY: { x: 170, y: 774, w: 824, h: 70 } # Left stick vertical
+    Pad_LStickX: { x: 170, y: 852, w: 824, h: 70 } # Left stick horizontal
+    Pad_LThumb: { x: 170, y: 930, w: 824, h: 70 } # Left stick click
+    Pad_LPadY: { x: 170, y: 1036, w: 824, h: 70 } # Left trackpad vertical
+    Pad_LPadX: { x: 170, y: 1114, w: 824, h: 70 } # Left trackpad horizontal
+    Pad_LPadClick: { x: 170, y: 1192, w: 824, h: 70 } # Left trackpad click
+    Pad_R4: { x: 170, y: 1554, w: 824, h: 76 } # Right upper rear grip
+    Pad_R5: { x: 170, y: 1684, w: 824, h: 76 } # Right lower rear grip
+    Pad_RTrigger: { x: 2950, y: 234, w: 824, h: 72 } # Right trigger
+    Pad_RBumper: { x: 2950, y: 329, w: 824, h: 72 } # Right bumper
+    Pad_Y: { x: 2950, y: 434, w: 824, h: 64 } # Y button
+    Pad_B: { x: 2950, y: 516, w: 824, h: 64 } # B button
+    Pad_A: { x: 2950, y: 598, w: 824, h: 64 } # A button
+    Pad_X: { x: 2950, y: 680, w: 824, h: 64 } # X button
+    Pad_RStickY: { x: 2950, y: 774, w: 824, h: 70 } # Right stick vertical
+    Pad_RStickX: { x: 2950, y: 852, w: 824, h: 70 } # Right stick horizontal
+    Pad_RThumb: { x: 2950, y: 930, w: 824, h: 70 } # Right stick click
+    Pad_RPadY: { x: 2950, y: 1036, w: 824, h: 70 } # Right trackpad vertical
+    Pad_RPadX: { x: 2950, y: 1114, w: 824, h: 70 } # Right trackpad horizontal
+    Pad_RPadClick: { x: 2950, y: 1192, w: 824, h: 70 } # Right trackpad click
+    Pad_L4: { x: 2950, y: 1554, w: 824, h: 76 } # Left upper rear grip
+    Pad_L5: { x: 2950, y: 1684, w: 824, h: 76 } # Left lower rear grip
 ImageMap: # Shortname -> image filename
   ThrustMasterHOTASOne : hotasone
   AlphaFlight: alphaflight
+  SteamController: steamcontroller
+  SteamDeck: steamdeck
 DeviceNameMap: # Device Identifier on Windows -> Shortname
   # Airbus T-A320 Quadrant throttle:
   Alpha Flight Controls: AlphaFlight
@@ -101,6 +169,8 @@ DeviceNameMap: # Device Identifier on Windows -> Shortname
   # Saitek Pro Flight Yoke:
   Saitek X52 Flight Control System: SaitekX52
   Saitek X52 Pro Flight Control System: SaitekX52Pro
+  Steam Controller: SteamController
+  Steam Deck: SteamDeck
   T.16000M: T16000M
   # T.A320 CoPilot:
   # T.A320 Pilot:
@@ -146,6 +216,8 @@ DeviceLabelsByImage: # Image filename -> Header label
   sabretooth: "Sabretooth Controller"
   sidepanelcontroldeck: "Side Panel Control Deck"
   slawbf109pedals: "Slaw BF-109 Pedals"
+  steamcontroller: "Steam Controller"
+  steamdeck: "Steam Deck"
   stickx: "Thrustmaster T.Flight X Stick"
   t16000m: "T-16000M Stick"
   t16000mfcs: "T.16000M FCS Stick & Throttle"
